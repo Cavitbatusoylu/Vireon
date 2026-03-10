@@ -2,6 +2,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV PORT=8080
 
 # Use the official .NET 10.0 SDK for building the application
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
