@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vireon - Immutable Ledger | Digital Bank Core System</title>
+    <meta name="description"
+        content="Vireon - Database-centric digital bank core system simulation. Secure, consistent, and traceable financial transaction management.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="vireon.css">
+    <link rel="icon" type="image/png" href="images/vireon-logo-transparent-new.png">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <img src="images/vireon-logo-transparent-new.png" alt="Vireon Logo" class="loading-logo">
+        
+        <div class="loader-ring"></div>
+        <div class="loading-text" data-tr="Vireon Yükleniyor..." data-en="Loading Vireon...">Loading Vireon...</div>
+    </div>
+
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Grid Overlay -->
+    <div class="grid-overlay"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar" id="topNavbar">
+        <div class="navbar-left">
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="navbar-logo" id="navLogo">
+            
+            <span class="navbar-brand">VIREON</span>
+        </div>
+        <div class="navbar-right">
+            <!-- Language Switcher -->
+            <div class="lang-switcher">
+                <button class="lang-btn" id="langTR" onclick="switchLang('tr')">TR</button>
+                <button class="lang-btn active" id="langEN" onclick="switchLang('en')">EN</button>
+            </div>
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle theme">
+                <span class="theme-icon-dark">🌙</span>
+                <span class="theme-icon-light">☀️</span>
+            </button>
+            <!-- Login Button -->
+            <button class="login-btn" id="loginBtn" onclick="openLoginModal()" aria-label="Open login modal">
+                <span class="login-icon">👤</span>
+                <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeLoginModal()" aria-label="Close login modal">✕</button>
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
+            
+            <h2 data-tr="Vireon'a Giriş Yap" data-en="Sign In to Vireon">Sign In to Vireon</h2>
+            <p class="modal-subtitle" data-tr="Dijital banka çekirdek sisteminize erişin"
+                data-en="Access your digital bank core system">Access your digital bank core system</p>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="ornek@vireon.com" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Şifre" data-en="Password">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span data-tr="Beni Hatırla" data-en="Remember Me">Remember Me</span>
+                    </label>
+                    <a href="#" onclick="openForgotPasswordModal(event)" class="forgot-link" data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot
+                        Password?</a>
+                </div>
+                <button type="submit" class="login-submit-btn" data-tr="Giriş Yap" data-en="Sign In">Sign In</button>
+            </form>
+            <p class="modal-footer-text">
+                <span data-tr="Hesabınız yok mu?" data-en="Don't have an account?">Don't have an account?</span>
+                <a href="#" onclick="openRegisterModal(event)" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRegisterModal()" aria-label="Close register modal">✕</button>
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
+            
+            <h2 data-tr="Vireon'a Kayıt Ol" data-en="Sign Up to Vireon">Sign Up to Vireon</h2>
+            <p class="modal-subtitle" data-tr="Dijital banka sistemine katılın"
+                data-en="Join the digital bank system">Join the digital bank system</p>
+            <form class="login-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label data-tr="Ad Soyad" data-en="Full Name">Full Name</label>
+                    <input type="text" id="registerName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                    <input type="email" id="registerEmail" placeholder="ornek@vireon.com" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Şifre" data-en="Password">Password</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Şifre Tekrar" data-en="Confirm Password">Confirm Password</label>
+                    <input type="password" id="registerConfirmPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-submit-btn" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</button>
+            </form>
+            <p class="modal-footer-text">
+                <span data-tr="Zaten hesabınız var mı?" data-en="Already have an account?">Already have an account?</span>
+                <a href="#" onclick="openLoginModalFromRegister(event)" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close forgot password modal">✕</button>
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
+            
+            <h2 data-tr="Şifremi Unuttum" data-en="Forgot Password">Forgot Password</h2>
+            <p class="modal-subtitle" data-tr="Şifrenizi sıfırlama bağlantısı için e-postanızı girin"
+                data-en="Enter your email to get a reset link">Enter your email to get a reset link</p>
+            <form class="login-form" onsubmit="handleForgotPassword(event)">
+                <div class="form-group">
+                    <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                    <input type="email" id="forgotPasswordEmail" placeholder="ornek@vireon.com" required>
+                </div>
+                <button type="submit" class="login-submit-btn" data-tr="Bağlantı Gönder" data-en="Send Reset Link">Send Reset Link</button>
+            </form>
+            <p class="modal-footer-text">
+                <span data-tr="Şifrenizi hatırladınız mı?" data-en="Remembered your password?">Remembered your password?</span>
+                <a href="#" onclick="openLoginModalFromForgot(event)" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header" id="mainHeader">
+            <div class="logo">
+                <img src="images/vireon-logo-transparent-new.png" alt="Vireon Logo" class="logo-image" id="mainLogo">
+                
+            </div>
+            <h1 class="brand-name">Vireon</h1>
+            <p class="tagline">IMMUTABLE LEDGER</p>
+        </div>
+
+        <!-- Menu Grid -->
+        <div class="menu-grid" id="menuGrid">
+            <div class="menu-item initial-load" data-section="introduction">
+                <div class="menu-badge">IN</div>
+                <div class="menu-title" data-tr="Tanıtım" data-en="Introduction">Introduction</div>
+            </div>
+            <div class="menu-item initial-load" data-section="services">
+                <div class="menu-badge">SV</div>
+                <div class="menu-title" data-tr="Bileşenler" data-en="Components">Components</div>
+            </div>
+            <div class="menu-item initial-load" data-section="gallery">
+                <div class="menu-badge">GL</div>
+                <div class="menu-title" data-tr="Mimari" data-en="Architecture">Architecture</div>
+            </div>
+            <div class="menu-item initial-load" data-section="testimonials">
+                <div class="menu-badge">TM</div>
+                <div class="menu-title" data-tr="Ekip" data-en="Team">Team</div>
+            </div>
+            <div class="menu-item initial-load" data-section="about">
+                <div class="menu-badge">AB</div>
+                <div class="menu-title" data-tr="Hakkında" data-en="About">About</div>
+            </div>
+            <div class="menu-item initial-load" data-section="contact">
+                <div class="menu-badge">CT</div>
+                <div class="menu-title" data-tr="İletişim" data-en="Contact">Contact</div>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="contentArea">
+            <!-- Introduction Section -->
+            <div class="content-section" id="introduction">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img">
+                    </div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <!-- Hero Banner -->
+                <div class="intro-hero">
+                    <div class="intro-hero-content">
+                        <span class="intro-badge">Est. 2026</span>
+                        <h1 class="intro-headline" data-tr="Güvenli Dijital<br><span>Bankacılık</span> Altyapısı"
+                            data-en="Secure Digital<br><span>Banking</span> Infrastructure">Secure
+                            Digital<br><span>Banking</span> Infrastructure</h1>
+                        <p class="intro-subtext"
+                            data-tr="Finansal işlemlerin güvenli, tutarlı ve izlenebilir biçimde yönetilmesini sağlayan, veritabanı merkezli dijital banka çekirdek sistemi simülasyonu."
+                            data-en="Database-centric digital bank core system simulation ensuring secure, consistent, and traceable financial transaction management.">
+                            Database-centric digital bank core system simulation ensuring secure, consistent, and
+                            traceable financial transaction management.</p>
+                        <div class="intro-cta-group">
+                            <button class="intro-cta-primary" data-tr="Sistemi Keşfet" data-en="Explore System">Explore
+                                System</button>
+                            <button class="intro-cta-secondary" data-tr="Dokümantasyon"
+                                data-en="Documentation">Documentation</button>
+                        </div>
+                    </div>
+                    <div class="intro-hero-visual">
+                        <div class="intro-floating-card card-1">
+                            <span class="card-icon">🔒</span>
+                            <span class="card-text" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+                        </div>
+                        <div class="intro-floating-card card-2">
+                            <span class="card-icon">🛡️</span>
+                            <span class="card-text" data-tr="Fraud Tespiti" data-en="Fraud Detection">Fraud
+                                Detection</span>
+                        </div>
+                        <div class="intro-floating-card card-3">
+                            <span class="card-icon">📊</span>
+                            <span class="card-text" data-tr="Değişmez Defter" data-en="Immutable Ledger">Immutable
+                                Ledger</span>
+                        </div>
+                        <div class="intro-orb"></div>
+                    </div>
+                </div>
+
+                <!-- Metrics Strip -->
+                <div class="intro-metrics">
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="10000">0</span>
+                        <span class="metric-label" data-tr="Güvenli İşlem" data-en="Secure Transactions">Secure
+                            Transactions</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="98">0</span>
+                        <span class="metric-suffix">%</span>
+                        <span class="metric-label" data-tr="Veri Bütünlüğü" data-en="Data Integrity">Data
+                            Integrity</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="6">0</span>
+                        <span class="metric-label" data-tr="Veritabanı Tablosu" data-en="DB Tables">DB Tables</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value">24/7</span>
+                        <span class="metric-label" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+                    </div>
+                </div>
+
+                <!-- Core Values -->
+                <div class="intro-values">
+                    <div class="value-card">
+                        <div class="value-number">01</div>
+                        <h3 data-tr="ACID Transaction" data-en="ACID Transaction">ACID Transaction</h3>
+                        <p data-tr="Tüm finansal işlemler veritabanı transactionı içerisinde yürütülür. Atomicity, Consistency, Isolation ve Durability prensipleri eksiksiz uygulanır."
+                            data-en="All financial operations run within database transactions. Atomicity, Consistency, Isolation, and Durability principles are fully implemented.">
+                            All financial operations run within database transactions. Atomicity, Consistency,
+                            Isolation, and Durability principles are fully implemented.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-number">02</div>
+                        <h3 data-tr="Fraud Analizi" data-en="Fraud Analysis">Fraud Analysis</h3>
+                        <p data-tr="Kural tabanlı risk analizi ile şüpheli işlemler otomatik tespit edilir ve FraudLogs tablosuna kaydedilir."
+                            data-en="Rule-based risk analysis automatically detects suspicious transactions and logs them to the FraudLogs table.">
+                            Rule-based risk analysis automatically detects suspicious transactions and logs them to the
+                            FraudLogs table.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-number">03</div>
+                        <h3 data-tr="Değişmez Defter" data-en="Immutable Ledger">Immutable Ledger</h3>
+                        <p data-tr="Muhasebe defteri kayıtları append-only mantıkla çalışır. Finansal kayıtlar değiştirilemez ve silinemez."
+                            data-en="Ledger entries work on an append-only basis. Financial records cannot be modified or deleted.">
+                            Ledger entries work on an append-only basis. Financial records cannot be modified or
+                            deleted.</p>
+                    </div>
+                </div>
+
+                <!-- Tech Stack Preview -->
+                <div class="intro-tech">
+                    <p class="tech-label" data-tr="Kullanılan Teknolojiler" data-en="Technologies Used">Technologies
+                        Used</p>
+                    <div class="tech-marquee">
+                        <div class="tech-track">
+                            <span class="tech-item">ASP.NET Core</span>
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">SQL Server</span>
+                            <span class="tech-item">EF Core</span>
+                            <span class="tech-item">WPF</span>
+                            <span class="tech-item">Azure</span>
+                            <span class="tech-item">Web API</span>
+                            <span class="tech-item">XAML</span>
+                            <span class="tech-item">ASP.NET Core</span>
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">SQL Server</span>
+                            <span class="tech-item">EF Core</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div class="content-section" id="services">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img">
+                    </div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Sistem Bileşenleri" data-en="System Components">System Components
+                    </h2>
+                    <p class="section-subtitle" data-tr="Vireon çekirdek bankacılık sistemi modülleri"
+                        data-en="Vireon core banking system modules">Vireon core banking system modules</p>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="switchTab(this, 'development')">Backend</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'design')">Database</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'consulting')">Security</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'support')">Desktop</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="development">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/ai-optimized-templates.jpg" alt="Transfer System" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Para Transfer Sistemi" data-en="Transfer System">Transfer System
+                                        </h4>
+                                        <p data-tr="ACID uyumlu para transferi mekanizması. Bakiye kontrolü, limit kontrolü, fraud analizi ve ledger kaydı tek bir transaction içinde yürütülür."
+                                            data-en="ACID-compliant money transfer mechanism. Balance check, limit check, fraud analysis, and ledger entry all run within a single transaction.">
+                                            ACID-compliant money transfer mechanism. Balance check, limit check, fraud
+                                            analysis, and ledger entry all run within a single transaction.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/coding-screen.jpg" alt="Account Management" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hesap Yönetimi" data-en="Account Management">Account Management
+                                        </h4>
+                                        <p data-tr="Kullanıcı hesaplarının oluşturulması, bakiye takibi, hesap durumu yönetimi. Entity Framework Core ile veritabanı üzerinden yönetilir."
+                                            data-en="User account creation, balance tracking, and account status management via Entity Framework Core.">
+                                            User account creation, balance tracking, and account status management via
+                                            Entity Framework Core.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <img src="images/ai-mobile-app.jpg" alt="Ledger System" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Muhasebe Defteri" data-en="Ledger System">Ledger System</h4>
+                                        <p data-tr="Immutable muhasebe defteri sistemi. LedgerEntries tablosu append-only mantıkla çalışır, kayıtlar güncellenemez ve silinemez."
+                                            data-en="Immutable ledger system. LedgerEntries table works on append-only basis, records cannot be updated or deleted.">
+                                            Immutable ledger system. LedgerEntries table works on append-only basis,
+                                            records cannot be updated or deleted.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="design">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/design-screen.jpg"
+                                            alt="Table Design" loading="lazy" decoding="async"></div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Tablo Tasarımı" data-en="Table Design">Table Design</h4>
+                                        <p data-tr="Users, Accounts, Transactions, DailyLimits, FraudLogs ve LedgerEntries tabloları foreign key ilişkileri ile tanımlanmıştır."
+                                            data-en="Users, Accounts, Transactions, DailyLimits, FraudLogs and LedgerEntries tables are defined with foreign key relationships.">
+                                            Users, Accounts, Transactions, DailyLimits, FraudLogs and LedgerEntries
+                                            tables are defined with foreign key relationships.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/brand-identity.jpg" alt="Migration" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>Migration & Code First</h4>
+                                        <p data-tr="Entity Framework Code First yaklaşımı: entity modelleri tanımlanır, DbContext oluşturulur ve migration işlemleri uygulanır."
+                                            data-en="Entity Framework Code First approach: entity models are defined, DbContext is created, and migrations are applied.">
+                                            Entity Framework Code First approach: entity models are defined, DbContext
+                                            is created, and migrations are applied.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/motion-design.jpg" alt="Seed Data" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>Seed Data</h4>
+                                        <p data-tr="Veritabanı test verileri ile başlatılır. Kullanıcılar, hesaplar ve örnek işlemler otomatik oluşturulur."
+                                            data-en="Database is initialized with test data. Users, accounts, and sample transactions are automatically created.">
+                                            Database is initialized with test data. Users, accounts, and sample
+                                            transactions are automatically created.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="consulting">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/digital-strategy.jpg" alt="ACID" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4>ACID & Rollback</h4>
+                                        <p data-tr="Transaction başlatılır, tüm adımlar başarıyla tamamlanırsa commit edilir. Herhangi bir hata durumunda rollback yapılır."
+                                            data-en="Transaction is started, committed on success. On any error, rollback is performed to maintain data integrity.">
+                                            Transaction is started, committed on success. On any error, rollback is
+                                            performed to maintain data integrity.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/tech-audit.jpg" alt="Fraud" loading="lazy" decoding="async"></div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Fraud Tespiti" data-en="Fraud Detection">Fraud Detection</h4>
+                                        <p data-tr="Yüksek tutarlı işlem, kısa sürede çok işlem, pasif hesaba transfer gibi kurallarla risk analizi yapılır."
+                                            data-en="Risk analysis with rules: high-amount transactions, frequent transactions in short time, transfers to inactive accounts.">
+                                            Risk analysis with rules: high-amount transactions, frequent transactions in
+                                            short time, transfers to inactive accounts.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/process-optimized.jpg"
+                                            alt="Concurrency" loading="lazy" decoding="async"></div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Eş Zamanlılık Kontrolü" data-en="Concurrency Control">Concurrency
+                                            Control</h4>
+                                        <p data-tr="Optimistic concurrency yaklaşımı ile aynı kaydın eş zamanlı değiştirilmesi kontrol edilir. RowVersion alanı kullanılır."
+                                            data-en="Optimistic concurrency with RowVersion field prevents simultaneous modification of the same record.">
+                                            Optimistic concurrency with RowVersion field prevents simultaneous
+                                            modification of the same record.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="support">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/247-support.jpg" alt="WPF" loading="lazy" decoding="async"></div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="WPF Masaüstü Uygulaması" data-en="WPF Desktop App">WPF Desktop App
+                                        </h4>
+                                        <p data-tr="WPF tabanlı masaüstü uygulaması ile veritabanına doğrudan bağlantı. Entity Framework Core üzerinden veri okuma ve yazma."
+                                            data-en="WPF-based desktop application with direct database connection via Entity Framework Core.">
+                                            WPF-based desktop application with direct database connection via Entity
+                                            Framework Core.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/training-center.jpg" alt="Screens" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hesap Ekranları" data-en="Account Screens">Account Screens</h4>
+                                        <p data-tr="Kullanıcı ve hesap yönetimi, bakiye görüntüleme, para transfer formu gibi ekranlar masaüstü uygulamasında yer alır."
+                                            data-en="User and account management, balance viewing, and money transfer forms in the desktop application.">
+                                            User and account management, balance viewing, and money transfer forms in
+                                            the desktop application.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon"><img src="images/managed-service.jpg" alt="History" loading="lazy" decoding="async">
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="İşlem Geçmişi" data-en="Transaction History">Transaction History
+                                        </h4>
+                                        <p data-tr="İşlem geçmişi, muhasebe defteri ve fraud logları masaüstü uygulaması üzerinden görüntülenebilir."
+                                            data-en="Transaction history, ledger entries, and fraud logs viewable through the desktop application.">
+                                            Transaction history, ledger entries, and fraud logs viewable through the
+                                            desktop application.</p>
+                                    </div>
+                                    <div class="service-row-arrow">→</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Section -->
+            <div class="content-section" id="gallery">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Sistem Mimarisi" data-en="System Architecture">System
+                        Architecture</h2>
+                    <p class="section-subtitle" data-tr="Vireon proje yapısı ve bileşenleri"
+                        data-en="Vireon project structure and components">Vireon project structure and components</p>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterGallery('all', this)" data-tr="Tümü"
+                        data-en="All">All</button>
+                    <button class="filter-btn" onclick="filterGallery('web', this)">API</button>
+                    <button class="filter-btn" onclick="filterGallery('mobile', this)">Data</button>
+                    <button class="filter-btn" onclick="filterGallery('branding', this)">Desktop</button>
+                </div>
+
+                <div class="gallery-grid">
+                    <div class="gallery-item" data-category="web">
+                        <img src="images/coding-screen.jpg" alt="Web API Layer" loading="lazy" decoding="async">
+                        <div class="gallery-overlay">
+                            <h4>Web API Layer</h4>
+                            <p>ASP.NET Core</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="mobile">
+                        <img src="images/ai-mobile-app.jpg" alt="Data Layer" loading="lazy" decoding="async">
+                        <div class="gallery-overlay">
+                            <h4>Data Layer</h4>
+                            <p>Entity Framework</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="branding">
+                        <img src="images/brand-identity.jpg" alt="Desktop App" loading="lazy" decoding="async">
+                        <div class="gallery-overlay">
+                            <h4>WPF Desktop</h4>
+                            <p>Desktop App</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="web">
+                        <img src="images/managed-service.jpg" alt="Controller Layer" loading="lazy" decoding="async">
+                        <div class="gallery-overlay">
+                            <h4>Controller Layer</h4>
+                            <p>REST API</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="mobile">
+                        <img src="images/ai-optimized-templates.jpg" alt="DbContext" loading="lazy" decoding="async">
+                        <div class="gallery-overlay">
+                            <h4>DbContext</h4>
+                            <p>Entity Framework</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item" data-category="branding">
+                        <img src="images/digital-strategy.jpg" alt="Solution" loading="lazy" decoding="async">
+                        <div class="gallery-overlay">
+                            <h4>Solution Structure</h4>
+                            <p>Architecture</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonials / Team Section -->
+            <div class="content-section" id="testimonials">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Ekibimiz" data-en="Our Team">Our Team</h2>
+                    <p class="section-subtitle" data-tr="Proje ekibi ve sorumlulukları"
+                        data-en="Project team and responsibilities">Project team and responsibilities</p>
+                </div>
+
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="Projenin frontend tarafı, WPF masaüstü uygulaması, TransferService (ACID/Rollback/Concurrency) ve veritabanı bağlantı konfigürasyonundan sorumluyum."
+                            data-en="Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and database connection configuration.">
+                            Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and
+                            database connection configuration.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">CBS</div>
+                            </div>
+                            <div class="author-info">
+                                <h5>Cavit Batu Soylu</h5>
+                                <p>Frontend & DB Connection</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="AccountService, FraudService, LedgerService ve tüm API Controller yazımından sorumluyum. Backend servis katmanı benim görev alanım."
+                            data-en="Responsible for AccountService, FraudService, LedgerService, and all API Controllers. Backend service layer is my domain.">
+                            Responsible for AccountService, FraudService, LedgerService, and all API Controllers.
+                            Backend service layer is my domain.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">EK</div>
+                            </div>
+                            <div class="author-info">
+                                <h5>Enes Kaya</h5>
+                                <p>Backend Services</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="Entity modellerin yazılması, DbContext tanımı, DailyLimit servisi ve seed data hazırlanmasından sorumluyum."
+                            data-en="Responsible for entity models, DbContext definition, DailyLimit service, and seed data preparation.">
+                            Responsible for entity models, DbContext definition, DailyLimit service, and seed data
+                            preparation.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">KA</div>
+                            </div>
+                            <div class="author-info">
+                                <h5>Kerem Arslan</h5>
+                                <p>Entity Models & Data</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="Vireon; ASP.NET Core Web API, Entity Framework Core, SQL Server ve WPF teknolojileri ile geliştirilmiş kapsamlı bir dijital banka çekirdek sistemi simülasyonudur."
+                            data-en="Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web API, Entity Framework Core, SQL Server, and WPF.">
+                            Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web
+                            API, Entity Framework Core, SQL Server, and WPF.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">VP</div>
+                            </div>
+                            <div class="author-info">
+                                <h5 data-tr="Proje Özeti" data-en="Project Summary">Project Summary</h5>
+                                <p data-tr="Bilgisayar Mühendisliği" data-en="Computer Engineering">Computer Engineering
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="content-section" id="about">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Hakkımızda" data-en="About">About</h2>
+                    <p class="section-subtitle" data-tr="Proje hakkında detaylı bilgi"
+                        data-en="Detailed project information">Detailed project information</p>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3 data-tr="Dijital Banka Çekirdek Sistemi" data-en="Digital Bank Core System">Digital Bank
+                            Core System</h3>
+                        <p data-tr="Vireon, finansal işlemlerin güvenli, tutarlı ve izlenebilir biçimde yönetilmesini modelleyen, veritabanı merkezli bir dijital banka çekirdek sistemi simülasyonudur."
+                            data-en="Vireon is a database-centric digital bank core system simulation that models secure, consistent, and traceable financial transaction management.">
+                            Vireon is a database-centric digital bank core system simulation that models secure,
+                            consistent, and traceable financial transaction management.</p>
+                        <p data-tr="Sistem; para transferi, hesap yönetimi, günlük limit kontrolü, fraud analizi ve immutable muhasebe defteri mantığını uygulayarak gerçek bankacılık sistemlerinin çekirdek işlem mekanizmasını teknik olarak modellemektedir."
+                            data-en="The system applies money transfer, account management, daily limit control, fraud analysis, and immutable ledger logic to technically model the core processing mechanism of real banking systems.">
+                            The system applies money transfer, account management, daily limit control, fraud analysis,
+                            and immutable ledger logic to technically model the core processing mechanism of real
+                            banking systems.</p>
+                        <p data-tr="Bu proje Bilgisayar Mühendisliği 2. sınıf final projesi olarak Cavit Batu Soylu, Enes Kaya ve Kerem Arslan tarafından geliştirilmektedir."
+                            data-en="This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a Computer Engineering 2nd year final project.">
+                            This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a
+                            Computer Engineering 2nd year final project.</p>
+                        <p data-tr="Sistem; SQL Server üzerinde çalışır, ASP.NET Core Web API mimarisi kullanır, Entity Framework ile veri yönetir, ACID prensiplerini uygular ve WPF masaüstü uygulaması ile veritabanına doğrudan erişim sağlar."
+                            data-en="The system runs on SQL Server, uses ASP.NET Core Web API architecture, manages data with Entity Framework, applies ACID principles, and provides direct database access through a WPF desktop application.">
+                            The system runs on SQL Server, uses ASP.NET Core Web API architecture, manages data with
+                            Entity Framework, applies ACID principles, and provides direct database access through a WPF
+                            desktop application.</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="images/about-our-team.jpg" alt="Our Team" loading="lazy" decoding="async">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="content-section" id="contact">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="İletişim" data-en="Contact">Contact</h2>
+                    <p class="section-subtitle" data-tr="Proje ekibi ile iletişime geçin"
+                        data-en="Get in touch with the project team">Get in touch with the project team</p>
+                </div>
+
+                <div class="contact-grid">
+                    <div class="contact-form">
+                        <div class="form-group">
+                            <input type="text" data-tr-placeholder="Adınız" data-en-placeholder="Your Name"
+                                placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" data-tr-placeholder="E-posta" data-en-placeholder="Email"
+                                placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" data-tr-placeholder="Konu" data-en-placeholder="Subject"
+                                placeholder="Subject">
+                        </div>
+                        <div class="form-group">
+                            <textarea data-tr-placeholder="Mesajınız" data-en-placeholder="Your Message"
+                                placeholder="Your Message"></textarea>
+                        </div>
+                        <button class="submit-btn" data-tr="Gönder" data-en="Send">Send</button>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">🎓</div>
+                            <div class="contact-details">
+                                <h4 data-tr="Üniversite" data-en="University">University</h4>
+                                <p data-tr="Bilgisayar Mühendisliği Bölümü" data-en="Computer Engineering Department">
+                                    Computer Engineering Department</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div class="contact-details">
+                                <h4>E-posta</h4>
+                                <p>vireon@university.edu.tr</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div class="contact-details">
+                                <h4 data-tr="Telefon" data-en="Phone">Phone</h4>
+                                <p>+90 (XXX) XXX-XXXX</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" id="mainFooter">
+            <p>© 2026 Vireon — <span
+                    data-tr="Dijital Banka Çekirdek Sistemi Simülasyonu | Bilgisayar Mühendisliği Final Projesi"
+                    data-en="Digital Bank Core System Simulation | Computer Engineering Final Project">Digital Bank Core
+                    System Simulation | Computer Engineering Final Project</span></p>
+        </footer>
+    </div>
+
+    <script src="vireon.js" defer></script>
+    <script>
+        // ========== LANGUAGE SWITCHER ==========
+        let currentLang = 'en';
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.getElementById('langTR').classList.toggle('active', lang === 'tr');
+            document.getElementById('langEN').classList.toggle('active', lang === 'en');
+
+            // Update all elements with data-tr / data-en
+            document.querySelectorAll('[data-tr][data-en]').forEach(el => {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+                el.innerHTML = el.getAttribute('data-' + lang);
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-tr-placeholder][data-en-placeholder]').forEach(el => {
+                el.placeholder = el.getAttribute('data-' + lang + '-placeholder');
+            });
+
+            localStorage.setItem('vireon-lang', lang);
+        }
+
+        // ========== THEME TOGGLE ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('vireon-theme', next);
+        }
+
+        // ========== LOGIN MODAL ==========
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            // Demo: just close modal and show alert
+            closeLoginModal();
+            alert(currentLang === 'tr' ? 'Giriş başarılı! (Demo)' : 'Login successful! (Demo)');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('loginModal').addEventListener('click', function (e) {
+            if (e.target === this) closeLoginModal();
+        });
+
+        // ========== LOAD SAVED PREFERENCES ==========
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedLang = localStorage.getItem('vireon-lang');
+            if (savedLang) switchLang(savedLang);
+
+            const savedTheme = localStorage.getItem('vireon-theme');
+            if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+
+</html>

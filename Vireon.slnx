@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="VireonAPI/VireonAPI.csproj" />
+  <Project Path="VireonFrontend/VireonFrontend.csproj" Id="d2de2c10-50ab-47b7-8881-38a5c351b050" />
+</Solution>
