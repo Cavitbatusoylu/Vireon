@@ -1,7 +1,7 @@
 <br/>
 <div align="center">
 <a href="https://github.com/Cavitbatusoylu/Vireon">
-<img src="https://raw.githubusercontent.com/Cavitbatusoylu/Vireon/main/VireonFrontend/wwwroot/images/vireon-logo-transparent-new.png" alt="Logo" width="180" height="auto">
+<img src="VireonFrontend/wwwroot/images/vireon-logo-transparent-new.png" alt="Logo" width="180" height="auto">
 </a>
 <h3 align="center">Vireon Projesi</h3>
   <p align="center">
