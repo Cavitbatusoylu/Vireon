@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.DataAccessLayer.Concrete.EntityFramework
@@ -7,8 +7,10 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // Bağlantı dizesini daha sonra Google Cloud'a göre güncelleyeceğiz.
-            optionsBuilder.UseSqlServer("Server=YOUR_SERVER;Database=VireonDb;Trusted_Connection=True;");
+            // İŞTE AZURE BAĞLANTIMIZ! 
+            // Lütfen "{your_password}" yazan yere kendi şifreni yazmayı unutma!
+            optionsBuilder.UseSqlServer("Server=tcp:vireon-server-1234.database.windows.net,1433;Initial Catalog=VireonDb;Persist Security Info=False;User ID=vireonadmin;Password=vireondb02#;" +
+                "MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         }
 
         public DbSet<User> Users { get; set; }
@@ -20,18 +22,33 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Decimal hassasiyeti (Rapor - Madde 1)
-            foreach (var property in modelBuilder.Model.GetEntityTypes()
-                .SelectMany(t => t.GetProperties())
-                .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+            // Para birimleri için 18,2 formatı (Teknik Rapor uyumu)
+            foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(t => t.GetProperties()).Where(p => p.ClrType == typeof(decimal)))
             {
                 property.SetColumnType("decimal(18,2)");
             }
 
-            // Concurrency (Rapor - Madde 7.2)
-            modelBuilder.Entity<Account>()
-                .Property(a => a.RowVersion)
-                .IsRowVersion();
+            // Eş zamanlılık - Concurrency kontrolü (Teknik Rapor uyumu)
+            modelBuilder.Entity<Account>().Property(a => a.RowVersion).IsRowVersion();
+
+            // Transaction -> Account ilişkileri (Sender ve Receiver ayrı FK'lar)
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.SenderAccount)
+                .WithMany(a => a.SentTransactions)
+                .HasForeignKey(t => t.SenderAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.ReceiverAccount)
+                .WithMany(a => a.ReceivedTransactions)
+                .HasForeignKey(t => t.ReceiverAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // DailyLimit -> User birebir ilişki
+            modelBuilder.Entity<DailyLimit>()
+                .HasOne(d => d.User)
+                .WithOne(u => u.DailyLimit)
+                .HasForeignKey<DailyLimit>(d => d.UserId);
         }
     }
 }
