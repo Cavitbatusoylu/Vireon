@@ -36,8 +36,7 @@ namespace Vireon.DataAccessLayer.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     AccountNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -145,6 +144,16 @@ namespace Vireon.DataAccessLayer.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "Name", "Password", "Surname" },
+                values: new object[] { 1, "admin@vireon.com", "Vireon", "123", "Admin" });
+
+            migrationBuilder.InsertData(
+                table: "Accounts",
+                columns: new[] { "Id", "AccountNumber", "Balance", "Currency", "UserId" },
+                values: new object[] { 1, "VR-1001", 1000m, "TRY", 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_UserId",

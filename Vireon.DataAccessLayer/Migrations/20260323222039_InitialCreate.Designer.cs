@@ -12,7 +12,7 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 namespace Vireon.DataAccessLayer.Migrations
 {
     [DbContext(typeof(VireonContext))]
-    [Migration("20260321213451_InitialCreate")]
+    [Migration("20260323222039_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -44,12 +44,6 @@ namespace Vireon.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -58,6 +52,16 @@ namespace Vireon.DataAccessLayer.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Accounts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccountNumber = "VR-1001",
+                            Balance = 1000m,
+                            Currency = "TRY",
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.DailyLimit", b =>
@@ -207,6 +211,16 @@ namespace Vireon.DataAccessLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "admin@vireon.com",
+                            Name = "Vireon",
+                            Password = "123",
+                            Surname = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.Account", b =>
