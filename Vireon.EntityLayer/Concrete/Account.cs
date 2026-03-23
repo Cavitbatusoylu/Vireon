@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Vireon.EntityLayer.Abstract;
 
 namespace Vireon.EntityLayer.Concrete
 {
-    public class Account : IEntity
+    public class Account
     {
         public int Id { get; set; }
         public int UserId { get; set; }
@@ -12,7 +11,6 @@ namespace Vireon.EntityLayer.Concrete
         public string Currency { get; set; }
 
         // Navigation Properties
-
         public User User { get; set; }
         public List<Transaction> SentTransactions { get; set; }
         public List<Transaction> ReceivedTransactions { get; set; }

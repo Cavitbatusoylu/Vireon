@@ -1,9 +1,7 @@
-﻿using System;
-using Vireon.EntityLayer.Abstract;
-
+using System;
 namespace Vireon.EntityLayer.Concrete
 {
-    public class Transaction : IEntity
+    public class Transaction
     {
         public int Id { get; set; }
         public int SenderAccountId { get; set; }
