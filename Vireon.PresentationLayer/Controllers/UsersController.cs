@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
+using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.PresentationLayer.Controllers
 {
@@ -19,6 +20,14 @@ namespace Vireon.PresentationLayer.Controllers
         {
             var values = _context.Users.ToList();
             return Ok(values);
+        }
+
+        [HttpPost]
+        public IActionResult AddUser(User user)
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
+            return Ok("Kullanıcı başarıyla eklendi!");
         }
     }
 }
