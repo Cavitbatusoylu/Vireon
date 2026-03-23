@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using Vireon.EntityLayer.Abstract;
-
+using System.Collections.Generic;
 namespace Vireon.EntityLayer.Concrete
 {
-    public class User : IEntity
+    public class User
     {
         public int Id { get; set; }
         public string Name { get; set; }

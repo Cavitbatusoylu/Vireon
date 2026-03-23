@@ -1,9 +1,8 @@
-﻿using System;
-using Vireon.EntityLayer.Abstract;
+using System;
 
 namespace Vireon.EntityLayer.Concrete
 {
-    public class FraudLog : IEntity
+    public class FraudLog
     {
         public int Id { get; set; }
         public int AccountId { get; set; }

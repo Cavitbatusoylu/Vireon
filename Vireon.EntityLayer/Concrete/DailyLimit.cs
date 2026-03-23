@@ -1,9 +1,7 @@
-﻿using System;
-using Vireon.EntityLayer.Abstract;
-
+using System;
 namespace Vireon.EntityLayer.Concrete
 {
-    public class DailyLimit : IEntity
+    public class DailyLimit
     {
         public int Id { get; set; }
         public int UserId { get; set; }
