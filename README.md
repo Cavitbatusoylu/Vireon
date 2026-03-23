@@ -1,7 +1,7 @@
 <br/>
 <div align="center">
 <a href="https://github.com/Cavitbatusoylu/Vireon">
-<img src="VireonFrontend/wwwroot/images/vireon-logo-transparent-new.png" alt="Logo" width="180" height="auto">
+<img src="Vireon.PresentationLayer/wwwroot/images/vireon-logo-transparent-new.png" alt="Logo" width="180" height="auto">
 </a>
 <h3 align="center">Vireon Projesi</h3>
   <p align="center">
@@ -44,16 +44,15 @@ Kod tabanı, sorumlulukları net şekilde ayıran anlaşılır bir düzene sahip
 
 ```plaintext
 Vireon/
-├── VireonAPI/              # Projenin beyni (Backend API, Modeller, Migrationlar)
-│   ├── Controllers/        # API Uç noktaları
-│   ├── Data/               # Veritabanı Context ve Mimari Bağlantıları
-│   └── Models/             # Veri Modelleri (User, Account, Question vb.)
+├── Vireon.BusinessLayer/        # İş kuralları ve servisler
+├── Vireon.DataAccessLayer/      # Veritabanı işlemleri (EfEntityRepositoryBase, Context)
+├── Vireon.DtoLayer/             # Veri transfer nesneleri (DTO)
+├── Vireon.EntityLayer/          # Veritabanı modelleri (Account, User vb.)
+├── Vireon.PresentationLayer/    # Web Kullanıcı Arayüzü (wwwroot, Controllers, Views)
+│   ├── wwwroot/                 # CSS, JS, Resimler (Logo burada)
+│   └── Controllers/             # UI Kontrolleri
 │
-├── VireonFrontend/         # Projenin modern yüzü (Kullanıcı Arayüzü)
-│   ├── wwwroot/            # CSS, JS, Medya ve HTML dosyaları
-│   └── Controllers/        # Frontend İletişim Noktaları
-│
-└── Vireon.slnx             # Tüm projeyi birbirine bağlayan merkez köprü
+└── Vireon.slnx                  # Proje çözüm (Solution) dosyası
 ```
 
 <p align="right">(<a href="#readme-top">yukarı dön</a>)</p>
