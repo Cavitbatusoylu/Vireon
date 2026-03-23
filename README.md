@@ -85,16 +85,42 @@ dotnet run
 
 <p align="right">(<a href="#readme-top">yukarı dön</a>)</p>
 
-## 🤝 Katkıda Bulunma & Ekip Çalışması
-Vireon, birlikte geliştirilmek için yaratılmış dinamik bir kod tabanıdır. Tüm ekip arkadaşları doğrudan **main** dalına veya kendi dallarına gönderim yapabilirler.
-Daha iyi bir kod tabanı için pull request'ler ve review (inceleme) süreçlerine önem veriyoruz.
+## 🤝 Git Çalışma Akışı (Workflow)
 
-**Ekip İçi Hızlı Commit Örneği:**
+Projeyi sağlıklı yürütmek için aşağıdaki adımları takip ediyoruz:
+
+### 👤 1. Geliştiriciler İçin (Örn: Enes)
+Kendi bilgisayarınızda yaptığınız değişiklikleri şu şekilde gönderin:
+
 ```bash
+# 1. Değişiklikleri pakete ekle
 git add .
-git commit -m "feat(api): yeni kullanıcı doğrulaması eklendi"
+
+# 2. Yapılan işi özetle
+git commit -m "feat: login sayfası tasarımı eklendi"
+
+# 3. Kendi şubene (branch) gönder
+git push origin Enes-login
+```
+
+---
+
+### 👑 2. Proje Sahibi / Yönetici İçin (Cavit)
+Gelen değişiklikleri terminalden kontrol edip ana projeye (main) katmak için:
+
+```bash
+# 1. GitHub'daki yeni değişiklikleri tanı
+git fetch origin
+
+# 2. Enes'in kodlarını main ile birleştir (Merge)
+git merge origin/Enes-login
+
+# 3. Güncellenmiş main dalını GitHub'a geri gönder
 git push origin main
 ```
+
+> [!TIP]
+> Eğer merge sırasında "Conflict" (çakışma) uyarısı alırsanız, çakışan dosyaları Visual Studio üzerinden açıp hangi kodun kalacağını seçerek kaydedin, sonra tekrar `add/commit/push` yapın.
 
 <p align="right">(<a href="#readme-top">yukarı dön</a>)</p>
 
