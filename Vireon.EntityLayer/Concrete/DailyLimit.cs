@@ -11,6 +11,7 @@ namespace Vireon.EntityLayer.Concrete
         public decimal UsedLimit { get; set; }
         public DateTime LastResetDate { get; set; }
 
+
         public User User { get; set; }
     }
 }
