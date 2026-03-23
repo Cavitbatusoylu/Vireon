@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Vireon.EntityLayer.Abstract;
 
 namespace Vireon.EntityLayer.Concrete
@@ -10,8 +10,6 @@ namespace Vireon.EntityLayer.Concrete
         public string AccountNumber { get; set; }
         public decimal Balance { get; set; }
         public string Currency { get; set; }
-
-        public byte[] RowVersion { get; set; }
 
         // Navigation Properties
 
