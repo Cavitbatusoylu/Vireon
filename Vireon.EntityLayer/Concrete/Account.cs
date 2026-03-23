@@ -11,7 +11,6 @@ namespace Vireon.EntityLayer.Concrete
         public decimal Balance { get; set; }
         public string Currency { get; set; }
 
-        // Concurrency Control (Rapor - Madde 7.2)
         public byte[] RowVersion { get; set; }
 
         // Navigation Properties
