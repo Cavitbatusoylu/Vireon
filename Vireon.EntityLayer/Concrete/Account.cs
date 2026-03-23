@@ -14,7 +14,6 @@ namespace Vireon.EntityLayer.Concrete
         // Concurrency Control (Rapor - Madde 7.2)
         public byte[] RowVersion { get; set; }
 
-        // Navigation Properties
         public User User { get; set; }
         public List<Transaction> SentTransactions { get; set; }
         public List<Transaction> ReceivedTransactions { get; set; }
