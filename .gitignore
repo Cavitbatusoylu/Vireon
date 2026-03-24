@@ -29,3 +29,10 @@ _ReSharper*/
 
 # Environment Variables
 .env
+
+# Build logs
+*.log
+build_errors.txt
+
+# HTTP test files
+*.http

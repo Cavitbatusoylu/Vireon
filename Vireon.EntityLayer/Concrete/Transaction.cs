@@ -10,7 +10,7 @@ namespace Vireon.EntityLayer.Concrete
         public DateTime Date { get; set; }
 
         // Navigation Properties
-        public Account SenderAccount { get; set; }
-        public Account ReceiverAccount { get; set; }
+        public Account? SenderAccount { get; set; }
+        public Account? ReceiverAccount { get; set; }
     }
 }

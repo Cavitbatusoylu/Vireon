@@ -298,8 +298,7 @@ namespace Vireon.DataAccessLayer.Migrations
                 {
                     b.Navigation("Accounts");
 
-                    b.Navigation("DailyLimit")
-                        .IsRequired();
+                    b.Navigation("DailyLimit");
                 });
 #pragma warning restore 612, 618
         }

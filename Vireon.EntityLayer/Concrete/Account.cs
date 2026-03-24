@@ -11,10 +11,10 @@ namespace Vireon.EntityLayer.Concrete
         public string Currency { get; set; }
 
         // Navigation Properties
-        public User User { get; set; }
-        public List<Transaction> SentTransactions { get; set; }
-        public List<Transaction> ReceivedTransactions { get; set; }
-        public List<FraudLog> FraudLogs { get; set; }
-        public List<LedgerEntry> LedgerEntries { get; set; }
+        public User? User { get; set; }
+        public List<Transaction>? SentTransactions { get; set; }
+        public List<Transaction>? ReceivedTransactions { get; set; }
+        public List<FraudLog>? FraudLogs { get; set; }
+        public List<LedgerEntry>? LedgerEntries { get; set; }
     }
 }
