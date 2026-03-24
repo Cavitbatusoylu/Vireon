@@ -10,7 +10,7 @@ namespace Vireon.EntityLayer.Concrete
         public string Password { get; set; }
 
         // Navigation Properties
-        public List<Account> Accounts { get; set; }
-        public DailyLimit DailyLimit { get; set; } // Bir kullanıcının bir limiti olur
+        public List<Account>? Accounts { get; set; }
+        public DailyLimit? DailyLimit { get; set; } // Bir kullanıcının bir limiti olur
     }
 }

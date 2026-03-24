@@ -9,7 +9,7 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Azure SQL Bağlantı Dizesi
-            optionsBuilder.UseSqlServer("Server=tcp:vireon-server-1234.database.windows.net,1433;Initial Catalog=VireonDb;Persist Security Info=False;User ID=vireonadmin;Password=vireondb02#;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            optionsBuilder.UseSqlServer("Server=tcp:vireon-server-1234.database.windows.net,1433;Initial Catalog=VireonDb;Persist Security Info=False;User ID=vireonadmin;Password=vireondb02#;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=120;Command Timeout=120;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

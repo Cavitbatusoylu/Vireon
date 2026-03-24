@@ -12,7 +12,7 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 namespace Vireon.DataAccessLayer.Migrations
 {
     [DbContext(typeof(VireonContext))]
-    [Migration("20260323222039_InitialCreate")]
+    [Migration("20260324022221_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -301,8 +301,7 @@ namespace Vireon.DataAccessLayer.Migrations
                 {
                     b.Navigation("Accounts");
 
-                    b.Navigation("DailyLimit")
-                        .IsRequired();
+                    b.Navigation("DailyLimit");
                 });
 #pragma warning restore 612, 618
         }

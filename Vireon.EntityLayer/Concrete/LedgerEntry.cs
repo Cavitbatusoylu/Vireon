@@ -12,6 +12,6 @@ namespace Vireon.EntityLayer.Concrete
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public Account Account { get; set; }
+        public Account? Account { get; set; }
     }
 }
