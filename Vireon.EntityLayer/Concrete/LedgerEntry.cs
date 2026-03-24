@@ -2,16 +2,17 @@ using System;
 
 namespace Vireon.EntityLayer.Concrete
 {
-    public class LedgerEntry
+    public class LedgerEntry // Muhasebe defteri kayıtlarını tutan sınıf
     {
-        public int Id { get; set; }
-        public int AccountId { get; set; }
-        public decimal Amount { get; set; }
-        public decimal PreviousBalance { get; set; }
-        public decimal NewBalance { get; set; }
-        public string Description { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public int Id { get; set; } // Defter kaydı kimliği
+        public int AccountId { get; set; } // İşlem gören hesap
+        public decimal Amount { get; set; } // İşlem miktarı
+        public decimal PreviousBalance { get; set; } // İşlem öncesi bakiye
+        public decimal NewBalance { get; set; } // İşlem sonrası yeni bakiye
+        public string Description { get; set; } // İşlem açıklaması
+        public DateTime CreatedAt { get; set; } // Kayıt oluşturulma tarihi
 
-        public Account? Account { get; set; }
+        public Account? Account { get; set; } // İlgili hesap nesnesi
     }
+
 }
