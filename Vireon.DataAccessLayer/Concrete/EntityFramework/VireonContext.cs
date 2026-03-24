@@ -4,15 +4,15 @@ using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.DataAccessLayer.Concrete.EntityFramework
 {
-    public class VireonContext : DbContext
+    public class VireonContext : DbContext // Veritabanı bağlantı ve yapılandırma sınıfı (Entity Framework Core)
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) // Veritabanı bağlantı ayarları
         {
             // Azure SQL Bağlantı Dizesi
             optionsBuilder.UseSqlServer("Server=tcp:vireon-server-1234.database.windows.net,1433;Initial Catalog=VireonDb;Persist Security Info=False;User ID=vireonadmin;Password=vireondb02#;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=120;Command Timeout=120;");
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder) // Tablo yapılandırmaları ve ilişkiler
         {
             base.OnModelCreating(modelBuilder);
 
@@ -41,7 +41,7 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 .WithOne(u => u.DailyLimit)
                 .HasForeignKey<DailyLimit>(d => d.UserId);
 
-            // 5. Seed Data (Hoca Kontrolü 1 için örnek veriler)
+            // 5. Seed Data (Hoca Kontrolü için örnek başlangıç verileri)
             modelBuilder.Entity<User>().HasData(new User
             {
                 Id = 1,
@@ -61,11 +61,13 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
             });
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Account> Accounts { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<DailyLimit> DailyLimits { get; set; }
-        public DbSet<FraudLog> FraudLogs { get; set; }
-        public DbSet<LedgerEntry> LedgerEntries { get; set; }
+        // Veritabanı Tablo Tanımlamaları (DbSet)
+        public DbSet<User> Users { get; set; } // Kullanıcılar tablosu
+        public DbSet<Account> Accounts { get; set; } // Hesaplar tablosu
+        public DbSet<Transaction> Transactions { get; set; } // İşlemler tablosu
+        public DbSet<DailyLimit> DailyLimits { get; set; } // Günlük limitler tablosu
+        public DbSet<FraudLog> FraudLogs { get; set; } // Dolandırıcılık kayıtları tablosu
+        public DbSet<LedgerEntry> LedgerEntries { get; set; } // Defter kayıtları tablosu
     }
+
 }
