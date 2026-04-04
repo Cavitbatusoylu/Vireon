@@ -10,25 +10,52 @@ namespace Vireon.PresentationLayer.Controllers
     {
         private readonly VireonContext _context;
 
-        public UsersController(VireonContext context) // Veritabanı bağlamını enjekte eder
-        {
-            _context = context;
-        }
+        public UsersController(VireonContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult GetUsers() // Sistemdeki tüm kullanıcıları listeler
+        public IActionResult GetUsers() // Tüm kullanıcıları listeler
         {
-            var values = _context.Users.ToList();
-            return Ok(values);
+            return Ok(_context.Users.ToList());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetUser(int id) // ID ile kullanıcı getirir
+        {
+            var user = _context.Users.Find(id);
+            if (user == null) return NotFound("Kullanıcı bulunamadı.");
+            return Ok(user);
         }
 
         [HttpPost]
-        public IActionResult AddUser(User user) // Sisteme yeni bir kullanıcı ekler
+        public IActionResult AddUser(User user) // Yeni kullanıcı ekler
         {
             _context.Users.Add(user);
             _context.SaveChanges();
             return Ok("Kullanıcı başarıyla eklendi!");
         }
-    }
 
+        [HttpPut("{id}")]
+        public IActionResult UpdateUser(int id, User user) // Kullanıcı bilgilerini günceller
+        {
+            var existing = _context.Users.Find(id);
+            if (existing == null) return NotFound("Kullanıcı bulunamadı.");
+            existing.Name = user.Name;
+            existing.Surname = user.Surname;
+            existing.Email = user.Email;
+            existing.Password = user.Password;
+            _context.SaveChanges();
+            return Ok("Kullanıcı güncellendi!");
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteUser(int id) // Kullanıcı siler
+        {
+            var user = _context.Users.Find(id);
+            if (user == null) return NotFound("Kullanıcı bulunamadı.");
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+            return Ok("Kullanıcı silindi!");
+        }
+    }
 }
+

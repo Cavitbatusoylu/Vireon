@@ -2,34 +2,38 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container. (Servisleri konteynere ekle)
-builder.Services.AddDbContext<VireonContext>(); // Veritabanı bağlamını servis olarak ekler
+// Servisleri konteynere ekle
+builder.Services.AddDbContext<VireonContext>();
 
-builder.Services.AddControllers().AddJsonOptions(options => // Denetleyicileri (Controllers) ekler ve JSON döngülerini engeller
+builder.Services.AddCors(options => // CORS politikası (Frontend erişimi için)
+{
+    options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
-builder.Services.AddEndpointsApiExplorer(); // API uç noktaları için keşif aracını ekler
-builder.Services.AddSwaggerGen(); // Swagger belgelerini oluşturur
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline. (HTTP istek boru hattını yapılandır)
+// Swagger arayüzü (Geliştirme ortamında aktif)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); // Swagger JSON uç noktasını etkinleştirir
-    app.UseSwaggerUI(); // Swagger arayüzünü etkinleştirir
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseDefaultFiles(); // Varsayılan dosyaları (index.html vb.) kullanır
-app.UseStaticFiles(); // Statik dosyaları (wwwroot) kullanır
+app.UseCors("AllowAll");
 
-app.UseHttpsRedirection(); // HTTP isteklerini HTTPS'e yönlendirir
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
-app.UseAuthorization(); // Yetkilendirme mekanizmasını etkinleştirir
+app.UseAuthorization();
 
-app.MapControllers(); // Denetleyici yönlendirmelerini eşleştirir
+app.MapControllers();
 
-app.Run(); // Uygulamayı başlatır
-
-
+app.Run();

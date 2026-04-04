@@ -10,25 +10,28 @@ namespace Vireon.PresentationLayer.Controllers
     {
         private readonly VireonContext _context;
 
-        public LedgerEntriesController(VireonContext context) // Veritabanı bağlamını enjekte eder
-        {
-            _context = context;
-        }
+        public LedgerEntriesController(VireonContext context) { _context = context; }
 
         [HttpGet]
         public IActionResult GetLedgerEntries() // Tüm muhasebe kayıtlarını listeler
         {
-            var values = _context.LedgerEntries.ToList();
-            return Ok(values);
+            return Ok(_context.LedgerEntries.ToList());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetLedgerEntry(int id) // ID ile muhasebe kaydı getirir
+        {
+            var entry = _context.LedgerEntries.Find(id);
+            if (entry == null) return NotFound("Kayıt bulunamadı.");
+            return Ok(entry);
         }
 
         [HttpPost]
-        public IActionResult AddLedgerEntry(LedgerEntry ledgerEntry) // Yeni bir muhasebe kaydı ekler
+        public IActionResult AddLedgerEntry(LedgerEntry ledgerEntry) // Yeni muhasebe kaydı ekler (Immutable - sadece eklenir, silinemez)
         {
             _context.LedgerEntries.Add(ledgerEntry);
             _context.SaveChanges();
             return Ok("Muhasebe kaydı başarıyla eklendi!");
         }
     }
-
 }

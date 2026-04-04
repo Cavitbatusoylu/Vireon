@@ -10,25 +10,28 @@ namespace Vireon.PresentationLayer.Controllers
     {
         private readonly VireonContext _context;
 
-        public FraudLogsController(VireonContext context) // Veritabanı bağlamını enjekte eder
-        {
-            _context = context;
-        }
+        public FraudLogsController(VireonContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult GetFraudLogs() // Tüm şüpheli işlem kayıtlarını listeler
+        public IActionResult GetFraudLogs() // Tüm fraud kayıtlarını listeler
         {
-            var values = _context.FraudLogs.ToList();
-            return Ok(values);
+            return Ok(_context.FraudLogs.ToList());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetFraudLog(int id) // ID ile fraud kaydı getirir
+        {
+            var log = _context.FraudLogs.Find(id);
+            if (log == null) return NotFound("Kayıt bulunamadı.");
+            return Ok(log);
         }
 
         [HttpPost]
-        public IActionResult AddFraudLog(FraudLog fraudLog) // Yeni bir şüpheli işlem kaydı oluşturur
+        public IActionResult AddFraudLog(FraudLog fraudLog) // Yeni fraud kaydı ekler
         {
             _context.FraudLogs.Add(fraudLog);
             _context.SaveChanges();
             return Ok("Fraud log başarıyla eklendi!");
         }
     }
-
 }

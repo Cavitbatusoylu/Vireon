@@ -10,25 +10,40 @@ namespace Vireon.PresentationLayer.Controllers
     {
         private readonly VireonContext _context;
 
-        public DailyLimitsController(VireonContext context) // Veritabanı bağlamını enjekte eder
-        {
-            _context = context;
-        }
+        public DailyLimitsController(VireonContext context) { _context = context; }
 
         [HttpGet]
         public IActionResult GetDailyLimits() // Tüm günlük limitleri listeler
         {
-            var values = _context.DailyLimits.ToList();
-            return Ok(values);
+            return Ok(_context.DailyLimits.ToList());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetDailyLimit(int id) // ID ile günlük limit getirir
+        {
+            var limit = _context.DailyLimits.Find(id);
+            if (limit == null) return NotFound("Limit bulunamadı.");
+            return Ok(limit);
         }
 
         [HttpPost]
-        public IActionResult AddDailyLimit(DailyLimit dailyLimit) // Sisteme yeni bir günlük limit ekler
+        public IActionResult AddDailyLimit(DailyLimit dailyLimit) // Yeni günlük limit ekler
         {
             _context.DailyLimits.Add(dailyLimit);
             _context.SaveChanges();
             return Ok("Günlük limit başarıyla eklendi!");
         }
-    }
 
+        [HttpPut("{id}")]
+        public IActionResult UpdateDailyLimit(int id, DailyLimit dailyLimit) // Limit günceller
+        {
+            var existing = _context.DailyLimits.Find(id);
+            if (existing == null) return NotFound("Limit bulunamadı.");
+            existing.MaxDailyLimit = dailyLimit.MaxDailyLimit;
+            existing.UsedLimit = dailyLimit.UsedLimit;
+            existing.LastResetDate = dailyLimit.LastResetDate;
+            _context.SaveChanges();
+            return Ok("Limit güncellendi!");
+        }
+    }
 }

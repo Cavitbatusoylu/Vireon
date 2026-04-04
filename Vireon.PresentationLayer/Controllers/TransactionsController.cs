@@ -10,25 +10,38 @@ namespace Vireon.PresentationLayer.Controllers
     {
         private readonly VireonContext _context;
 
-        public TransactionsController(VireonContext context) // Veritabanı bağlamını enjekte eder
-        {
-            _context = context;
-        }
+        public TransactionsController(VireonContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult GetTransactions() // Sisteme kayıtlı tüm işlemleri listeler
+        public IActionResult GetTransactions() // Tüm işlemleri listeler
         {
-            var values = _context.Transactions.ToList();
-            return Ok(values);
+            return Ok(_context.Transactions.ToList());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetTransaction(int id) // ID ile işlem getirir
+        {
+            var transaction = _context.Transactions.Find(id);
+            if (transaction == null) return NotFound("İşlem bulunamadı.");
+            return Ok(transaction);
         }
 
         [HttpPost]
-        public IActionResult AddTransaction(Transaction transaction) // Sisteme yeni bir işlem ekler
+        public IActionResult AddTransaction(Transaction transaction) // Yeni işlem ekler
         {
             _context.Transactions.Add(transaction);
             _context.SaveChanges();
             return Ok("İşlem başarıyla eklendi!");
         }
-    }
 
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTransaction(int id) // İşlem siler
+        {
+            var transaction = _context.Transactions.Find(id);
+            if (transaction == null) return NotFound("İşlem bulunamadı.");
+            _context.Transactions.Remove(transaction);
+            _context.SaveChanges();
+            return Ok("İşlem silindi!");
+        }
+    }
 }
