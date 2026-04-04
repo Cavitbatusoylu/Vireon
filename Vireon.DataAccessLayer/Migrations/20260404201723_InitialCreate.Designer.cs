@@ -12,7 +12,7 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 namespace Vireon.DataAccessLayer.Migrations
 {
     [DbContext(typeof(VireonContext))]
-    [Migration("20260324022221_InitialCreate")]
+    [Migration("20260404201723_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -21,9 +21,9 @@ namespace Vireon.DataAccessLayer.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.25")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.Account", b =>
                 {
@@ -31,18 +31,18 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Currency")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -58,9 +58,25 @@ namespace Vireon.DataAccessLayer.Migrations
                         {
                             Id = 1,
                             AccountNumber = "VR-1001",
-                            Balance = 1000m,
+                            Balance = 15000m,
                             Currency = "TRY",
                             UserId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AccountNumber = "VR-1002",
+                            Balance = 8500m,
+                            Currency = "TRY",
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AccountNumber = "VR-1003",
+                            Balance = 3200m,
+                            Currency = "TRY",
+                            UserId = 3
                         });
                 });
 
@@ -70,10 +86,10 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("LastResetDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("MaxDailyLimit")
                         .HasColumnType("decimal(18,2)");
@@ -90,6 +106,32 @@ namespace Vireon.DataAccessLayer.Migrations
                         .IsUnique();
 
                     b.ToTable("DailyLimits");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            LastResetDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MaxDailyLimit = 50000m,
+                            UsedLimit = 1500m,
+                            UserId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            LastResetDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MaxDailyLimit = 25000m,
+                            UsedLimit = 0m,
+                            UserId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            LastResetDate = new DateTime(2026, 4, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            MaxDailyLimit = 10000m,
+                            UsedLimit = 500m,
+                            UserId = 3
+                        });
                 });
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.FraudLog", b =>
@@ -98,27 +140,45 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("LogDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("RiskType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AccountId");
 
                     b.ToTable("FraudLogs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccountId = 1,
+                            Description = "Normal işlem",
+                            LogDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RiskType = "Low"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AccountId = 2,
+                            Description = "Yüksek tutarlı işlem tespit edildi",
+                            LogDate = new DateTime(2026, 4, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RiskType = "Medium"
+                        });
                 });
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.LedgerEntry", b =>
@@ -127,7 +187,7 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccountId")
                         .HasColumnType("int");
@@ -136,11 +196,11 @@ namespace Vireon.DataAccessLayer.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("NewBalance")
                         .HasColumnType("decimal(18,2)");
@@ -153,6 +213,48 @@ namespace Vireon.DataAccessLayer.Migrations
                     b.HasIndex("AccountId");
 
                     b.ToTable("LedgerEntries");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AccountId = 1,
+                            Amount = -1000m,
+                            CreatedAt = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "VR-1002 hesabına havale",
+                            NewBalance = 15000m,
+                            PreviousBalance = 16000m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AccountId = 2,
+                            Amount = 1000m,
+                            CreatedAt = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "VR-1001 hesabından havale",
+                            NewBalance = 8500m,
+                            PreviousBalance = 7500m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AccountId = 2,
+                            Amount = -500m,
+                            CreatedAt = new DateTime(2026, 4, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "VR-1003 hesabına havale",
+                            NewBalance = 8500m,
+                            PreviousBalance = 9000m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AccountId = 3,
+                            Amount = 500m,
+                            CreatedAt = new DateTime(2026, 4, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "VR-1002 hesabından havale",
+                            NewBalance = 3200m,
+                            PreviousBalance = 2700m
+                        });
                 });
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.Transaction", b =>
@@ -161,13 +263,13 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("ReceiverAccountId")
                         .HasColumnType("int");
@@ -182,6 +284,32 @@ namespace Vireon.DataAccessLayer.Migrations
                     b.HasIndex("SenderAccountId");
 
                     b.ToTable("Transactions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Amount = 1000m,
+                            Date = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ReceiverAccountId = 2,
+                            SenderAccountId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Amount = 500m,
+                            Date = new DateTime(2026, 4, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ReceiverAccountId = 3,
+                            SenderAccountId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Amount = 250m,
+                            Date = new DateTime(2026, 4, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ReceiverAccountId = 3,
+                            SenderAccountId = 1
+                        });
                 });
 
             modelBuilder.Entity("Vireon.EntityLayer.Concrete.User", b =>
@@ -190,23 +318,23 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -216,10 +344,26 @@ namespace Vireon.DataAccessLayer.Migrations
                         new
                         {
                             Id = 1,
-                            Email = "admin@vireon.com",
-                            Name = "Vireon",
-                            Password = "123",
-                            Surname = "Admin"
+                            Email = "cavitbatu@vireon.com",
+                            Name = "Cavit Batu",
+                            Password = "123456",
+                            Surname = "Soylu"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "enes@vireon.com",
+                            Name = "Enes",
+                            Password = "123456",
+                            Surname = "Kaya"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "kerem@vireon.com",
+                            Name = "Kerem",
+                            Password = "123456",
+                            Surname = "Arslan"
                         });
                 });
 
