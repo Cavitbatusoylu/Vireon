@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 namespace Vireon.EntityLayer.Concrete
 {
-    public class User
+    public class User // Sistemdeki kullanıcı bilgilerini tutan sınıf
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public int Id { get; set; } // Kullanıcı kimliği
+        public string Name { get; set; } // Kullanıcı adı
+        public string Surname { get; set; } // Kullanıcı soyadı
+        public string Email { get; set; } // E-posta adresi
+        public string Password { get; set; } // Giriş şifresi
 
-        // Navigation Properties
-        public List<Account> Accounts { get; set; }
-        public DailyLimit DailyLimit { get; set; } // Bir kullanıcının bir limiti olur
+        // Navigation Properties (İlişkili Tablolar)
+        public List<Account>? Accounts { get; set; } // Kullanıcıya ait hesaplar
+        public DailyLimit? DailyLimit { get; set; } // Kullanıcının günlük işlem limiti
     }
+
 }

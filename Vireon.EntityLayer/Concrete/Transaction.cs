@@ -1,16 +1,17 @@
 using System;
 namespace Vireon.EntityLayer.Concrete
 {
-    public class Transaction
+    public class Transaction // Para transferi işlemlerini tutan sınıf
     {
-        public int Id { get; set; }
-        public int SenderAccountId { get; set; }
-        public int ReceiverAccountId { get; set; }
-        public decimal Amount { get; set; }
-        public DateTime Date { get; set; }
+        public int Id { get; set; } // İşlem kimliği
+        public int SenderAccountId { get; set; } // Gönderici hesap kimliği
+        public int ReceiverAccountId { get; set; } // Alıcı hesap kimliği
+        public decimal Amount { get; set; } // Transfer edilen miktar
+        public DateTime Date { get; set; } // İşlem tarihi
 
-        // Navigation Properties
-        public Account SenderAccount { get; set; }
-        public Account ReceiverAccount { get; set; }
+        // Navigation Properties (İlişkili Tablolar)
+        public Account? SenderAccount { get; set; } // Gönderici hesap bilgisi
+        public Account? ReceiverAccount { get; set; } // Alıcı hesap bilgisi
     }
+
 }
