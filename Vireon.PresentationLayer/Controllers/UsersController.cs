@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 using Vireon.EntityLayer.Concrete;
+using Vireon.PresentationLayer.DTOs;
+
 
 namespace Vireon.PresentationLayer.Controllers
 {
@@ -55,6 +57,29 @@ namespace Vireon.PresentationLayer.Controllers
             _context.Users.Remove(user);
             _context.SaveChanges();
             return Ok("Kullanıcı silindi!");
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginDto loginDto)
+
+        {
+            // Veritabanında eşleşen kullanıcıyı bul
+            var user = _context.Users.FirstOrDefault(u => u.Email == loginDto.Email && u.Password == loginDto.Password);
+
+
+            if (user == null)
+            {
+                return Unauthorized(new { message = "E-posta ya da şifre yanlıştır. " });
+            }
+
+            // Başarılı giriş durumunda kullanıcı bilgilerini döndür
+            return Ok(new
+            {
+                id = user.Id,
+                name = user.Name,
+                surname = user.Surname,
+                email = user.Email
+            });
         }
     }
 }

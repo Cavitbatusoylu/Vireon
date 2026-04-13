@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 
@@ -11,9 +12,11 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 namespace Vireon.DataAccessLayer.Migrations
 {
     [DbContext(typeof(VireonContext))]
-    partial class VireonContextModelSnapshot : ModelSnapshot
+    [Migration("20260413165306_InitialCreate_SqlServer")]
+    partial class InitialCreate_SqlServer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,8 +242,8 @@ namespace Vireon.DataAccessLayer.Migrations
                             Amount = -500m,
                             CreatedAt = new DateTime(2026, 4, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "VR-1003 hesabına havale",
-                            NewBalance = 8000m,
-                            PreviousBalance = 8500m
+                            NewBalance = 8500m,
+                            PreviousBalance = 9000m
                         },
                         new
                         {
