@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 using Vireon.EntityLayer.Concrete;
-using Vireon.PresentationLayer.DTOs;
+using Vireon.DtoLayer;
 
 
 namespace Vireon.PresentationLayer.Controllers

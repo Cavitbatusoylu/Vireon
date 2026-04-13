@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Vireon.PresentationLayer.DTOs;
-using Vireon.EntityLayer.Concrete; // Cavit'in tablolarını içeri aldık
+using Vireon.DtoLayer;
+using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.PresentationLayer.Mappings
 {

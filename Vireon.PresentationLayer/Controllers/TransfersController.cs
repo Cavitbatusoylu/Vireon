@@ -1,7 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Vireon.PresentationLayer.DTOs;
+using Vireon.DtoLayer;
 using Vireon.EntityLayer.Concrete;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
