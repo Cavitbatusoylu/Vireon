@@ -1,0 +1,27 @@
+{
+  "name": "vireon-digital-bank",
+  "version": "1.0.0",
+  "description": "Vireon Immutable Ledger - Digital Banking Core System",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging"
+  },
+  "keywords": ["vireon", "banking", "ledger", "electron", "immutable", "acid"],
+  "author": "Cavit Batu Soylu, Enes Kaya, Kerem Arslan",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "build": {
+    "appId": "com.vireon.digitalbank",
+    "productName": "Vireon Digital Bank",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "Vireon.PresentationLayer/wwwroot/images/vireon-logo-transparent-new.png"
+    }
+  }
+}
