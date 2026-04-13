@@ -30,6 +30,10 @@ _ReSharper*/
 # Environment Variables
 .env
 
+# Node
+node_modules/
+package-lock.json
+
 # Build logs
 *.log
 build_errors.txt

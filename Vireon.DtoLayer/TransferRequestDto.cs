@@ -1,4 +1,4 @@
-﻿namespace Vireon.PresentationLayer.DTOs
+namespace Vireon.DtoLayer
 {
     public class TransferRequestDto
     {
