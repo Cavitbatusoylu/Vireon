@@ -1,8 +1,4 @@
-using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
-using Vireon.BusinessLayer.Abstract;                                         //Enes
-using Vireon.BusinessLayer.Concrete;                                        //Enes
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,17 +17,6 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddAutoMapper(config =>                                                                                            //Enes
-{
-    config.AddProfile<Vireon.PresentationLayer.Mappings.VireonMappingProfile>();
-});
-
-// Güvenlik kurallarını (Validator'ları) bulup sisteme dahil ediyoruz
-builder.Services.AddValidatorsFromAssemblyContaining<Vireon.PresentationLayer.Validators.TransferRequestDtoValidator>();
-
-// Sisteme diyoruz ki: Vezne senden ITransactionService isterse, ona TransactionManager'ı ver.
-builder.Services.AddScoped<ITransactionService, TransactionManager>();                                                               //Enes
 
 var app = builder.Build();
 
