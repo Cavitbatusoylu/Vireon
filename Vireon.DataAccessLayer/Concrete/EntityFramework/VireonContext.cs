@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Linq;
 using Vireon.EntityLayer.Concrete;
 
@@ -6,11 +7,31 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
 {
     public class VireonContext : DbContext // Veritabanı bağlantı ve yapılandırma sınıfı (Entity Framework Core)
     {
+        private readonly IConfiguration? _configuration;
+
+        public VireonContext() { }
+
+        public VireonContext(DbContextOptions<VireonContext> options, IConfiguration configuration) 
+            : base(options)
+        {
+            _configuration = configuration;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) // Veritabanı bağlantı ayarları
         {
-            // Yerel MySQL Bağlantı Dizesi (XAMPP)
-            var connectionString = "server=localhost;port=3306;database=VireonDB;user=root;password=;";
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            if (!optionsBuilder.IsConfigured)
+            {
+                // SQL Server Bağlantı Dizesi - CBS Sunucusu
+                var connectionString = _configuration?.GetConnectionString("VireonDB") 
+                    ?? "Server=CBS;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;";
+                
+                // SQL Server bağlantısını yapılandır
+                optionsBuilder.UseSqlServer(connectionString);
+                
+                // Development ortamında detaylı log
+                optionsBuilder.EnableSensitiveDataLogging();
+                optionsBuilder.EnableDetailedErrors();
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) // Tablo yapılandırmaları ve ilişkiler
@@ -82,7 +103,7 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
             modelBuilder.Entity<LedgerEntry>().HasData(
                 new LedgerEntry { Id = 1, AccountId = 1, Amount = -1000, PreviousBalance = 16000, NewBalance = 15000, Description = "VR-1002 hesabına havale", CreatedAt = new DateTime(2026, 4, 1) },
                 new LedgerEntry { Id = 2, AccountId = 2, Amount = 1000, PreviousBalance = 7500, NewBalance = 8500, Description = "VR-1001 hesabından havale", CreatedAt = new DateTime(2026, 4, 1) },
-                new LedgerEntry { Id = 3, AccountId = 2, Amount = -500, PreviousBalance = 9000, NewBalance = 8500, Description = "VR-1003 hesabına havale", CreatedAt = new DateTime(2026, 4, 2) },
+                new LedgerEntry { Id = 3, AccountId = 2, Amount = -500, PreviousBalance = 8500, NewBalance = 8000, Description = "VR-1003 hesabına havale", CreatedAt = new DateTime(2026, 4, 2) },
                 new LedgerEntry { Id = 4, AccountId = 3, Amount = 500, PreviousBalance = 2700, NewBalance = 3200, Description = "VR-1002 hesabından havale", CreatedAt = new DateTime(2026, 4, 2) }
             );
         }

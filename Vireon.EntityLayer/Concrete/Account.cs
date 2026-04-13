@@ -6,9 +6,9 @@ namespace Vireon.EntityLayer.Concrete
     {
         public int Id { get; set; } // Benzersiz hesap kimliği
         public int UserId { get; set; } // Hesabın ait olduğu kullanıcı kimliği
-        public string AccountNumber { get; set; } // Hesap numarası
+        public string AccountNumber { get; set; } = null!; // Hesap numarası
         public decimal Balance { get; set; } // Hesap bakiyesi
-        public string Currency { get; set; } // Hesap para birimi
+        public string Currency { get; set; } = null!; // Hesap para birimi
 
         // Navigation Properties (İlişkili Tablolar)
         public User? User { get; set; } // Hesabın sahibi
