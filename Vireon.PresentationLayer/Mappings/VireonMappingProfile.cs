@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Vireon.DtoLayer;
+using Vireon.PresentationLayer.DTOs;
 using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.PresentationLayer.Mappings
