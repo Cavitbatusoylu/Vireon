@@ -1,9 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Vireon.PresentationLayer.DTOs;
 using Vireon.EntityLayer.Concrete;
 using Vireon.BusinessLayer.Abstract;
+using Vireon.BusinessLayer.Concrete;
 
 namespace Vireon.PresentationLayer.Controllers
 {
@@ -14,39 +15,58 @@ namespace Vireon.PresentationLayer.Controllers
         private readonly IMapper _mapper;
         private readonly IValidator<TransferRequestDto> _validator;
 
-        //İş katmanıyla haberleşecek köprü
-        private readonly ITransactionService _transactionService; 
+        // İş katmanıyla haberleşecek köprü
+        private readonly ITransactionService _transactionService;
 
-        // Vezne açıldığında Çevirmen, Güvenlik ve İşlem Müdürü masaya gelir
-        public TransfersController(IMapper mapper, IValidator<TransferRequestDto> validator , ITransactionService transactionService)
+        // Yapay Zeka (AI) Servisi
+        private readonly FraudModelService _fraudModelService;
+
+        // Vezne açıldığında Çevirmen, Güvenlik, İşlem Müdürü ve artık AI Analist masaya gelir
+        public TransfersController(IMapper mapper, IValidator<TransferRequestDto> validator,
+            ITransactionService transactionService, FraudModelService fraudModelService)
         {
             _mapper = mapper;
             _validator = validator;
             _transactionService = transactionService;
+            _fraudModelService = fraudModelService;
         }
 
-        [HttpPost("send")] // "gonder" yerine evrensel "send" kullanıyoruz
+        [HttpPost("send")]
         public IActionResult SendTransfer([FromBody] TransferRequestDto requestDto)
         {
-            // GÜVENLİK
+            // 1. GÜVENLİK (FluentValidation)
             var validationResult = _validator.Validate(requestDto);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
             }
 
-            // ÇEVİRİ (DTO -> Entity)
-            // İngilizce formumuzu alıp, İngilizce veritabanı tablosuna (Transaction) çeviriyoruz
+            // 2. YAPAY ZEKA ANALİZİ (ML.NET) - WOW FAKTÖRÜ
+            // İşlemi iş katmanına göndermeden önce AI "Şüpheli mi?" diye kontrol ediyor
+            var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount);
+
+            if (isFraud && probability > 0.7) // %70 üzeri risk varsa işlemi engelle
+            {
+                return BadRequest(new
+                {
+                    Mesaj = "Profesör, Yapay Zeka (ML.NET) bu işlemi yüksek riskli buldu ve otomatik olarak engelledi!",
+                    RiskSkoru = probability,
+                    Durum = "Engellendi"
+                });
+            }
+
+            // 3. ÇEVİRİ (DTO -> Entity)
             var transactionEntity = _mapper.Map<Transaction>(requestDto);
 
-            // İŞ KATMANINA İLETİM
-            // Çevrilen veriyi Cavit'in servisine gönderiyoruz
+            // 4. İŞ KATMANINA İLETİM
             _transactionService.ProcessTransaction(transactionEntity);
 
             return Ok(new
             {
-                Mesaj = "Profesör, havale işlemi güvenlikten geçti ve İş Katmanına başarıyla iletildi!",
-                GonderilenTutar = requestDto.Amount
+                Mesaj = "Profesör, AI analizinden başarıyla geçildi ve işlem tamamlandı!",
+                RiskSkoru = probability,
+                GonderilenTutar = requestDto.Amount,
+                Durum = "Başarılı"
             });
         }
     }
