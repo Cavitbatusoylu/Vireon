@@ -10,7 +10,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     title: "Vireon - Immutable Ledger Digital Bank",
-    icon: path.join(__dirname, 'Vireon.PresentationLayer', 'wwwroot', 'images', 'vireon-logo-transparent-new.png'),
+    icon: path.join(__dirname, 'Vireon.PresentationLayer', 'wwwroot', 'favicon.ico'),
     backgroundColor: '#0a0f1a',
     webPreferences: {
       nodeIntegration: false,
