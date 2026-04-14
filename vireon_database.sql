@@ -1,7 +1,10 @@
 -- ============================================================
 -- Vireon Digital Bank - SQL Server Database Script
 -- Versiyon: 1.0 | Tarih: 14 Nisan 2026
--- Kullanim: SQL Server Management Studio veya sqlcmd ile calistirin
+-- 
+-- NOT: Bu dosya MANUEL kurulum içindir.
+-- Proje otomatik olarak database'i oluşturur (dotnet run).
+-- Sadece migration çalışmazsa bu dosyayı kullanın.
 -- ============================================================
 
 USE master;

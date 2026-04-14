@@ -158,7 +158,7 @@ Vireon/
 
 ### Gereksinimler
 - .NET 8.0 SDK
-- MySQL 8.0+
+- SQL Server 2019+ (LocalDB veya Express yeterli)
 - Visual Studio 2022 veya VS Code
 - Git
 
@@ -168,35 +168,48 @@ git clone https://github.com/Cavitbatusoylu/Vireon.git
 cd Vireon
 ```
 
-### 2. Database Bağlantısını Yapılandırın
+### 2. SQL Server Bağlantısını Yapılandırın
 `Vireon.PresentationLayer/appsettings.json` dosyasını düzenleyin:
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=VireonDB;User=root;Password=yourpassword;"
+    "VireonDB": "Server=localhost;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;"
   }
 }
 ```
 
-### 3. Database Migration
-```bash
-cd Vireon.DataAccessLayer
-dotnet ef database update
-```
+**Alternatif bağlantı string'leri:**
+- LocalDB: `Server=(localdb)\\mssqllocaldb;Database=VireonDB;Trusted_Connection=True;`
+- SQL Server Express: `Server=localhost\\SQLEXPRESS;Database=VireonDB;Integrated Security=true;`
+- Kullanıcı/Şifre ile: `Server=localhost;Database=VireonDB;User Id=sa;Password=yourpassword;TrustServerCertificate=true;`
 
-### 4. Projeyi Çalıştırın
+### 3. Projeyi Çalıştırın
 ```bash
 cd Vireon.PresentationLayer
 dotnet run
 ```
 
+**Database otomatik oluşturulur!** İlk çalıştırmada:
+- `VireonDB` database'i oluşturulur
+- Tüm tablolar oluşturulur
+- Seed data (test kullanıcıları) yüklenir
+
 Tarayıcınızda `https://localhost:5202` adresini açın.
+
+### 4. Manuel Database Kurulumu (Opsiyonel)
+Eğer otomatik migration çalışmazsa, `vireon_database.sql` dosyasını SQL Server Management Studio'da çalıştırın.
 
 ### 5. Test Kullanıcıları
 ```
-Email: admin@vireon.com
-Password: admin123
+Email: cavitbatu@vireon.com
+Password: 123456
+
+Email: enes@vireon.com
+Password: 123456
+
+Email: kerem@vireon.com
+Password: 123456
 
 Email: ahmet@test.com
 Password: test123

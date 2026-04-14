@@ -50,6 +50,33 @@ internal class Program
 
         var app = builder.Build();
 
+        // ============================================================
+        // OTOMATIK DATABASE MIGRATION VE SEED DATA
+        // Proje her başlatıldığında database'i kontrol eder ve gerekirse oluşturur
+        // ============================================================
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<VireonContext>();
+                var logger = services.GetRequiredService<ILogger<Program>>();
+
+                logger.LogInformation("Database bağlantısı kontrol ediliyor...");
+
+                // Database yoksa oluştur, migration'ları uygula
+                context.Database.Migrate();
+
+                logger.LogInformation("✅ Database hazır! Seed data yüklendi.");
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "❌ Database oluşturulurken hata: {Message}", ex.Message);
+                logger.LogWarning("⚠️ Lütfen SQL Server'ın çalıştığından ve connection string'in doğru olduğundan emin olun.");
+            }
+        }
+
         // Swagger arayüzü (Geliştirme ortamında aktif)
         if (app.Environment.IsDevelopment())
         {
