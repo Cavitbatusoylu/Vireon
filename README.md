@@ -179,10 +179,17 @@ cd Vireon
 }
 ```
 
-**Alternatif bağlantı string'leri:**
-- LocalDB: `Server=(localdb)\\mssqllocaldb;Database=VireonDB;Trusted_Connection=True;`
-- SQL Server Express: `Server=localhost\\SQLEXPRESS;Database=VireonDB;Integrated Security=true;`
-- Kullanıcı/Şifre ile: `Server=localhost;Database=VireonDB;User Id=sa;Password=yourpassword;TrustServerCertificate=true;`
+**Alternatif Connection String'ler:**
+```
+// SQL Server Express
+Server=localhost\\SQLEXPRESS;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;
+
+// LocalDB
+Server=(localdb)\\mssqllocaldb;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;
+
+// SQL Authentication
+Server=localhost;Database=VireonDB;User Id=sa;Password=YourPassword;TrustServerCertificate=true;
+```
 
 ### 3. Projeyi Çalıştırın
 ```bash
@@ -190,32 +197,20 @@ cd Vireon.PresentationLayer
 dotnet run
 ```
 
-**Database otomatik oluşturulur!** İlk çalıştırmada:
+**ÖNEMLİ:** Database otomatik oluşturulur! İlk çalıştırmada:
 - `VireonDB` database'i oluşturulur
 - Tüm tablolar oluşturulur
 - Seed data (test kullanıcıları) yüklenir
 
+Manuel kurulum için `vireon_database.sql` dosyasını SQL Server Management Studio'da çalıştırabilirsiniz.
+
 Tarayıcınızda `https://localhost:5202` adresini açın.
 
-### 4. Manuel Database Kurulumu (Opsiyonel)
-Eğer otomatik migration çalışmazsa, `vireon_database.sql` dosyasını SQL Server Management Studio'da çalıştırın.
-
-### 5. Test Kullanıcıları
+### 4. Test Kullanıcıları (Otomatik Yüklenir)
 ```
-Email: cavitbatu@vireon.com
-Password: 123456
-
-Email: enes@vireon.com
-Password: 123456
-
-Email: kerem@vireon.com
-Password: 123456
-
-Email: ahmet@test.com
-Password: test123
-
-Email: ayse@test.com
-Password: test123
+Email: cavitbatu@vireon.com | Şifre: 123456 | Hesap: VR-1001 | Bakiye: 15.000 TRY
+Email: enes@vireon.com      | Şifre: 123456 | Hesap: VR-1002 | Bakiye: 8.500 TRY
+Email: kerem@vireon.com     | Şifre: 123456 | Hesap: VR-1003 | Bakiye: 3.200 TRY
 ```
 
 <p align="right">(<a href="#readme-top">yukarı dön</a>)</p>

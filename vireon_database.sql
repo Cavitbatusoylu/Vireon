@@ -3,8 +3,12 @@
 -- Versiyon: 1.0 | Tarih: 14 Nisan 2026
 -- 
 -- NOT: Bu dosya MANUEL kurulum içindir.
--- Proje otomatik olarak database'i oluşturur (dotnet run).
--- Sadece migration çalışmazsa bu dosyayı kullanın.
+-- Proje otomatik olarak database'i oluşturur (Program.cs -> context.Database.Migrate())
+-- 
+-- Manuel Kurulum:
+-- 1. SQL Server Management Studio'yu aç
+-- 2. Bu dosyayı aç ve çalıştır (F5)
+-- 3. appsettings.json'daki connection string'i kontrol et
 -- ============================================================
 
 USE master;
