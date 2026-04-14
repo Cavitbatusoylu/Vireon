@@ -9,7 +9,7 @@ namespace Vireon.BusinessLayer.Concrete
     public class NeonAIOptions
     {
         public string ApiToken { get; set; } = "";
-        public string ModelId { get; set; } = "meta-llama/Llama-3.1-8B-Instruct";
+        public string ModelId { get; set; } = "llama-3.1-8b-instant";
     }
 
     public class NeonAIService
@@ -49,7 +49,7 @@ namespace Vireon.BusinessLayer.Concrete
                 };
 
                 var json = JsonSerializer.Serialize(requestBody);
-                using var req = new HttpRequestMessage(HttpMethod.Post, "https://router.huggingface.co/v1/chat/completions");
+                using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.groq.com/openai/v1/chat/completions");
                 req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", opt.ApiToken.Trim());
                 req.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
