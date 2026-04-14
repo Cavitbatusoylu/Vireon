@@ -553,7 +553,6 @@ function handleForgotPassword(e) {
 }
 
 // handleLogin fonksiyonu dosyanın sonunda tanımlı (yeni versiyon)
-}
 
 function updateNavForLoggedUser() {
    const loginBtn = getEl('loginBtn');
@@ -1245,8 +1244,10 @@ async function handleLogin(event) {
     const email = getEl('loginEmail')?.value;
     const password = getEl('loginPassword')?.value;
     
+    console.log('Login attempt:', { email, password: '***' });
+    
     if (!email || !password) {
-        showToast('Please fill all fields', 'warning');
+        showToast('Lütfen tüm alanları doldurun', 'warning');
         return;
     }
     
@@ -1257,22 +1258,34 @@ async function handleLogin(event) {
             body: JSON.stringify({ email, password })
         });
         
+        console.log('Login response status:', response.status);
+        
         if (response.ok) {
             const user = await response.json();
+            console.log('Login successful:', user);
+            
             currentUser = user;
             localStorage.setItem('vireonUser', JSON.stringify(user));
             
-            showToast(`Welcome ${user.name}!`, 'success');
+            showToast(`Hoş geldin ${user.name}!`, 'success');
             closeLoginModal();
-            showSection('dashboard');
-            fetchDashboardData();
+            
+            // Navbar'ı güncelle
+            updateNavbarForLoggedInUser();
+            
+            // Dashboard'a geçiş
+            setTimeout(() => {
+                showSection('dashboard');
+                fetchDashboardData();
+            }, 300);
         } else {
-            const error = await response.json();
-            showToast(error.message || 'Login failed', 'error');
+            const error = await response.json().catch(() => ({ message: 'Giriş başarısız' }));
+            console.error('Login failed:', error);
+            showToast(error.message || 'E-posta veya şifre hatalı', 'error');
         }
     } catch (err) {
         console.error('Login error:', err);
-        showToast('Connection error', 'error');
+        showToast('Sunucuya bağlanılamadı. Lütfen backend\'in çalıştığından emin olun.', 'error');
     }
 }
 
@@ -1341,6 +1354,7 @@ window.addEventListener('DOMContentLoaded', () => {
         try {
             currentUser = JSON.parse(savedUser);
             console.log('User restored from localStorage:', currentUser);
+            updateNavbarForLoggedInUser();
         } catch (e) {
             localStorage.removeItem('vireonUser');
         }
@@ -1449,4 +1463,38 @@ async function handleSendTransfer() {
         console.error('Transfer error:', err);
         showToast('Connection error', 'error');
     }
+}
+
+
+// ========== NAVBAR MANAGEMENT ==========
+
+function updateNavbarForLoggedInUser() {
+    const loginBtn = getEl('loginBtn');
+    const logoutBtn = getEl('logoutBtn');
+    const dashboardBtn = getEl('homeDashboardBtn');
+    
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+    if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
+}
+
+function updateNavbarForLoggedOutUser() {
+    const loginBtn = getEl('loginBtn');
+    const logoutBtn = getEl('logoutBtn');
+    const dashboardBtn = getEl('homeDashboardBtn');
+    
+    if (loginBtn) loginBtn.style.display = 'inline-flex';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    if (dashboardBtn) dashboardBtn.style.display = 'none';
+}
+
+function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('vireonUser');
+    
+    showToast('Çıkış yapıldı', 'info');
+    updateNavbarForLoggedOutUser();
+    
+    // Ana sayfaya dön
+    showSection('home');
 }
