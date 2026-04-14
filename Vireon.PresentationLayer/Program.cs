@@ -43,8 +43,8 @@ internal class Program
         // Sisteme diyoruz ki: Vezne senden ITransactionService isterse, ona TransactionManager'ı ver.
         builder.Services.AddScoped<ITransactionService, TransactionManager>();                                                               //Enes
 
-        builder.Services.Configure<KumruOptions>(builder.Configuration.GetSection("Kumru"));
-        builder.Services.AddHttpClient<KumruAIService>();
+        builder.Services.Configure<NeonAIOptions>(builder.Configuration.GetSection("NeonAI"));
+        builder.Services.AddHttpClient<NeonAIService>();
 
         builder.Services.AddSingleton<Vireon.BusinessLayer.Concrete.FraudModelService>();
 

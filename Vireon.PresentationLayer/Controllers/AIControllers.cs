@@ -7,22 +7,20 @@ namespace Vireon.PresentationLayer.Controllers
     [ApiController]
     public class AIController : ControllerBase
     {
-        private readonly KumruAIService _kumruAIService;
+        private readonly NeonAIService _neonAIService;
 
-        public AIController(KumruAIService kumruAIService)
+        public AIController(NeonAIService neonAIService)
         {
-            _kumruAIService = kumruAIService;
+            _neonAIService = neonAIService;
         }
 
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] ChatRequest request)
         {
             if (string.IsNullOrWhiteSpace(request?.Message))
-            {
                 return BadRequest(new { message = "Mesaj boş olamaz." });
-            }
 
-            var result = await _kumruAIService.GetKumruResponseAsync(request.Message);
+            var result = await _neonAIService.GetResponseAsync(request.Message);
             return Ok(new { response = result });
         }
     }
@@ -32,4 +30,3 @@ namespace Vireon.PresentationLayer.Controllers
         public string? Message { get; set; }
     }
 }
-
