@@ -160,56 +160,9 @@ INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion) VALUES
 GO
 
 -- ============================================================
--- SEED DATA
+-- SEED DATA KALDIRILDI
+-- Kullanıcılar /api/users/register endpoint'i ile kayıt olacak
 -- ============================================================
-
-SET IDENTITY_INSERT dbo.Users ON;
-INSERT INTO dbo.Users (Id, Name, Surname, Email, Password) VALUES
-(1, 'Cavit Batu', 'Soylu',  'cavitbatu@vireon.com', '123456'),
-(2, 'Enes',       'Kaya',   'enes@vireon.com',       '123456'),
-(3, 'Kerem',      'Arslan', 'kerem@vireon.com',      '123456');
-SET IDENTITY_INSERT dbo.Users OFF;
-GO
-
-SET IDENTITY_INSERT dbo.Accounts ON;
-INSERT INTO dbo.Accounts (Id, UserId, AccountNumber, Balance, Currency) VALUES
-(1, 1, 'VR-1001', 15000.00, 'TRY'),
-(2, 2, 'VR-1002',  8500.00, 'TRY'),
-(3, 3, 'VR-1003',  3200.00, 'TRY');
-SET IDENTITY_INSERT dbo.Accounts OFF;
-GO
-
-SET IDENTITY_INSERT dbo.DailyLimits ON;
-INSERT INTO dbo.DailyLimits (Id, UserId, MaxDailyLimit, UsedLimit, LastResetDate) VALUES
-(1, 1, 50000.00, 1500.00, '2026-04-04 00:00:00'),
-(2, 2, 25000.00,    0.00, '2026-04-04 00:00:00'),
-(3, 3, 10000.00,  500.00, '2026-04-04 00:00:00');
-SET IDENTITY_INSERT dbo.DailyLimits OFF;
-GO
-
-SET IDENTITY_INSERT dbo.Transactions ON;
-INSERT INTO dbo.Transactions (Id, SenderAccountId, ReceiverAccountId, Amount, Date) VALUES
-(1, 1, 2, 1000.00, '2026-04-01 00:00:00'),
-(2, 2, 3,  500.00, '2026-04-02 00:00:00'),
-(3, 1, 3,  250.00, '2026-04-03 00:00:00');
-SET IDENTITY_INSERT dbo.Transactions OFF;
-GO
-
-SET IDENTITY_INSERT dbo.FraudLogs ON;
-INSERT INTO dbo.FraudLogs (Id, AccountId, RiskType, Description, LogDate) VALUES
-(1, 1, 'Low',    'Normal islem',                       '2026-04-01 00:00:00'),
-(2, 2, 'Medium', 'Yuksek tutarli islem tespit edildi', '2026-04-02 00:00:00');
-SET IDENTITY_INSERT dbo.FraudLogs OFF;
-GO
-
-SET IDENTITY_INSERT dbo.LedgerEntries ON;
-INSERT INTO dbo.LedgerEntries (Id, AccountId, Amount, PreviousBalance, NewBalance, Description, CreatedAt) VALUES
-(1, 1, -1000.00, 16000.00, 15000.00, 'VR-1002 hesabina havale',   '2026-04-01 00:00:00'),
-(2, 2,  1000.00,  7500.00,  8500.00, 'VR-1001 hesabindan havale', '2026-04-01 00:00:00'),
-(3, 2,  -500.00,  8500.00,  8000.00, 'VR-1003 hesabina havale',   '2026-04-02 00:00:00'),
-(4, 3,   500.00,  2700.00,  3200.00, 'VR-1002 hesabindan havale', '2026-04-02 00:00:00');
-SET IDENTITY_INSERT dbo.LedgerEntries OFF;
-GO
 
 -- ============================================================
 -- KONTROL
