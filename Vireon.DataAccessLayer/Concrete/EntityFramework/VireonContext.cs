@@ -62,6 +62,16 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 .HasOne(d => d.User)
                 .WithOne(u => u.DailyLimit)
                 .HasForeignKey<DailyLimit>(d => d.UserId);
+
+            // 4. Account -> AccountNumber unique constraint
+            modelBuilder.Entity<Account>()
+                .HasIndex(a => a.AccountNumber)
+                .IsUnique();
+
+            // 5. User -> Email unique constraint
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
 
         // Veritabanı Tablo Tanımlamaları (DbSet)

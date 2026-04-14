@@ -6,5 +6,6 @@ namespace Vireon.BusinessLayer.Abstract
     {
         // Vezneden gelen temiz veriyi alıp işleyecek olan ana metot
         void ProcessTransaction(Transaction transaction);
+        Account? GetAccountByNumber(string accountNumber);
     }
 }
