@@ -67,6 +67,10 @@ namespace Vireon.BusinessLayer.Concrete
 
                 // 5. Transaction kaydı
                 transaction.Date = DateTime.Now;
+                if (string.IsNullOrWhiteSpace(transaction.Description))
+                {
+                    transaction.Description = $"Transfer: {senderAccount.AccountNumber} → {receiverAccount.AccountNumber}";
+                }
                 _context.Transactions.Add(transaction);
 
                 // 6. Ledger kayıtları (Immutable)

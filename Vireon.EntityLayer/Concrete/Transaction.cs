@@ -8,6 +8,7 @@ namespace Vireon.EntityLayer.Concrete
         public int ReceiverAccountId { get; set; } // Alıcı hesap kimliği
         public decimal Amount { get; set; } // Transfer edilen miktar
         public DateTime Date { get; set; } // İşlem tarihi
+        public string? Description { get; set; } // İşlem açıklaması
 
         // Navigation Properties (İlişkili Tablolar)
         public Account? SenderAccount { get; set; } // Gönderici hesap bilgisi

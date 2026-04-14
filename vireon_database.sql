@@ -94,6 +94,7 @@ CREATE TABLE dbo.Transactions (
     ReceiverAccountId INT          NOT NULL,
     Amount           DECIMAL(18,2) NOT NULL,
     Date             DATETIME2     NOT NULL,
+    Description      NVARCHAR(MAX) NULL,
     CONSTRAINT PK_Transactions PRIMARY KEY (Id),
     CONSTRAINT FK_Transactions_Accounts_SenderAccountId FOREIGN KEY (SenderAccountId)
         REFERENCES dbo.Accounts (Id) ON DELETE NO ACTION,

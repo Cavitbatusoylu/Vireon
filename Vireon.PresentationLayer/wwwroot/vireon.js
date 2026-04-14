@@ -1495,6 +1495,6 @@ function handleLogout() {
     showToast('Çıkış yapıldı', 'info');
     updateNavbarForLoggedOutUser();
     
-    // Ana sayfaya dön
-    showSection('home');
+    // Ana menüye dön
+    backToMenu();
 }

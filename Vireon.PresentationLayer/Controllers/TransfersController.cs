@@ -95,7 +95,8 @@ namespace Vireon.PresentationLayer.Controllers
                     SenderAccountId = senderAccount.Id,
                     ReceiverAccountId = receiverAccount.Id,
                     Amount = dto.Amount,
-                    Date = DateTime.Now
+                    Date = DateTime.Now,
+                    Description = dto.Description ?? "Transfer"
                 };
 
                 _transactionService.ProcessTransaction(transaction);
