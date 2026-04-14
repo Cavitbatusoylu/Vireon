@@ -552,52 +552,7 @@ function handleForgotPassword(e) {
    closeForgotPasswordModal();
 }
 
-async function handleLogin(e) {
-   e.preventDefault();
-   const emailField = getEl('loginEmail');
-   const passwordField = getEl('loginPassword');
-   if (!emailField || !passwordField) return;
-   
-   const email = emailField.value;
-   const password = passwordField.value;
-   const btn = e.target.querySelector('button[type="submit"]');
-   const originalText = btn.innerHTML;
-   const lang = window.currentLang || 'en';
-   btn.innerHTML = lang === 'tr' ? 'Giriş Yapılıyor...' : 'Signing In...';
-
-   try {
-      const response = await fetch('/api/users/login', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ email, password })
-      });
-      if (response.ok) {
-         currentUser = await response.json();
-         console.log('NEON AI: Login Success', currentUser);
-         closeLoginModal();
-         updateNavForLoggedUser();
-         
-         // Dashboard'a yönlendirme - önce modal'ı kapat, sonra geçiş yap
-         setTimeout(() => {
-            showSection('dashboard');
-            fetchDashboardData();
-         }, 300);
-         
-         // Ensure Home Dashboard button is visible
-         const hdb = getEl('homeDashboardBtn');
-         if (hdb) hdb.style.display = 'inline-flex';
-      } else {
-         const error = await response.json();
-         console.warn('NEON AI: Login Failed', error);
-         showToast(error.message || ((window.currentLang || 'en') === 'tr' ? 'Giriş başarısız! Lütfen bilgilerinizi kontrol edin.' : 'Login failed! Please check your credentials.'), 'error');
-      }
-
-   } catch (err) {
-      console.error('Login Error:', err);
-      showToast((window.currentLang || 'en') === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Could not connect to server.', 'error');
-   } finally {
-      btn.innerHTML = originalText;
-   }
+// handleLogin fonksiyonu dosyanın sonunda tanımlı (yeni versiyon)
 }
 
 function updateNavForLoggedUser() {
@@ -1270,17 +1225,17 @@ function openRegisterModal(e) {
     if (e) e.preventDefault();
     closeLoginModal();
     const modal = getEl('registerModal');
-    if (modal) modal.classList.add('show');
+    if (modal) modal.classList.add('active');
 }
 
 function closeRegisterModal() {
     const modal = getEl('registerModal');
-    if (modal) modal.classList.remove('show');
+    if (modal) modal.classList.remove('active');
 }
 
 function closeLoginModal() {
     const modal = getEl('loginModal');
-    if (modal) modal.classList.remove('show');
+    if (modal) modal.classList.remove('active');
 }
 
 // Handle Login
@@ -1367,7 +1322,7 @@ async function handleRegister(event) {
                 getEl('loginEmail').value = email;
                 getEl('loginPassword').value = password;
                 const loginModal = getEl('loginModal');
-                if (loginModal) loginModal.classList.add('show');
+                if (loginModal) loginModal.classList.add('active');
             }, 1500);
         } else {
             const error = await response.json();
@@ -1398,26 +1353,26 @@ function openLoginModalFromRegister(e) {
     if (e) e.preventDefault();
     closeRegisterModal();
     const modal = getEl('loginModal');
-    if (modal) modal.classList.add('show');
+    if (modal) modal.classList.add('active');
 }
 
 function openLoginModalFromForgot(e) {
     if (e) e.preventDefault();
     closeForgotPasswordModal();
     const modal = getEl('loginModal');
-    if (modal) modal.classList.add('show');
+    if (modal) modal.classList.add('active');
 }
 
 function closeForgotPasswordModal() {
     const modal = getEl('forgotPasswordModal');
-    if (modal) modal.classList.remove('show');
+    if (modal) modal.classList.remove('active');
 }
 
 function openForgotPasswordModal(e) {
     if (e) e.preventDefault();
     closeLoginModal();
     const modal = getEl('forgotPasswordModal');
-    if (modal) modal.classList.add('show');
+    if (modal) modal.classList.add('active');
 }
 
 function handleForgotPassword(event) {
@@ -1431,7 +1386,7 @@ const loginBtn = getEl('loginBtn');
 if (loginBtn) {
     loginBtn.addEventListener('click', () => {
         const modal = getEl('loginModal');
-        if (modal) modal.classList.add('show');
+        if (modal) modal.classList.add('active');
     });
 }
 
