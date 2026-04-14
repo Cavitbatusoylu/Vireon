@@ -10,7 +10,7 @@ namespace Vireon.BusinessLayer.Concrete
     {
         public string ApiToken { get; set; } = "";
         // Sadece Kumru modeline odaklanıyoruz
-        public string ModelId { get; set; } = "vngrs-ai/Kumru";
+        public string ModelId { get; set; } = "meta-llama/Llama-3.1-8B-Instruct";
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ namespace Vireon.BusinessLayer.Concrete
                     new
                     {
                         role = "system",
-                        content = "Sen Vireon dijital banka asistanı Neon'sun. Kumru dil modelini kullanıyorsun. Kısa ve net yanıtlar ver."
+                        content = "Sen Vireon dijital bankasının yapay zeka asistanı Neon'sun. Türkçe yanıt ver. Bankacılık, para transferi, hesap işlemleri ve finansal konularda yardımcı ol. Kısa, net ve profesyonel yanıtlar ver."
                     },
                     new { role = "user", content = message }
                 },
