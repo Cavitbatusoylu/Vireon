@@ -30,6 +30,9 @@ _ReSharper*/
 # Environment Variables
 .env
 
+# Secrets (API keys - never commit)
+Vireon.PresentationLayer/appsettings.Development.json
+
 # Node
 node_modules/
 package-lock.json
