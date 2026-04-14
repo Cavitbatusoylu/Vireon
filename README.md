@@ -200,18 +200,25 @@ dotnet run
 **ÖNEMLİ:** Database otomatik oluşturulur! İlk çalıştırmada:
 - `VireonDB` database'i oluşturulur
 - Tüm tablolar oluşturulur
-- Seed data (test kullanıcıları) yüklenir
-
-Manuel kurulum için `vireon_database.sql` dosyasını SQL Server Management Studio'da çalıştırabilirsiniz.
+- Kayıt sistemi aktif (seed data yok)
 
 Tarayıcınızda `https://localhost:5202` adresini açın.
 
-### 4. Test Kullanıcıları (Otomatik Yüklenir)
+### 4. İlk Kullanıcıyı Kaydet
+API: `POST /api/users/register`
+```json
+{
+  "name": "Ahmet",
+  "surname": "Yılmaz",
+  "email": "ahmet@test.com",
+  "password": "123456"
+}
 ```
-Email: cavitbatu@vireon.com | Şifre: 123456 | Hesap: VR-1001 | Bakiye: 15.000 TRY
-Email: enes@vireon.com      | Şifre: 123456 | Hesap: VR-1002 | Bakiye: 8.500 TRY
-Email: kerem@vireon.com     | Şifre: 123456 | Hesap: VR-1003 | Bakiye: 3.200 TRY
-```
+
+Kayıt olunca otomatik:
+- Hesap oluşturulur (VR-0001 formatında)
+- Günlük limit atanır (50.000 TRY)
+- Bakiye 0 TRY başlar
 
 <p align="right">(<a href="#readme-top">yukarı dön</a>)</p>
 
