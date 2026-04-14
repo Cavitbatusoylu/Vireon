@@ -1261,3 +1261,237 @@ async function handleUpdateLimit() {
         showToast((window.currentLang || 'en') === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
     }
 }
+
+
+// ========== AUTHENTICATION FUNCTIONS ==========
+
+// Open/Close Modals
+function openRegisterModal(e) {
+    if (e) e.preventDefault();
+    closeLoginModal();
+    const modal = getEl('registerModal');
+    if (modal) modal.classList.add('show');
+}
+
+function closeRegisterModal() {
+    const modal = getEl('registerModal');
+    if (modal) modal.classList.remove('show');
+}
+
+function closeLoginModal() {
+    const modal = getEl('loginModal');
+    if (modal) modal.classList.remove('show');
+}
+
+// Handle Login
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = getEl('loginEmail')?.value;
+    const password = getEl('loginPassword')?.value;
+    
+    if (!email || !password) {
+        showToast('Please fill all fields', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (response.ok) {
+            const user = await response.json();
+            currentUser = user;
+            localStorage.setItem('vireonUser', JSON.stringify(user));
+            
+            showToast(`Welcome ${user.name}!`, 'success');
+            closeLoginModal();
+            showSection('dashboard');
+            fetchDashboardData();
+        } else {
+            const error = await response.json();
+            showToast(error.message || 'Login failed', 'error');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        showToast('Connection error', 'error');
+    }
+}
+
+// Handle Register
+async function handleRegister(event) {
+    event.preventDefault();
+    
+    const fullName = getEl('registerName')?.value.trim();
+    const email = getEl('registerEmail')?.value;
+    const password = getEl('registerPassword')?.value;
+    const confirmPassword = getEl('registerConfirmPassword')?.value;
+    
+    if (!fullName || !email || !password || !confirmPassword) {
+        showToast('Please fill all fields', 'warning');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'warning');
+        return;
+    }
+    
+    // Split full name
+    const nameParts = fullName.split(' ');
+    const name = nameParts[0];
+    const surname = nameParts.slice(1).join(' ') || name;
+    
+    try {
+        const response = await fetch('/api/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, surname, email, password })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showToast(`Account created! Account Number: ${result.accountNumber}`, 'success');
+            closeRegisterModal();
+            
+            // Auto-login
+            setTimeout(() => {
+                getEl('loginEmail').value = email;
+                getEl('loginPassword').value = password;
+                const loginModal = getEl('loginModal');
+                if (loginModal) loginModal.classList.add('show');
+            }, 1500);
+        } else {
+            const error = await response.json();
+            showToast(error.message || 'Registration failed', 'error');
+        }
+    } catch (err) {
+        console.error('Register error:', err);
+        showToast('Connection error', 'error');
+    }
+}
+
+// Check if user is logged in on page load
+window.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem('vireonUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            console.log('User restored from localStorage:', currentUser);
+        } catch (e) {
+            localStorage.removeItem('vireonUser');
+        }
+    }
+});
+
+
+// Modal navigation helpers
+function openLoginModalFromRegister(e) {
+    if (e) e.preventDefault();
+    closeRegisterModal();
+    const modal = getEl('loginModal');
+    if (modal) modal.classList.add('show');
+}
+
+function openLoginModalFromForgot(e) {
+    if (e) e.preventDefault();
+    closeForgotPasswordModal();
+    const modal = getEl('loginModal');
+    if (modal) modal.classList.add('show');
+}
+
+function closeForgotPasswordModal() {
+    const modal = getEl('forgotPasswordModal');
+    if (modal) modal.classList.remove('show');
+}
+
+function openForgotPasswordModal(e) {
+    if (e) e.preventDefault();
+    closeLoginModal();
+    const modal = getEl('forgotPasswordModal');
+    if (modal) modal.classList.add('show');
+}
+
+function handleForgotPassword(event) {
+    event.preventDefault();
+    showToast('Password reset feature coming soon!', 'info');
+    closeForgotPasswordModal();
+}
+
+// Login button handler
+const loginBtn = getEl('loginBtn');
+if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+        const modal = getEl('loginModal');
+        if (modal) modal.classList.add('show');
+    });
+}
+
+
+// ========== TRANSFER FUNCTIONS ==========
+
+async function handleSendTransfer() {
+    if (!currentUser || !currentUser.accountNumber) {
+        showToast('Please login first', 'warning');
+        return;
+    }
+    
+    const receiverAccountNumber = getEl('transferTarget')?.value.trim();
+    const amount = parseFloat(getEl('transferAmount')?.value);
+    const description = getEl('transferDesc')?.value || '';
+    
+    if (!receiverAccountNumber || !amount) {
+        showToast('Please fill receiver account and amount', 'warning');
+        return;
+    }
+    
+    if (amount <= 0) {
+        showToast('Amount must be greater than 0', 'warning');
+        return;
+    }
+    
+    if (receiverAccountNumber === currentUser.accountNumber) {
+        showToast('Cannot transfer to your own account', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/transfers/send-by-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                senderAccountNumber: currentUser.accountNumber,
+                receiverAccountNumber: receiverAccountNumber,
+                amount: amount,
+                description: description
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showToast(result.mesaj || 'Transfer successful!', 'success');
+            
+            // Clear form
+            getEl('transferTarget').value = '';
+            getEl('transferAmount').value = '';
+            getEl('transferDesc').value = '';
+            
+            // Refresh dashboard
+            fetchDashboardData();
+        } else {
+            const error = await response.json();
+            showToast(error.mesaj || error.message || 'Transfer failed', 'error');
+        }
+    } catch (err) {
+        console.error('Transfer error:', err);
+        showToast('Connection error', 'error');
+    }
+}
