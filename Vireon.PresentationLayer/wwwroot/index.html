@@ -12,7 +12,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260413">
+    <link rel="stylesheet" href="vireon.css?v=20260415-3">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/png" href="images/vireon-logo-transparent-new.png">
     <link rel="shortcut icon" href="images/vireon-logo-transparent-new.png">
     <link rel="apple-touch-icon" href="images/vireon-logo-transparent-new.png">
@@ -272,6 +275,10 @@
                                         <span class="sidebar-icon">🗄️</span>
                                         <span data-tr="DB Explorer" data-en="DB Explorer">DB Explorer</span>
                                     </li>
+                                    <li data-dash="dash-account-info" onclick="switchDashSection('dash-account-info')">
+                                        <span class="sidebar-icon">📋</span>
+                                        <span data-tr="Hesap Bilgileri" data-en="Account Info">Account Info</span>
+                                    </li>
                                     <li data-dash="dash-ai-coach" onclick="switchDashSection('dash-ai-coach')">
                                         <span class="sidebar-icon">🤖</span>
                                         <span data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</span>
@@ -319,7 +326,7 @@
 
                                     <div class="glass-card recent-tx-modern">
                                         <h4 data-tr="Son İşlemler" data-en="Recent Transactions">Recent Transactions</h4>
-                                        <div id="recentTransactions" class="tx-list-modern">
+                                        <div id="overviewTransactions" class="tx-list-modern">
                                             <p>Yükleniyor...</p>
                                         </div>
                                     </div>
@@ -340,7 +347,7 @@
                                     <div class="vireon-table-scroll">
                                         <table id="dbUsersTable" class="vireon-table-modern">
                                             <thead>
-                                                <tr><th>ID</th><th>Müşteri</th><th>Bakiye</th><th>Risk Skoru</th></tr>
+                                                <tr><th>ID</th><th data-tr="Müşteri" data-en="Customer">Customer</th><th data-tr="Hesap No" data-en="Account No">Account No</th><th data-tr="Bakiye" data-en="Balance">Balance</th></tr>
                                             </thead>
                                             <tbody></tbody>
                                         </table>
@@ -364,6 +371,51 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- ACCOUNT INFORMATION SECTION -->
+                            <div class="dash-sub-section" id="dash-account-info">
+                                <h2 class="sub-section-title" data-tr="Hesap Bilgileri" data-en="Account Information">Account Information</h2>
+                                <div class="account-info-grid">
+                                    <div class="glass-card account-info-card">
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Hesap Numarası" data-en="Account Number">Account Number</span>
+                                            <span class="info-value info-highlight" id="infoAccountNumber">-</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Ad Soyad" data-en="Full Name">Full Name</span>
+                                            <span class="info-value" id="infoFullName">-</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="E-posta" data-en="Email">Email</span>
+                                            <span class="info-value" id="infoEmail">-</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Kayıt Tarihi" data-en="Registration Date">Registration Date</span>
+                                            <span class="info-value" id="infoCreatedAt">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card account-info-card">
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Güncel Bakiye" data-en="Current Balance">Current Balance</span>
+                                            <span class="info-value info-balance" id="infoBalance">₺0.00</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Para Birimi" data-en="Currency">Currency</span>
+                                            <span class="info-value" id="infoCurrency">TRY</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                            <span class="info-value" id="infoTxCount">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="glass-card" style="margin-top: 20px;">
+                                    <h4 data-tr="İşlem Geçmişi" data-en="Transaction History">Transaction History</h4>
+                                    <div id="infoTransactionHistory" class="tx-list-modern">
+                                        <p data-tr="Yükleniyor..." data-en="Loading...">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="dash-sub-section" id="dash-deposit">
                                 <h2 class="sub-section-title" data-tr="Para Yatır" data-en="Deposit Funds">Deposit Funds</h2>
                                 <div class="glass-card transfer-card">
@@ -481,7 +533,7 @@
                             <div class="dash-sub-section" id="dash-history">
                                 <h2 class="sub-section-title" data-tr="Tüm İşlemler" data-en="Full Transaction History">Full Transaction History</h2>
                                 <div class="dash-card transactions-card">
-                                    <div class="tx-list" id="recentTransactions">
+                                    <div class="tx-list" id="fullTransactionHistory">
                                         <p data-tr="Henüz işlem bulunamadı." data-en="No transactions found.">No transactions found.</p>
                                     </div>
                                 </div>
@@ -1208,7 +1260,7 @@
                 </div>
             </div>
             <div class="ai-chat-footer">
-                <input type="text" id="aiInput" class="ai-input" placeholder="Mesajınızı yazın..." autocomplete="off" onkeydown="if(event.key === 'Enter') { event.preventDefault(); sendAIMessage(); }">
+                <input type="text" id="floatingAiInput" class="ai-input" placeholder="Mesajınızı yazın..." autocomplete="off" onkeydown="if(event.key === 'Enter') { event.preventDefault(); sendAIMessage(); }">
                 <button type="button" class="ai-send-btn" onclick="sendAIMessage()" aria-label="Send message">➤</button>
             </div>
         </div>
@@ -1222,7 +1274,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js" defer></script>
+    <script src="vireon.js?v=20260415-3" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
