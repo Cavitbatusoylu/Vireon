@@ -21,12 +21,12 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // SQL Server Bağlantı Dizesi - CBS Sunucusu
+                // SQLite Bağlantı Dizesi
                 var connectionString = _configuration?.GetConnectionString("VireonDB") 
-                    ?? "Server=CBS;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;";
+                    ?? "Data Source=../vireon_local.db";
                 
-                // SQL Server bağlantısını yapılandır
-                optionsBuilder.UseSqlServer(connectionString);
+                // SQLite bağlantısını yapılandır
+                optionsBuilder.UseSqlite(connectionString);
                 
                 // Development ortamında detaylı log
                 optionsBuilder.EnableSensitiveDataLogging();
@@ -72,6 +72,17 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            // 6. User -> AccountNumber unique constraint (hesap numarası benzersiz olmalı)
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.AccountNumber)
+                .IsUnique();
+
+            // 7. Transaction -> Status default value
+            modelBuilder.Entity<Transaction>()
+                .Property(t => t.Status)
+                .HasDefaultValue("pending")
+                .HasMaxLength(20);
         }
 
         // Veritabanı Tablo Tanımlamaları (DbSet)

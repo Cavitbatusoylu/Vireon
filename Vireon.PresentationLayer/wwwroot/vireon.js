@@ -1,7 +1,7 @@
-/* JavaScript Document
-TemplateMo 603 Nexaverse
-https://templatemo.com/tm-603-nexaverse
-*/
+/* ============================================================
+ * Vireon Digital Bank - Frontend Application
+ * Version: 2.0 | Clean, deduplicated, production-ready
+ * ============================================================ */
 
 // ========== TOAST NOTIFICATION SYSTEM ==========
 function showToast(message, type = 'info') {
@@ -19,6 +19,7 @@ function showToast(message, type = 'info') {
     toast.innerHTML = `
         <span class="toast-icon">${icon}</span>
         <span class="toast-message">${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
     `;
     
     toastContainer.appendChild(toast);
@@ -28,7 +29,7 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
 }
 
 function createToastContainer() {
@@ -40,7 +41,6 @@ function createToastContainer() {
 }
 
 // ABSOLUTE SAFETY: This runs globally at the very start
-// Even if anything below fails, this ensures the screen is never blocked.
 (function() {
     const clearLoader = () => {
         const ls = document.getElementById('loadingScreen');
@@ -51,21 +51,31 @@ function createToastContainer() {
             ls.style.pointerEvents = 'none';
             ls.style.visibility = 'hidden';
             setTimeout(() => ls.style.display = 'none', 800);
-            console.log("NEON AI: UI Unlocked (Safety Mode)");
         }
     };
-    // Attempt 1: Fast
     setTimeout(clearLoader, 1500);
-    // Attempt 2: Final Guarantee
     setTimeout(clearLoader, 3500);
 })();
 
 // Loading Screen & PWA Registration
 window.addEventListener('load', () => {
-   // Register Service Worker for PWA
    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-         .then(reg => console.log('SW Registered', reg))
+      // Service worker'ı güncellemeye zorla
+      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+         .then(reg => {
+            console.log('SW Registered', reg);
+            // Güncelleme varsa hemen uygula
+            reg.addEventListener('updatefound', () => {
+               const newWorker = reg.installing;
+               if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                     if (newWorker.state === 'activated') {
+                        console.log('New SW activated — cache refreshed');
+                     }
+                  });
+               }
+            });
+         })
          .catch(err => console.log('SW Reg Error', err));
    }
 });
@@ -73,8 +83,6 @@ window.addEventListener('load', () => {
 // Global state tracking
 let isTransitioning = false;
 let currentUser = null;
-// currentLang is managed by index.html to prevent SyntaxError from redeclaration
-
 let deferredPrompt; 
 
 // Safely get elements
@@ -84,6 +92,22 @@ const getEls = (selector) => document.querySelectorAll(selector);
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
    try {
+       // Restore user from localStorage
+       const savedUser = localStorage.getItem('vireonUser');
+       if (savedUser) {
+           try {
+               currentUser = JSON.parse(savedUser);
+               console.log('User restored from localStorage:', currentUser.name);
+               updateNavbarForLoggedInUser();
+               
+               // Restore to dashboard immediately if session exists
+               showSection('dashboard');
+               fetchDashboardData();
+           } catch (e) {
+               localStorage.removeItem('vireonUser');
+           }
+       }
+
        initNavigation();
        initInteractions();
        console.log("NEON AI: Systems Initialized Successfully");
@@ -93,12 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initNavigation() {
-   // Menu items event listeners
    document.querySelectorAll('.menu-item').forEach(item => {
       item.addEventListener('click', function() {
          const onclick = this.getAttribute('onclick');
          if (onclick) {
-            // Extract section id from onclick attribute
             const match = onclick.match(/scrollToSection\('([^']+)'\)/);
             if (match && match[1]) {
                scrollToSection(match[1]);
@@ -111,62 +133,39 @@ function initNavigation() {
 function smoothScrollTo(id) {
     const element = document.getElementById(id);
     if (element) {
-        const navbarHeight = 80; // navbar yüksekliği
+        const navbarHeight = 80;
         const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
         const offsetPosition = elementPosition - navbarHeight;
-        
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
     }
 }
 
 function scrollToSection(id) {
     console.log('scrollToSection called with:', id);
     
-    // Hide all sections
     document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
         sec.classList.remove('active');
         sec.style.display = 'none';
         sec.style.visibility = 'hidden';
     });
 
-    // Hide menu elements
     const menuGrid = getEl('menuGrid');
     const mainHeader = getEl('mainHeader');
     const mainFooter = getEl('mainFooter');
 
-    if (menuGrid) {
-        menuGrid.style.display = 'none';
-        menuGrid.style.visibility = 'hidden';
-    }
-    if (mainHeader) {
-        mainHeader.style.display = 'none';
-        mainHeader.style.visibility = 'hidden';
-    }
-    if (mainFooter) {
-        mainFooter.style.display = 'none';
-        mainFooter.style.visibility = 'hidden';
-    }
+    if (menuGrid) { menuGrid.style.display = 'none'; menuGrid.style.visibility = 'hidden'; }
+    if (mainHeader) { mainHeader.style.display = 'none'; mainHeader.style.visibility = 'hidden'; }
+    if (mainFooter) { mainFooter.style.display = 'none'; mainFooter.style.visibility = 'hidden'; }
 
-    // Show target section
     const el = document.getElementById(id);
     if (el) {
         el.classList.add('active');
         el.style.display = 'block';
         el.style.opacity = '1';
         el.style.visibility = 'visible';
-        console.log('Section found and displayed:', id, el);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Animate stats if introduction section
-        if (id === 'section-introduction') {
-            setTimeout(animateStats, 500);
-        }
+        if (id === 'section-introduction') setTimeout(animateStats, 500);
     } else {
-        console.error('Section not found:', id);
-        // If section not found, go back to menu
         backToMenu();
     }
 }
@@ -175,8 +174,12 @@ function initInteractions() {
    const loginBtn = getEl('loginBtn');
    if (loginBtn) {
       loginBtn.addEventListener('click', (e) => {
-         console.log('Login button clicked');
-         openLoginModal(e);
+         e.preventDefault();
+         if (currentUser) {
+            showSection('dashboard');
+         } else {
+            openLoginModal(e);
+         }
       });
    }
 
@@ -228,11 +231,15 @@ function initInteractions() {
       }
    });
 
-   [['registerModal', closeRegisterModal], ['forgotPasswordModal', closeForgotPasswordModal]].forEach(([id, closer]) => {
+   // Modal backdrop click-to-close
+   ['loginModal', 'registerModal', 'forgotPasswordModal'].forEach(id => {
       const m = getEl(id);
       if (m) {
          m.addEventListener('click', (ev) => {
-            if (ev.target === m) closer();
+            if (ev.target === m) {
+               m.classList.remove('active');
+               document.body.style.overflow = '';
+            }
          });
       }
    });
@@ -241,147 +248,103 @@ function initInteractions() {
 function showSection(sectionId) {
    console.log('showSection called with:', sectionId);
    
-   // Immediately hide all sections
    document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
       sec.classList.remove('active');
       sec.style.display = 'none';
       sec.style.visibility = 'hidden';
    });
 
-   // Hide menu elements - ALWAYS hide when showing a section
    const menuGrid = getEl('menuGrid');
    const mainHeader = getEl('mainHeader');
    const mainFooter = getEl('mainFooter');
    const contentArea = getEl('contentArea');
 
-   if (menuGrid) {
-      menuGrid.style.display = 'none';
-      menuGrid.style.visibility = 'hidden';
-   }
-   if (mainHeader) {
-      mainHeader.style.display = 'none';
-      mainHeader.style.visibility = 'hidden';
-   }
-   if (mainFooter) {
-      mainFooter.style.display = 'none';
-      mainFooter.style.visibility = 'hidden';
-   }
+   if (menuGrid) { menuGrid.style.display = 'none'; menuGrid.style.visibility = 'hidden'; }
+   if (mainHeader) { mainHeader.style.display = 'none'; mainHeader.style.visibility = 'hidden'; }
+   if (mainFooter) { mainFooter.style.display = 'none'; mainFooter.style.visibility = 'hidden'; }
    if (contentArea) contentArea.style.display = 'block';
 
-   // Show target section immediately
    const section = getEl(sectionId);
    if (section) {
       section.classList.add('active');
       section.style.display = 'block';
       section.style.opacity = '1';
       section.style.visibility = 'visible';
-      console.log('Section displayed:', sectionId);
-   } else {
-      console.error('Section not found:', sectionId);
    }
 
-   // Handle dashboard
    if (sectionId === 'dashboard') {
       document.body.classList.add('dashboard-active');
       
-      // Force hide all landing sections
       document.querySelectorAll('.landing-content-section').forEach(sec => {
-         sec.style.display = 'none !important';
-         sec.style.visibility = 'hidden !important';
+         sec.style.display = 'none';
+         sec.style.visibility = 'hidden';
       });
       
       const wrapper = document.querySelector('#dashboard .dashboard-wrapper');
-      if (wrapper) {
-         wrapper.style.display = 'flex';
-         console.log('Dashboard wrapper displayed');
-      }
+      if (wrapper) wrapper.style.display = 'flex';
       
-      // Show back to home button
       const backBtn = getEl('backToHomeBtn');
       if (backBtn) backBtn.style.display = 'inline-flex';
       
       if (!currentUser) {
-         console.warn('No currentUser, redirecting to menu');
          document.body.classList.remove('dashboard-active');
          backToMenu();
       } else {
-         console.log('Loading dashboard for user:', currentUser.name);
          fetchDashboardData();
          window.scrollTo(0, 0);
       }
    } else {
       document.body.classList.remove('dashboard-active');
-      // Hide back to home button
       const backBtn = getEl('backToHomeBtn');
       if (backBtn) backBtn.style.display = 'none';
    }
 
-   // Animate stats for introduction
-   if (sectionId === 'section-introduction') {
-      setTimeout(animateStats, 500);
-   }
+   if (sectionId === 'section-introduction') setTimeout(animateStats, 500);
 }
 
 function backToMenu() {
-   console.log('backToMenu called');
-   
-   // Hide all sections first
    document.querySelectorAll('.content-section').forEach(sec => {
       sec.classList.remove('active');
       sec.style.display = 'none';
       sec.style.visibility = 'hidden';
    });
    
-   // Show landing sections
    document.querySelectorAll('.landing-content-section').forEach(sec => {
+      sec.classList.add('active');
       sec.style.display = 'block';
       sec.style.visibility = 'visible';
+      sec.style.opacity = '1';
    });
 
-   // Show menu elements
    const menuGrid = getEl('menuGrid');
    const mainHeader = getEl('mainHeader');
    const mainFooter = getEl('mainFooter');
-   const contentArea = getEl('contentArea');
 
-   if (menuGrid) {
-      menuGrid.style.display = 'grid';
-      menuGrid.style.visibility = 'visible';
-   }
-   if (mainHeader) {
-      mainHeader.style.display = 'block';
-      mainHeader.style.visibility = 'visible';
-   }
-   if (mainFooter) {
-      mainFooter.style.display = 'block';
-      mainFooter.style.visibility = 'visible';
-   }
+   if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
+   if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
+   if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
+
+   // Ensure overall layout wrapper is visible
+   const contentArea = getEl('contentArea');
    if (contentArea) contentArea.style.display = 'block';
 
-   // Remove dashboard class
    document.body.classList.remove('dashboard-active');
    
-   // Hide back to home button
    const backBtn = getEl('backToHomeBtn');
    if (backBtn) backBtn.style.display = 'none';
    
-   // Scroll to top
    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function scrollToDashboardTop() {
    window.scrollTo(0, 0);
-   document.documentElement.scrollTop = 0;
    const dash = getEl('dashboard');
-   if (dash) {
-      dash.scrollIntoView({ block: 'start', behavior: 'auto' });
-   }
+   if (dash) dash.scrollIntoView({ block: 'start', behavior: 'auto' });
 }
 
 // Animate Stats
 function animateStats() {
-   const metricValues = getEls('.metric-value[data-target]');
-   metricValues.forEach((el, index) => {
+   getEls('.metric-value[data-target]').forEach((el, index) => {
       setTimeout(() => {
          const target = parseInt(el.dataset.target);
          let current = 0;
@@ -399,10 +362,8 @@ function animateStats() {
 function switchTab(btn, tabId) {
    const container = btn.closest('.tabs-container');
    if (!container) return;
-   
    container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
    btn.classList.add('active');
-   
    container.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
    const target = document.getElementById(tabId);
    if (target) target.classList.add('active');
@@ -421,156 +382,234 @@ function filterGallery(category, btn) {
    });
 }
 
-// ========== LOGIN MODAL ==========
+// ========== MODAL SYSTEM ==========
 function openLoginModal(e) {
-   if (e) e.preventDefault();
-   closeRegisterModal();
-   closeForgotPasswordModal();
-   const modal = getEl('loginModal');
-   if (modal) {
-       modal.classList.add('active');
-       document.body.style.overflow = 'hidden';
-   }
+    if (e) e.preventDefault();
+    closeRegisterModal();
+    closeForgotPasswordModal();
+    const modal = getEl('loginModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeLoginModal() {
-   const modal = getEl('loginModal');
-   if (modal) {
-       modal.classList.remove('active');
-       document.body.style.overflow = '';
-   }
+    const modal = getEl('loginModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 function openRegisterModal(e) {
-   if (e) e.preventDefault();
-   closeLoginModal();
-   const modal = getEl('registerModal');
-   if (modal) {
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-   }
+    if (e) e.preventDefault();
+    closeLoginModal();
+    const modal = getEl('registerModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeRegisterModal() {
-   const modal = getEl('registerModal');
-   if (modal) {
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
-   }
+    const modal = getEl('registerModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 function openLoginModalFromRegister(e) {
-   if (e) e.preventDefault();
-   closeRegisterModal();
-   openLoginModal();
+    if (e) e.preventDefault();
+    closeRegisterModal();
+    openLoginModal();
 }
 
 function openForgotPasswordModal(e) {
-   if (e) e.preventDefault();
-   closeLoginModal();
-   const modal = getEl('forgotPasswordModal');
-   if (modal) {
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-   }
+    if (e) e.preventDefault();
+    closeLoginModal();
+    const modal = getEl('forgotPasswordModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeForgotPasswordModal() {
-   const modal = getEl('forgotPasswordModal');
-   if (modal) {
-      modal.classList.remove('active');
-      document.body.style.overflow = '';
-   }
+    const modal = getEl('forgotPasswordModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
 function openLoginModalFromForgot(e) {
-   if (e) e.preventDefault();
-   closeForgotPasswordModal();
-   openLoginModal();
-}
-
-async function handleRegister(e) {
-   e.preventDefault();
-   const nameField = getEl('registerName');
-   const emailField = getEl('registerEmail');
-   const passField = getEl('registerPassword');
-   const confirmField = getEl('registerConfirmPassword');
-   if (!nameField || !emailField || !passField || !confirmField) return;
-
-   const full = nameField.value.trim();
-   const parts = full.split(/\s+/).filter(Boolean);
-   const firstName = parts[0] || 'User';
-   const lastName = parts.length > 1 ? parts.slice(1).join(' ') : ' ';
-
-   if (passField.value !== confirmField.value) {
-      showToast((window.currentLang || 'en') === 'tr' ? 'Şifreler eşleşmiyor.' : 'Passwords do not match.', 'error');
-      return;
-   }
-
-   const btn = e.target.querySelector('button[type="submit"]');
-   const originalText = btn.innerHTML;
-   const lang = window.currentLang || 'en';
-   btn.innerHTML = lang === 'tr' ? 'Kaydediliyor...' : 'Signing up...';
-
-   try {
-      const response = await fetch('/api/users', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-            name: firstName,
-            surname: lastName,
-            email: emailField.value.trim(),
-            password: passField.value
-         })
-      });
-      if (response.ok) {
-         showToast(lang === 'tr' ? 'Kayıt tamamlandı. Giriş yapabilirsiniz.' : 'Registration complete. You can sign in.', 'success');
-         closeRegisterModal();
-         openLoginModal();
-      } else {
-         let msg = lang === 'tr' ? 'Kayıt başarısız.' : 'Registration failed.';
-         try {
-            const err = await response.json();
-            msg = err.message || err.title || msg;
-         } catch (_) { /* non-JSON body */ }
-         showToast(msg, 'error');
-      }
-   } catch (err) {
-      console.error(err);
-      showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Could not connect to server.', 'error');
-   } finally {
-      btn.innerHTML = originalText;
-   }
+    if (e) e.preventDefault();
+    closeForgotPasswordModal();
+    openLoginModal();
 }
 
 function handleForgotPassword(e) {
-   e.preventDefault();
-   const lang = window.currentLang || 'en';
-   showToast(lang === 'tr'
-      ? 'Bu demo sürümünde şifre sıfırlama yoktur. Yönetici ile iletişime geçin veya giriş bilgilerinizi deneyin.'
-      : 'Password reset is not available in this demo. Contact an administrator or use your known credentials.', 'info');
-   closeForgotPasswordModal();
+    e.preventDefault();
+    const lang = window.currentLang || 'en';
+    showToast(lang === 'tr'
+       ? 'Şifre sıfırlama bu sürümde mevcut değildir.'
+       : 'Password reset is not available in this version.', 'info');
+    closeForgotPasswordModal();
 }
 
-// handleLogin fonksiyonu dosyanın sonunda tanımlı (yeni versiyon)
+// ========== AUTHENTICATION ==========
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = getEl('loginEmail')?.value?.trim();
+    const password = getEl('loginPassword')?.value;
+    const lang = window.currentLang || 'en';
+    
+    if (!email || !password) {
+        showToast(lang === 'tr' ? 'Lütfen tüm alanları doldurun.' : 'Please fill all fields.', 'warning');
+        return;
+    }
+    
+    const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
+    
+    try {
+        const response = await fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (response.ok) {
+            const user = await response.json();
+            currentUser = user;
+            localStorage.setItem('vireonUser', JSON.stringify(user));
+            
+            showToast(lang === 'tr' ? `Hoş geldin ${user.name}!` : `Welcome ${user.name}!`, 'success');
+            closeLoginModal();
+            updateNavbarForLoggedInUser();
+            
+            setTimeout(() => {
+                showSection('dashboard');
+                fetchDashboardData();
+            }, 300);
+        } else {
+            const error = await response.json().catch(() => ({}));
+            showToast(error.message || (lang === 'tr' ? 'E-posta veya şifre hatalı.' : 'Invalid email or password.'), 'error');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Could not connect to server.', 'error');
+    } finally {
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    }
+}
 
-function updateNavForLoggedUser() {
-   const loginBtn = getEl('loginBtn');
-   if (loginBtn && currentUser) {
-      loginBtn.onclick = (ev) => {
-         ev.preventDefault();
-         showSection('dashboard');
-         setTimeout(scrollToDashboardTop, 650);
-      };
-   }
-   const hdb = getEl('homeDashboardBtn');
-   if (hdb && currentUser) hdb.style.display = 'inline-flex';
+async function handleRegister(event) {
+    event.preventDefault();
+    const lang = window.currentLang || 'en';
+    
+    const fullName = getEl('registerName')?.value?.trim();
+    const email = getEl('registerEmail')?.value?.trim();
+    const password = getEl('registerPassword')?.value;
+    const confirmPassword = getEl('registerConfirmPassword')?.value;
+    
+    if (!fullName || !email || !password || !confirmPassword) {
+        showToast(lang === 'tr' ? 'Lütfen tüm alanları doldurun.' : 'Please fill all fields.', 'warning');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showToast(lang === 'tr' ? 'Şifreler eşleşmiyor.' : 'Passwords do not match.', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showToast(lang === 'tr' ? 'Şifre en az 6 karakter olmalı.' : 'Password must be at least 6 characters.', 'warning');
+        return;
+    }
+    
+    const nameParts = fullName.split(/\s+/).filter(Boolean);
+    const name = nameParts[0] || 'User';
+    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : name;
+    
+    const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
+    
+    try {
+        const response = await fetch('/api/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, surname, email, password })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showToast(
+                lang === 'tr'
+                    ? `Kayıt başarılı! Hesap No: ${result.accountNumber}`
+                    : `Account created! Account No: ${result.accountNumber}`,
+                'success'
+            );
+            closeRegisterModal();
+            
+            setTimeout(() => {
+                const loginEmail = getEl('loginEmail');
+                const loginPassword = getEl('loginPassword');
+                if (loginEmail) loginEmail.value = email;
+                if (loginPassword) loginPassword.value = password;
+                openLoginModal();
+            }, 1500);
+        } else {
+            const error = await response.json().catch(() => ({}));
+            showToast(error.message || (lang === 'tr' ? 'Kayıt başarısız.' : 'Registration failed.'), 'error');
+        }
+    } catch (err) {
+        console.error('Register error:', err);
+        showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Connection error.', 'error');
+    } finally {
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    }
+}
+
+// ========== NAVBAR MANAGEMENT ==========
+function updateNavbarForLoggedInUser() {
+    const loginBtn = getEl('loginBtn');
+    const logoutBtn = getEl('logoutBtn');
+    const dashboardBtn = getEl('homeDashboardBtn');
+    
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+    if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
+}
+
+function updateNavbarForLoggedOutUser() {
+    const loginBtn = getEl('loginBtn');
+    const logoutBtn = getEl('logoutBtn');
+    const dashboardBtn = getEl('homeDashboardBtn');
+    
+    if (loginBtn) loginBtn.style.display = 'inline-flex';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+    if (dashboardBtn) dashboardBtn.style.display = 'none';
+}
+
+function handleLogout() {
+    const lang = window.currentLang || 'en';
+    currentUser = null;
+    localStorage.removeItem('vireonUser');
+    showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
+    updateNavbarForLoggedOutUser();
+    backToMenu();
 }
 
 function escapeHtml(s) {
-   const d = document.createElement('div');
-   d.textContent = s;
-   return d.innerHTML;
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
 }
 
 // ========== DASHBOARD NAVIGATION ==========
@@ -580,31 +619,26 @@ function switchDashSection(targetId) {
       li.classList.toggle('active', dash === targetId);
    });
 
-   document.querySelectorAll('.dash-sub-section').forEach(sec => {
-      sec.classList.remove('active');
-   });
+   document.querySelectorAll('.dash-sub-section').forEach(sec => sec.classList.remove('active'));
    const target = getEl(targetId);
-   if (target) {
-      target.classList.add('active');
-      console.log(`NEON AI: Switched to ${targetId}`);
-   }
-   if (targetId === 'dash-qr') {
-      refreshQrCode();
-   }
-   if (targetId === 'dash-db-explorer') {
-      fetchDatabaseStats();
-   }
+   if (target) target.classList.add('active');
+
+   if (targetId === 'dash-qr') refreshQrCode();
+   if (targetId === 'dash-db-explorer') fetchDatabaseStats();
+   if (targetId === 'dash-account-info') loadAccountInfo();
 }
 
-
+// ========== DASHBOARD DATA ==========
 async function fetchDashboardData() {
     if (!currentUser) return;
+    const lang = window.currentLang || 'en';
     try {
         const response = await fetch('/api/accounts');
         const accounts = await response.json();
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         if (userAccount) {
+            // Update balance display
             const balEl = getEl('dashBalance');
             const accEl = getEl('dashAccountNo');
             const curEl = getEl('dashCurrency');
@@ -613,15 +647,38 @@ async function fetchDashboardData() {
             if (accEl) accEl.textContent = userAccount.accountNumber;
             if (curEl) curEl.textContent = userAccount.currency;
 
+            // Fetch transactions
             const txResponse = await fetch('/api/transactions');
             const transactions = await txResponse.json();
             const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
-            updateTransactionList(userTxs, userAccount.id);
+            
+            // Update overview transaction list
+            const overviewList = getEl('overviewTransactions');
+            if (overviewList) updateTransactionList(userTxs, userAccount.id, overviewList);
+            
+            // Update full history
+            const historyList = getEl('fullTransactionHistory');
+            if (historyList) updateTransactionList(userTxs, userAccount.id, historyList);
+            
             initModernDashboardCharts(userTxs, userAccount.id, userAccount.balance);
             initOverviewChart(userTxs, userAccount.id);
             refreshQrCode();
+
+            // Update daily limits
+            try {
+                const limitsRes = await fetch('/api/dailylimits');
+                const limits = await limitsRes.json();
+                const userLimit = limits.find(l => l.userId === currentUser.id);
+                if (userLimit) {
+                    const maxEl = getEl('maxLimit');
+                    const usedEl = getEl('usedLimit');
+                    if (maxEl) maxEl.textContent = userLimit.maxDailyLimit.toLocaleString('tr-TR');
+                    if (usedEl) usedEl.textContent = userLimit.usedLimit.toLocaleString('tr-TR');
+                }
+            } catch (e) { console.error('Limits fetch error:', e); }
         }
 
+        // Profile fields
         const pn = getEl('profileName');
         const ps = getEl('profileSurname');
         const pe = getEl('profileEmail');
@@ -630,8 +687,8 @@ async function fetchDashboardData() {
         if (pe) pe.value = currentUser.email || '';
 
     } catch (err) { 
-        console.error('NEON AI: Dashboard Sync Error:', err);
-        showToast((window.currentLang || 'en') === 'tr' ? 'Dashboard yüklenemedi.' : 'Failed to load dashboard.', 'error');
+        console.error('Dashboard Sync Error:', err);
+        showToast(lang === 'tr' ? 'Dashboard yüklenemedi.' : 'Failed to load dashboard.', 'error');
     }
 }
 
@@ -643,13 +700,11 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
     const pieCtx = document.getElementById('expensePieChart');
     if (!lineCtx || !pieCtx) return;
 
-    // Destroy old charts to prevent memory leaks
     if (balanceChart) balanceChart.destroy();
     if (expensePieChart) expensePieChart.destroy();
 
-    // Line Chart: Balance History (Simulated path from current txs)
     const labels = txs.slice(-6).map(t => new Date(t.date).toLocaleDateString('tr-TR', {day:'numeric', month:'short'}));
-    const dataPoints = txs.slice(-6).map(t => t.amount); // Simplification for demo
+    const dataPoints = txs.slice(-6).map(t => t.amount);
 
     balanceChart = new Chart(lineCtx, {
         type: 'line',
@@ -672,17 +727,16 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
         }
     });
 
-    // Pie Chart: Sent vs Received
     const sent = txs.filter(t => t.senderAccountId === accountId).reduce((sum, t) => sum + t.amount, 0);
     const received = txs.filter(t => t.receiverAccountId === accountId).reduce((sum, t) => sum + t.amount, 0);
 
     expensePieChart = new Chart(pieCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Giden', 'Gelen'],
+            labels: [(window.currentLang === 'tr' ? 'Giden' : 'Outgoing'), (window.currentLang === 'tr' ? 'Gelen' : 'Incoming')],
             datasets: [{
                 data: [sent || 1, received || 1],
-                backgroundColor: ['#1e3a8a', '#00b4d8'],
+                backgroundColor: ['#e11d48', '#00b4d8'],
                 hoverOffset: 4,
                 borderWidth: 0
             }]
@@ -708,7 +762,7 @@ async function fetchDatabaseStats() {
             container.innerHTML = `
                 <div class="db-stat-mini glass-card"><span>Users</span><strong>${users.length}</strong></div>
                 <div class="db-stat-mini glass-card"><span>Accounts</span><strong>${accounts.length}</strong></div>
-                <div class="db-stat-mini glass-card"><span>Ledger</span><strong>${transactions.length}</strong></div>
+                <div class="db-stat-mini glass-card"><span>Transactions</span><strong>${transactions.length}</strong></div>
             `;
         }
 
@@ -719,9 +773,9 @@ async function fetchDatabaseStats() {
                 return `
                     <tr>
                         <td>${u.id}</td>
-                        <td>${u.name} ${u.surname}</td>
+                        <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
+                        <td>${u.accountNumber || '-'}</td>
                         <td class="bal-text">₺${acc ? acc.balance.toLocaleString() : '0'}</td>
-                        <td class="risk-text">${Math.floor(Math.random() * 20)}%</td>
                     </tr>
                 `;
             }).join('');
@@ -729,20 +783,31 @@ async function fetchDatabaseStats() {
     } catch (e) { console.error('DB Explorer error:', e); }
 }
 
+// ========== AI CHAT ==========
+function toggleAIChat() {
+   const win = getEl('aiChatWindow');
+   const launcher = getEl('aiLauncher');
+   if (win) {
+      win.classList.toggle('active');
+      const open = win.classList.contains('active');
+      win.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (launcher) launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) {
+         const inp = getEl('floatingAiInput');
+         if (inp) setTimeout(() => inp.focus(), 100);
+      }
+   }
+}
+
 async function sendAiMessage() {
     const input = getEl('aiInput');
     const display = getEl('aiChatContent');
     if (!input || !display || !input.value.trim()) return;
 
-    const userText = input.value.trim();
+    const userText = escapeHtml(input.value.trim());
     input.value = '';
 
-    // Add user message
-    display.innerHTML += `
-        <div class="user-bubble">
-            <div class="bubble-text">${userText}</div>
-        </div>
-    `;
+    display.innerHTML += `<div class="user-bubble"><div class="bubble-text">${userText}</div></div>`;
     display.scrollTop = display.scrollHeight;
 
     try {
@@ -756,20 +821,74 @@ async function sendAiMessage() {
         display.innerHTML += `
             <div class="bot-bubble">
                 <div class="bubble-icon">🤖</div>
-                <div class="bubble-text">${data.response || 'Hata oluştu.'}</div>
+                <div class="bubble-text">${escapeHtml(data.response || 'Hata oluştu.')}</div>
             </div>
         `;
     } catch (err) {
         display.innerHTML += `
             <div class="bot-bubble error">
                 <div class="bubble-icon">⚠️</div>
-                <div class="bubble-text">Kumru AI şu an meşgul. Lütfen Hugging Face anahtarınızı kontrol edin.</div>
+                <div class="bubble-text">Neon AI şu an yanıt veremiyor.</div>
             </div>
         `;
     }
     display.scrollTop = display.scrollHeight;
 }
 
+async function sendAIMessage() {
+   const input = getEl('floatingAiInput');
+   if (!input) return;
+   const message = input.value.trim();
+   if (!message) return;
+   appendMessage('user', message);
+   input.value = '';
+   const loadingId = 'ai-loading-' + Date.now();
+   appendMessage('bot', '...', loadingId);
+   try {
+      const response = await fetch('/api/ai/chat', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ message: message })
+      });
+      let text = '';
+      const ct = response.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+         const data = await response.json();
+         text = data.response || data.message || '';
+         if (!response.ok && !text) {
+            text = data.title || `HTTP ${response.status}`;
+         }
+      } else {
+         text = await response.text();
+         if (!response.ok) text = `Server error (${response.status})`;
+      }
+      const loadingEl = getEl(loadingId);
+      if (loadingEl) {
+         loadingEl.innerHTML = '';
+         const p = document.createElement('p');
+         p.textContent = text;
+         loadingEl.appendChild(p);
+      }
+   } catch (err) {
+      const loadingEl = getEl(loadingId);
+      if (loadingEl) loadingEl.innerHTML = `<p>Neon System Error, please try again.</p>`;
+   }
+}
+
+function appendMessage(sender, text, id = null) {
+   const body = getEl('aiChatBody');
+   if (!body) return;
+   const msgDiv = document.createElement('div');
+   msgDiv.className = `ai-message ${sender}`;
+   if (id) msgDiv.id = id;
+   const p = document.createElement('p');
+   p.textContent = text;
+   msgDiv.appendChild(p);
+   body.appendChild(msgDiv);
+   body.scrollTop = body.scrollHeight;
+}
+
+// ========== QR CODE ==========
 function refreshQrCode() {
    const accEl = getEl('dashAccountNo');
    const accNo = accEl ? accEl.textContent.trim() : '';
@@ -779,11 +898,14 @@ function refreshQrCode() {
    if (lbl) lbl.textContent = accNo || '-';
    if (img) {
       img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${payload}`;
-      img.alt = 'QR';
+      img.alt = 'QR Code';
    }
 }
 
-function handleDepositRequest() {
+// ========== DEPOSIT ==========
+// ========== DEPOSIT ==========
+async function handleDepositRequest() {
+   if (!currentUser) return;
    const lang = window.currentLang || 'en';
    const amtField = getEl('depositAmount');
    if (!amtField) return;
@@ -796,22 +918,45 @@ function handleDepositRequest() {
    const noteField = getEl('depositNote');
    const note = noteField ? noteField.value : '';
    
-   showToast(lang === 'tr'
-      ? `Yatırım talebi (demo): ₺${amt.toLocaleString()}${note ? ' — ' + note : ''}\nGerçek ödeme kanalı bağlı değildir.`
-      : `Deposit request (demo): ₺${amt.toLocaleString()}${note ? ' — ' + note : ''}\nNo real payment rail connected.`, 'info');
-   
-   amtField.value = '';
-   if (noteField) noteField.value = '';
+   const btn = document.querySelector('#dash-deposit .login-submit-btn');
+   if (btn) btn.disabled = true;
+
+   try {
+       const response = await fetch('/api/transfers/deposit', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+               accountNumber: currentUser.accountNumber,
+               amount: amt,
+               description: note || (lang === 'tr' ? 'Para Yatırma' : 'Deposit')
+           })
+       });
+
+       if (response.ok) {
+           showToast(lang === 'tr' ? 'Para başarıyla yatırıldı!' : 'Deposit successful!', 'success');
+           amtField.value = '';
+           if (noteField) noteField.value = '';
+           // Fetch updated balance and transactions
+           fetchDashboardData();
+       } else {
+           const err = await response.json();
+           showToast(err.mesaj || err.message || 'Error', 'error');
+       }
+   } catch (e) {
+       console.error('Deposit error:', e);
+       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
+   } finally {
+       if (btn) btn.disabled = false;
+   }
 }
 
+// ========== PROFILE ==========
 async function handleProfileSave() {
    if (!currentUser) return;
    const lang = window.currentLang || 'en';
-   
    const nameField = getEl('profileName');
    const surnameField = getEl('profileSurname');
    const emailField = getEl('profileEmail');
-   
    if (!nameField || !emailField) return;
    
    const name = nameField.value.trim();
@@ -819,38 +964,25 @@ async function handleProfileSave() {
    const email = emailField.value.trim();
    
    if (!name || !email) {
-      showToast(lang === 'tr' ? 'Ad ve e-posta zorunludur.' : 'First name and email are required.', 'warning');
-      return;
-   }
-   
-   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-   if (!emailRegex.test(email)) {
-      showToast(lang === 'tr' ? 'Geçerli bir e-posta adresi girin.' : 'Enter a valid email address.', 'warning');
+      showToast(lang === 'tr' ? 'Ad ve e-posta zorunludur.' : 'Name and email are required.', 'warning');
       return;
    }
    
    try {
-      const cur = await fetch(`/api/users/${currentUser.id}`).then(r => r.json());
       const res = await fetch(`/api/users/${currentUser.id}`, {
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-            id: currentUser.id,
-            name,
-            surname: surname || ' ',
-            email,
-            password: cur.password
-         })
+         body: JSON.stringify({ id: currentUser.id, name, surname: surname || ' ', email, password: '' })
       });
       if (res.ok) {
          currentUser = { ...currentUser, name, surname: surname || ' ', email };
-         updateNavForLoggedUser();
+         localStorage.setItem('vireonUser', JSON.stringify(currentUser));
          showToast(lang === 'tr' ? 'Bilgiler güncellendi.' : 'Profile updated.', 'success');
       } else {
-         showToast(lang === 'tr' ? 'Güncelleme başarısız.' : 'Update failed.', 'error');
+         const err = await res.json().catch(() => ({}));
+         showToast(err.message || (lang === 'tr' ? 'Güncelleme başarısız.' : 'Update failed.'), 'error');
       }
    } catch (e) {
-      console.error(e);
       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
    }
 }
@@ -858,11 +990,9 @@ async function handleProfileSave() {
 async function handlePasswordChange() {
    if (!currentUser) return;
    const lang = window.currentLang || 'en';
-   
    const curPwdField = getEl('pwdCurrent');
    const newPwdField = getEl('pwdNew');
    const confirmField = getEl('pwdConfirm');
-   
    if (!curPwdField || !newPwdField || !confirmField) return;
    
    const curPwd = curPwdField.value;
@@ -890,13 +1020,7 @@ async function handlePasswordChange() {
       const res = await fetch(`/api/users/${currentUser.id}`, {
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-            id: currentUser.id,
-            name: cur.name,
-            surname: cur.surname,
-            email: cur.email,
-            password: newPwd
-         })
+         body: JSON.stringify({ id: currentUser.id, name: cur.name, surname: cur.surname, email: cur.email, password: newPwd })
       });
       if (res.ok) {
          curPwdField.value = '';
@@ -907,191 +1031,156 @@ async function handlePasswordChange() {
          showToast(lang === 'tr' ? 'İşlem başarısız.' : 'Operation failed.', 'error');
       }
    } catch (e) {
-      console.error(e);
       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
    }
 }
+// ========== DASHBOARD ACCOUNT INFO ==========
+async function loadAccountInfo() {
+    if (!currentUser) return;
+    
+    // Yükleme sırasında spinner veya - gösterelim
+    const setValue = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
+    
+    try {
+        setValue('infoAccountNumber', currentUser.accountNumber || '-');
+        setValue('infoFullName', (currentUser.name + ' ' + (currentUser.surname || '')).trim());
+        setValue('infoEmail', currentUser.email || '-');
+        
+        if (currentUser.createdAt) {
+            const d = new Date(currentUser.createdAt);
+            setValue('infoCreatedAt', d.toLocaleDateString('tr-TR'));
+        } else {
+            setValue('infoCreatedAt', '-');
+        }
 
-async function handleSendTransfer() {
-   const targetField = getEl('transferTarget');
-   const amountField = getEl('transferAmount');
-   const descField = getEl('transferDesc');
-   const btn = getEl('sendBtn');
-   
-   if (!targetField || !amountField || !btn) return;
-
-   const targetId = parseInt(targetField.value);
-   const amount = parseFloat(amountField.value);
-   const desc = descField ? descField.value : '';
-
-   if (!targetId || !amount || amount <= 0) {
-      showToast((window.currentLang || 'en') === 'tr' ? 'Lütfen geçerli bilgiler girin.' : 'Please enter valid information.', 'warning');
-      return;
-   }
-
-   const originalText = btn.innerHTML;
-   btn.innerHTML = '<span class="loader-tiny"></span>';
-   btn.disabled = true;
-
-   try {
-      const accountsRes = await fetch('/api/accounts');
-      if (!accountsRes.ok) throw new Error('Failed to fetch accounts');
-      
-      const accounts = await accountsRes.json();
-      const userAccount = accounts.find(a => a.userId === currentUser.id);
-
-      if (!userAccount) throw new Error("Account not found");
-      if (userAccount.balance < amount) {
-         showToast((window.currentLang || 'en') === 'tr' ? 'Yetersiz bakiye!' : 'Insufficient balance!', 'error');
-         return;
-      }
-
-      const response = await fetch('/api/transfers/send', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({
-            senderAccountId: userAccount.id,
-            receiverAccountId: targetId,
-            amount: amount,
-            description: desc || 'Transfer'
-         })
-      });
-
-      if (response.ok) {
-         showToast((window.currentLang || 'en') === 'tr' ? 'Transfer başarılı!' : 'Transfer successful!', 'success');
-         targetField.value = '';
-         amountField.value = '';
-         if (descField) descField.value = '';
-         fetchDashboardData();
-      } else {
-         const error = await response.json();
-         showToast(error.message || ((window.currentLang || 'en') === 'tr' ? 'Transfer başarısız!' : 'Transfer failed!'), 'error');
-      }
-   } catch (err) {
-      console.error('Transfer Error:', err);
-      showToast((window.currentLang || 'en') === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Could not connect to server.', 'error');
-   } finally {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-   }
+        const response = await fetch('/api/accounts');
+        const accounts = await response.json();
+        const userAccount = accounts.find(a => a.userId === currentUser.id);
+        
+        if (userAccount) {
+            setValue('infoBalance', '₺' + userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+            setValue('infoCurrency', userAccount.currency || 'TRY');
+            
+            const txResponse = await fetch('/api/transactions');
+            const transactions = await txResponse.json();
+            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
+            setValue('infoTxCount', userTxs.length.toString());
+        }
+    } catch (err) {
+        console.error('Account Info Error:', err);
+    }
 }
 
+// ========== TRANSFERS ==========
+async function handleSendTransfer() {
+    if (!currentUser || !currentUser.accountNumber) {
+        showToast('Please login first', 'warning');
+        return;
+    }
+    
+    const lang = window.currentLang || 'en';
+    const receiverAccountNumber = getEl('transferTarget')?.value?.trim()?.toUpperCase();
+    const amount = parseFloat(getEl('transferAmount')?.value);
+    const description = getEl('transferDesc')?.value || '';
+    const btn = getEl('sendBtn');
+    
+    if (!receiverAccountNumber || !amount) {
+        showToast(lang === 'tr' ? 'Alıcı hesap ve tutar gerekli.' : 'Receiver account and amount required.', 'warning');
+        return;
+    }
+    
+    if (amount <= 0) {
+        showToast(lang === 'tr' ? 'Tutar 0\'dan büyük olmalı.' : 'Amount must be greater than 0.', 'warning');
+        return;
+    }
+    
+    if (receiverAccountNumber === currentUser.accountNumber) {
+        showToast(lang === 'tr' ? 'Kendi hesabınıza transfer yapamazsınız.' : 'Cannot transfer to your own account.', 'error');
+        return;
+    }
+    
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
+    
+    try {
+        const response = await fetch('/api/transfers/send-by-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                senderAccountNumber: currentUser.accountNumber,
+                receiverAccountNumber: receiverAccountNumber,
+                amount: amount,
+                description: description || 'Transfer'
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showToast(
+                lang === 'tr' ? (result.mesaj || 'Transfer başarılı!') : (result.message || 'Transfer successful!'),
+                'success'
+            );
+            
+            const targetField = getEl('transferTarget');
+            const amountField = getEl('transferAmount');
+            const descField = getEl('transferDesc');
+            if (targetField) targetField.value = '';
+            if (amountField) amountField.value = '';
+            if (descField) descField.value = '';
+            
+            fetchDashboardData();
+        } else {
+            const error = await response.json().catch(() => ({}));
+            showToast(
+                lang === 'tr' ? (error.mesaj || 'Transfer başarısız!') : (error.message || 'Transfer failed!'),
+                'error'
+            );
+        }
+    } catch (err) {
+        showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Connection error.', 'error');
+    } finally {
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    }
+}
 
-function updateTransactionList(txs, accountId) {
-   const list = getEl('recentTransactions');
-   if (!list) return;
+function updateTransactionList(txs, accountId, listElement) {
+   if (!listElement) return;
    const lang = window.currentLang || 'en';
-   if (txs.length === 0) {
-      list.innerHTML = `<p>${lang === 'tr' ? 'Henüz işlem bulunamadı.' : 'No transactions found.'}</p>`;
+   if (!txs || txs.length === 0) {
+      listElement.innerHTML = `<p class="tx-empty">${lang === 'tr' ? 'Henüz işlem bulunamadı.' : 'No transactions found.'}</p>`;
       return;
    }
-   const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing transfer';
-   const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming transfer';
-   list.innerHTML = txs.map(tx => {
+   const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing';
+   const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming';
+   listElement.innerHTML = txs.slice().reverse().map(tx => {
       const isOut = tx.senderAccountId === accountId;
       const amountClass = isOut ? 'tx-out' : 'tx-in';
       const symbol = isOut ? '-' : '+';
+      const statusBadge = tx.status ? `<span class="tx-status tx-status-${tx.status}">${tx.status}</span>` : '';
       return `
             <div class="tx-item">
                 <div class="tx-info">
-                    <span class="tx-date">${new Date(tx.date).toLocaleDateString()}</span>
+                    <span class="tx-date">${new Date(tx.date).toLocaleDateString('tr-TR')}</span>
                     <span class="tx-desc">${isOut ? outLabel : inLabel}</span>
+                    ${statusBadge}
                 </div>
-                <div class="tx-amount ${amountClass}">${symbol}₺${tx.amount}</div>
+                <div class="tx-amount ${amountClass}">${symbol}₺${tx.amount.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</div>
             </div>`;
     }).join('');
 }
 
-// ========== NEON AI CHAT LOGIC ==========
-function toggleAIChat() {
-   const win = getEl('aiChatWindow');
-   const launcher = getEl('aiLauncher');
-   if (win) {
-      win.classList.toggle('active');
-      const open = win.classList.contains('active');
-      win.setAttribute('aria-hidden', open ? 'false' : 'true');
-      if (launcher) launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (open) {
-         const inp = getEl('aiInput');
-         if (inp) setTimeout(() => inp.focus(), 100);
-      }
-   }
-}
-
-async function sendAIMessage() {
-   const input = getEl('aiInput');
-   if (!input) return;
-   const message = input.value.trim();
-   if (!message) return;
-   appendMessage('user', message);
-   input.value = '';
-   const loadingId = 'ai-loading-' + Date.now();
-   appendMessage('bot', '...', loadingId);
-   try {
-      const response = await fetch('/api/ai/chat', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ message: message })
-      });
-      let text = '';
-      const ct = response.headers.get('content-type') || '';
-      if (ct.includes('application/json')) {
-         const data = await response.json();
-         text = data.response || data.message || '';
-         if (!response.ok && !text) {
-            text = data.title || (typeof data.errors === 'object' ? JSON.stringify(data.errors) : '') || `HTTP ${response.status}`;
-         }
-      } else {
-         text = await response.text();
-         if (!response.ok) {
-            text = (window.currentLang || 'en') === 'tr'
-               ? `Sunucu hatası (${response.status})`
-               : `Server error (${response.status})`;
-         }
-      }
-      const loadingEl = getEl(loadingId);
-      if (loadingEl) {
-         loadingEl.innerHTML = '';
-         const p = document.createElement('p');
-         p.textContent = text;
-         loadingEl.appendChild(p);
-      }
-   } catch (err) {
-      console.error('AI Error:', err);
-      const loadingEl = getEl(loadingId);
-      if (loadingEl) loadingEl.innerHTML = `<p>${(window.currentLang || 'en') === 'tr' ? 'Neon Sistem Hatası, lütfen tekrar deneyin.' : 'Neon System Error, please try again.'}</p>`;
-   }
-}
-
-function appendMessage(sender, text, id = null) {
-   const body = getEl('aiChatBody');
-   if (!body) return;
-   const msgDiv = document.createElement('div');
-   msgDiv.className = `ai-message ${sender}`;
-   if (id) msgDiv.id = id;
-   const p = document.createElement('p');
-   p.textContent = text;
-   msgDiv.appendChild(p);
-   body.appendChild(msgDiv);
-   body.scrollTop = body.scrollHeight;
-}
 // ========== ANALYTICS CHART ==========
 let overviewChartInstance = null;
 
 function initOverviewChart(txs, accountId) {
     const ctx = document.getElementById('overviewChart');
     if (!ctx) return;
+    if (overviewChartInstance) overviewChartInstance.destroy();
 
-    if (overviewChartInstance) {
-        overviewChartInstance.destroy();
-    }
-
-    // Process data for the chart (Simple In vs Out)
     const labels = [];
     const outgoingData = [];
     const incomingData = [];
 
-    // Filter last 7 days or last 10 txs
     const sortedTxs = [...txs].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-7);
 
     sortedTxs.forEach(t => {
@@ -1106,7 +1195,6 @@ function initOverviewChart(txs, accountId) {
         }
     });
 
-    // If no data, add dummy data for demo as requested
     if (labels.length === 0) {
         labels.push('Demo 1', 'Demo 2', 'Demo 3', 'Demo 4');
         incomingData.push(5000, 2000, 4500, 3000);
@@ -1129,8 +1217,8 @@ function initOverviewChart(txs, accountId) {
                 {
                     label: window.currentLang === 'tr' ? 'Giden' : 'Outgoing',
                     data: outgoingData,
-                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
-                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(225, 29, 72, 0.6)',
+                    borderColor: '#e11d48',
                     borderWidth: 1,
                     borderRadius: 5
                 }
@@ -1140,21 +1228,10 @@ function initOverviewChart(txs, accountId) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.05)' },
-                    ticks: { color: 'rgba(255,255,255,0.5)' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: 'rgba(255,255,255,0.5)' }
-                }
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
+                x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)' } }
             },
-            plugins: {
-                legend: {
-                    labels: { color: 'rgba(255,255,255,0.7)', font: { family: 'Outfit' } }
-                }
-            }
+            plugins: { legend: { labels: { color: 'rgba(255,255,255,0.7)', font: { family: 'Outfit' } } } }
         }
     });
 }
@@ -1170,24 +1247,23 @@ function toggleLimitEdit() {
 
 async function handleUpdateLimit() {
     if (!currentUser) return;
+    const lang = window.currentLang || 'en';
     const limitField = getEl('newMaxLimit');
     if (!limitField) return;
     
     const newLimit = parseFloat(limitField.value);
     if (!newLimit || newLimit < 0) {
-        showToast((window.currentLang || 'en') === 'tr' ? 'Geçerli bir limit girin.' : 'Enter a valid limit.', 'warning');
+        showToast(lang === 'tr' ? 'Geçerli bir limit girin.' : 'Enter a valid limit.', 'warning');
         return;
     }
 
     try {
         const limitRes = await fetch('/api/dailylimits');
-        if (!limitRes.ok) throw new Error('Failed to fetch limits');
-        
         const allLimits = await limitRes.json();
         const userLimit = allLimits.find(l => l.userId === currentUser.id);
 
         if (!userLimit) {
-            showToast((window.currentLang || 'en') === 'tr' ? 'Limit kaydı bulunamadı.' : 'Limit record not found.', 'error');
+            showToast(lang === 'tr' ? 'Limit kaydı bulunamadı.' : 'Limit record not found.', 'error');
             return;
         }
 
@@ -1204,297 +1280,57 @@ async function handleUpdateLimit() {
         });
 
         if (response.ok) {
-            showToast((window.currentLang || 'en') === 'tr' ? 'Limit başarıyla güncellendi.' : 'Limit updated successfully.', 'success');
+            showToast(lang === 'tr' ? 'Limit güncellendi.' : 'Limit updated.', 'success');
             toggleLimitEdit();
             fetchDashboardData();
         } else {
-            showToast((window.currentLang || 'en') === 'tr' ? 'Güncelleme başarısız.' : 'Update failed.', 'error');
+            showToast(lang === 'tr' ? 'Güncelleme başarısız.' : 'Update failed.', 'error');
         }
     } catch (err) {
-        console.error(err);
-        showToast((window.currentLang || 'en') === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
+        showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
     }
 }
 
+// ========== ACCOUNT INFORMATION ==========
+async function loadAccountInfo() {
+    if (!currentUser) return;
+    const lang = window.currentLang || 'en';
 
-// ========== AUTHENTICATION FUNCTIONS ==========
-
-// Open/Close Modals
-function openRegisterModal(e) {
-    if (e) e.preventDefault();
-    closeLoginModal();
-    const modal = getEl('registerModal');
-    if (modal) modal.classList.add('active');
-}
-
-function closeRegisterModal() {
-    const modal = getEl('registerModal');
-    if (modal) modal.classList.remove('active');
-}
-
-function closeLoginModal() {
-    const modal = getEl('loginModal');
-    if (modal) modal.classList.remove('active');
-}
-
-// Handle Login
-async function handleLogin(event) {
-    event.preventDefault();
-    
-    const email = getEl('loginEmail')?.value;
-    const password = getEl('loginPassword')?.value;
-    
-    console.log('Login attempt:', { email, password: '***' });
-    
-    if (!email || !password) {
-        showToast('Lütfen tüm alanları doldurun', 'warning');
-        return;
-    }
-    
     try {
-        const response = await fetch('/api/users/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
+        // User details
+        const accNumEl = getEl('infoAccountNumber');
+        const nameEl = getEl('infoFullName');
+        const emailEl = getEl('infoEmail');
+        const createdEl = getEl('infoCreatedAt');
         
-        console.log('Login response status:', response.status);
+        if (accNumEl) accNumEl.textContent = currentUser.accountNumber || '-';
+        if (nameEl) nameEl.textContent = `${currentUser.name} ${currentUser.surname || ''}`.trim();
+        if (emailEl) emailEl.textContent = currentUser.email || '-';
+        if (createdEl) createdEl.textContent = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('tr-TR') : '-';
+
+        // Balance
+        const response = await fetch('/api/accounts');
+        const accounts = await response.json();
+        const userAccount = accounts.find(a => a.userId === currentUser.id);
         
-        if (response.ok) {
-            const user = await response.json();
-            console.log('Login successful:', user);
+        const balEl = getEl('infoBalance');
+        const curEl = getEl('infoCurrency');
+        if (balEl) balEl.textContent = userAccount ? `₺${userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺0.00';
+        if (curEl) curEl.textContent = userAccount?.currency || 'TRY';
+
+        // Transaction history
+        if (userAccount) {
+            const txResponse = await fetch('/api/transactions');
+            const transactions = await txResponse.json();
+            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
             
-            currentUser = user;
-            localStorage.setItem('vireonUser', JSON.stringify(user));
+            const historyEl = getEl('infoTransactionHistory');
+            if (historyEl) updateTransactionList(userTxs, userAccount.id, historyEl);
             
-            showToast(`Hoş geldin ${user.name}!`, 'success');
-            closeLoginModal();
-            
-            // Navbar'ı güncelle
-            updateNavbarForLoggedInUser();
-            
-            // Dashboard'a geçiş
-            setTimeout(() => {
-                showSection('dashboard');
-                fetchDashboardData();
-            }, 300);
-        } else {
-            const error = await response.json().catch(() => ({ message: 'Giriş başarısız' }));
-            console.error('Login failed:', error);
-            showToast(error.message || 'E-posta veya şifre hatalı', 'error');
+            const txCountEl = getEl('infoTxCount');
+            if (txCountEl) txCountEl.textContent = userTxs.length;
         }
     } catch (err) {
-        console.error('Login error:', err);
-        showToast('Sunucuya bağlanılamadı. Lütfen backend\'in çalıştığından emin olun.', 'error');
+        console.error('Account info error:', err);
     }
-}
-
-// Handle Register
-async function handleRegister(event) {
-    event.preventDefault();
-    
-    const fullName = getEl('registerName')?.value.trim();
-    const email = getEl('registerEmail')?.value;
-    const password = getEl('registerPassword')?.value;
-    const confirmPassword = getEl('registerConfirmPassword')?.value;
-    
-    if (!fullName || !email || !password || !confirmPassword) {
-        showToast('Please fill all fields', 'warning');
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        showToast('Passwords do not match', 'error');
-        return;
-    }
-    
-    if (password.length < 6) {
-        showToast('Password must be at least 6 characters', 'warning');
-        return;
-    }
-    
-    // Split full name
-    const nameParts = fullName.split(' ');
-    const name = nameParts[0];
-    const surname = nameParts.slice(1).join(' ') || name;
-    
-    try {
-        const response = await fetch('/api/users/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, surname, email, password })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            showToast(`Account created! Account Number: ${result.accountNumber}`, 'success');
-            closeRegisterModal();
-            
-            // Auto-login
-            setTimeout(() => {
-                getEl('loginEmail').value = email;
-                getEl('loginPassword').value = password;
-                const loginModal = getEl('loginModal');
-                if (loginModal) loginModal.classList.add('active');
-            }, 1500);
-        } else {
-            const error = await response.json();
-            showToast(error.message || 'Registration failed', 'error');
-        }
-    } catch (err) {
-        console.error('Register error:', err);
-        showToast('Connection error', 'error');
-    }
-}
-
-// Check if user is logged in on page load
-window.addEventListener('DOMContentLoaded', () => {
-    const savedUser = localStorage.getItem('vireonUser');
-    if (savedUser) {
-        try {
-            currentUser = JSON.parse(savedUser);
-            console.log('User restored from localStorage:', currentUser);
-            updateNavbarForLoggedInUser();
-        } catch (e) {
-            localStorage.removeItem('vireonUser');
-        }
-    }
-});
-
-
-// Modal navigation helpers
-function openLoginModalFromRegister(e) {
-    if (e) e.preventDefault();
-    closeRegisterModal();
-    const modal = getEl('loginModal');
-    if (modal) modal.classList.add('active');
-}
-
-function openLoginModalFromForgot(e) {
-    if (e) e.preventDefault();
-    closeForgotPasswordModal();
-    const modal = getEl('loginModal');
-    if (modal) modal.classList.add('active');
-}
-
-function closeForgotPasswordModal() {
-    const modal = getEl('forgotPasswordModal');
-    if (modal) modal.classList.remove('active');
-}
-
-function openForgotPasswordModal(e) {
-    if (e) e.preventDefault();
-    closeLoginModal();
-    const modal = getEl('forgotPasswordModal');
-    if (modal) modal.classList.add('active');
-}
-
-function handleForgotPassword(event) {
-    event.preventDefault();
-    showToast('Password reset feature coming soon!', 'info');
-    closeForgotPasswordModal();
-}
-
-// Login button handler
-const loginBtn = getEl('loginBtn');
-if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-        const modal = getEl('loginModal');
-        if (modal) modal.classList.add('active');
-    });
-}
-
-
-// ========== TRANSFER FUNCTIONS ==========
-
-async function handleSendTransfer() {
-    if (!currentUser || !currentUser.accountNumber) {
-        showToast('Please login first', 'warning');
-        return;
-    }
-    
-    const receiverAccountNumber = getEl('transferTarget')?.value.trim();
-    const amount = parseFloat(getEl('transferAmount')?.value);
-    const description = getEl('transferDesc')?.value || '';
-    
-    if (!receiverAccountNumber || !amount) {
-        showToast('Please fill receiver account and amount', 'warning');
-        return;
-    }
-    
-    if (amount <= 0) {
-        showToast('Amount must be greater than 0', 'warning');
-        return;
-    }
-    
-    if (receiverAccountNumber === currentUser.accountNumber) {
-        showToast('Cannot transfer to your own account', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/transfers/send-by-account', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                senderAccountNumber: currentUser.accountNumber,
-                receiverAccountNumber: receiverAccountNumber,
-                amount: amount,
-                description: description
-            })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            showToast(result.mesaj || 'Transfer successful!', 'success');
-            
-            // Clear form
-            getEl('transferTarget').value = '';
-            getEl('transferAmount').value = '';
-            getEl('transferDesc').value = '';
-            
-            // Refresh dashboard
-            fetchDashboardData();
-        } else {
-            const error = await response.json();
-            showToast(error.mesaj || error.message || 'Transfer failed', 'error');
-        }
-    } catch (err) {
-        console.error('Transfer error:', err);
-        showToast('Connection error', 'error');
-    }
-}
-
-
-// ========== NAVBAR MANAGEMENT ==========
-
-function updateNavbarForLoggedInUser() {
-    const loginBtn = getEl('loginBtn');
-    const logoutBtn = getEl('logoutBtn');
-    const dashboardBtn = getEl('homeDashboardBtn');
-    
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-    if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
-}
-
-function updateNavbarForLoggedOutUser() {
-    const loginBtn = getEl('loginBtn');
-    const logoutBtn = getEl('logoutBtn');
-    const dashboardBtn = getEl('homeDashboardBtn');
-    
-    if (loginBtn) loginBtn.style.display = 'inline-flex';
-    if (logoutBtn) logoutBtn.style.display = 'none';
-    if (dashboardBtn) dashboardBtn.style.display = 'none';
-}
-
-function handleLogout() {
-    currentUser = null;
-    localStorage.removeItem('vireonUser');
-    
-    showToast('Çıkış yapıldı', 'info');
-    updateNavbarForLoggedOutUser();
-    
-    // Ana menüye dön
-    backToMenu();
 }

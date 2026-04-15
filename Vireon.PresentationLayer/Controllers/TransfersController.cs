@@ -49,9 +49,10 @@ namespace Vireon.PresentationLayer.Controllers
             {
                 return BadRequest(new
                 {
-                    Mesaj = "Profesör, Yapay Zeka (ML.NET) bu işlemi yüksek riskli buldu ve otomatik olarak engelledi!",
-                    RiskSkoru = probability,
-                    Durum = "Engellendi"
+                    message = "AI (ML.NET) flagged this transaction as high risk and blocked it automatically.",
+                    mesaj = "Yapay Zeka (ML.NET) bu işlemi yüksek riskli buldu ve otomatik olarak engelledi!",
+                    riskScore = probability,
+                    status = "blocked"
                 });
             }
 
@@ -65,15 +66,16 @@ namespace Vireon.PresentationLayer.Controllers
 
                 return Ok(new
                 {
-                    Mesaj = "Transfer başarılı!",
-                    RiskSkoru = probability,
-                    GonderilenTutar = requestDto.Amount,
-                    Durum = "Başarılı"
+                    message = "Transfer successful!",
+                    mesaj = "Transfer başarılı!",
+                    riskScore = probability,
+                    amount = requestDto.Amount,
+                    status = "completed"
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Mesaj = ex.Message });
+                return BadRequest(new { message = ex.Message, mesaj = ex.Message, status = "failed" });
             }
         }
 
@@ -82,12 +84,44 @@ namespace Vireon.PresentationLayer.Controllers
         {
             try
             {
-                // Hesap numaralarından ID'leri bul
-                var senderAccount = _transactionService.GetAccountByNumber(dto.SenderAccountNumber);
-                var receiverAccount = _transactionService.GetAccountByNumber(dto.ReceiverAccountNumber);
+                // Input validation
+                if (string.IsNullOrWhiteSpace(dto.SenderAccountNumber) || string.IsNullOrWhiteSpace(dto.ReceiverAccountNumber))
+                {
+                    return BadRequest(new { message = "Sender and receiver account numbers are required.", mesaj = "Gönderici ve alıcı hesap numaraları zorunludur." });
+                }
 
-                if (senderAccount == null || receiverAccount == null)
-                    return NotFound(new { Mesaj = "Gönderici veya alıcı hesap bulunamadı." });
+                if (dto.Amount <= 0)
+                {
+                    return BadRequest(new { message = "Amount must be greater than 0.", mesaj = "Tutar 0'dan büyük olmalıdır." });
+                }
+
+                if (dto.SenderAccountNumber.Trim().ToUpperInvariant() == dto.ReceiverAccountNumber.Trim().ToUpperInvariant())
+                {
+                    return BadRequest(new { message = "Cannot transfer to your own account.", mesaj = "Kendi hesabınıza transfer yapamazsınız." });
+                }
+
+                // Hesap numaralarından ID'leri bul
+                var senderAccount = _transactionService.GetAccountByNumber(dto.SenderAccountNumber.Trim().ToUpperInvariant());
+                var receiverAccount = _transactionService.GetAccountByNumber(dto.ReceiverAccountNumber.Trim().ToUpperInvariant());
+
+                if (senderAccount == null)
+                    return NotFound(new { message = "Sender account not found.", mesaj = "Gönderici hesap bulunamadı." });
+
+                if (receiverAccount == null)
+                    return NotFound(new { message = "Receiver account not found.", mesaj = "Alıcı hesap bulunamadı." });
+
+                // AI fraud check
+                var (isFraud, probability) = _fraudModelService.Predict((float)dto.Amount);
+                if (isFraud && probability > 0.7)
+                {
+                    return BadRequest(new
+                    {
+                        message = "AI flagged this transaction as high risk.",
+                        mesaj = "Yapay Zeka bu işlemi yüksek riskli buldu.",
+                        riskScore = probability,
+                        status = "blocked"
+                    });
+                }
 
                 // Transaction oluştur
                 var transaction = new Transaction
@@ -103,15 +137,44 @@ namespace Vireon.PresentationLayer.Controllers
 
                 return Ok(new
                 {
-                    Mesaj = "Transfer başarılı!",
-                    GonderilenTutar = dto.Amount,
-                    Gonderici = dto.SenderAccountNumber,
-                    Alici = dto.ReceiverAccountNumber
+                    message = "Transfer successful!",
+                    mesaj = "Transfer başarılı!",
+                    amount = dto.Amount,
+                    sender = dto.SenderAccountNumber,
+                    receiver = dto.ReceiverAccountNumber,
+                    status = "completed"
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Mesaj = ex.Message });
+                return BadRequest(new { message = ex.Message, mesaj = ex.Message, status = "failed" });
+            }
+        }
+
+        [HttpPost("deposit")]
+        public IActionResult Deposit([FromBody] DepositDto dto)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dto.AccountNumber) || dto.Amount <= 0)
+                {
+                    return BadRequest(new { message = "Valid account number and amount required.", mesaj = "Geçerli hesap numarası ve tutar gereklidir." });
+                }
+
+                _transactionService.Deposit(dto.AccountNumber, dto.Amount, dto.Description);
+
+                return Ok(new
+                {
+                    message = "Deposit successful!",
+                    mesaj = "Para yatırma işlemi başarılı!",
+                    amount = dto.Amount,
+                    account = dto.AccountNumber,
+                    status = "completed"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, mesaj = ex.Message, status = "failed" });
             }
         }
     }

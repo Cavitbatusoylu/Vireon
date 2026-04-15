@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
@@ -19,27 +19,40 @@ namespace Vireon.BusinessLayer.Concrete
 
         public void ProcessTransaction(Transaction transaction)
         {
-            using var dbTransaction = _context.Database.BeginTransaction();
+            // İşlem durumunu "pending" olarak başlat
+            transaction.Status = "pending";
+
+            using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
             try
             {
-                // 1. Hesapları yükle (lock ile)
-                var senderAccount = _context.Accounts
-                    .FirstOrDefault(a => a.Id == transaction.SenderAccountId);
-                var receiverAccount = _context.Accounts
-                    .FirstOrDefault(a => a.Id == transaction.ReceiverAccountId);
+                // 1. Hesapları yükle
+                var senderAccount = _context.Accounts.FirstOrDefault(a => a.Id == transaction.SenderAccountId);
+                var receiverAccount = _context.Accounts.FirstOrDefault(a => a.Id == transaction.ReceiverAccountId);
 
                 if (senderAccount == null || receiverAccount == null)
+                {
+                    transaction.Status = "failed";
                     throw new InvalidOperationException("Gönderici veya alıcı hesap bulunamadı.");
+                }
 
                 // 2. İş kuralları
                 if (transaction.SenderAccountId == transaction.ReceiverAccountId)
+                {
+                    transaction.Status = "failed";
                     throw new InvalidOperationException("Kendi hesabınıza transfer yapamazsınız.");
+                }
 
                 if (transaction.Amount <= 0)
+                {
+                    transaction.Status = "failed";
                     throw new InvalidOperationException("Transfer miktarı 0'dan büyük olmalıdır.");
+                }
 
                 if (senderAccount.Balance < transaction.Amount)
+                {
+                    transaction.Status = "failed";
                     throw new InvalidOperationException("Yetersiz bakiye.");
+                }
 
                 // 3. Günlük limit kontrolü
                 var dailyLimit = _context.DailyLimits.FirstOrDefault(d => d.UserId == senderAccount.UserId);
@@ -53,7 +66,10 @@ namespace Vireon.BusinessLayer.Concrete
                     }
 
                     if (dailyLimit.UsedLimit + transaction.Amount > dailyLimit.MaxDailyLimit)
+                    {
+                        transaction.Status = "failed";
                         throw new InvalidOperationException($"Günlük limit aşıldı. Kalan: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} TRY");
+                    }
 
                     dailyLimit.UsedLimit += transaction.Amount;
                 }
@@ -67,6 +83,8 @@ namespace Vireon.BusinessLayer.Concrete
 
                 // 5. Transaction kaydı
                 transaction.Date = DateTime.Now;
+                transaction.CreatedAt = DateTime.Now;
+                transaction.Status = "completed";
                 if (string.IsNullOrWhiteSpace(transaction.Description))
                 {
                     transaction.Description = $"Transfer: {senderAccount.AccountNumber} → {receiverAccount.AccountNumber}";
@@ -110,13 +128,13 @@ namespace Vireon.BusinessLayer.Concrete
                 _context.SaveChanges();
                 dbTransaction.Commit();
 
-                _logger.LogInformation("Transfer başarılı: {Amount} TRY, {Sender} -> {Receiver}",
-                    transaction.Amount, senderAccount.AccountNumber, receiverAccount.AccountNumber);
+                _logger.LogInformation("✅ Transfer başarılı: {Amount} TRY, {Sender} -> {Receiver} (Status: {Status})",
+                    transaction.Amount, senderAccount.AccountNumber, receiverAccount.AccountNumber, transaction.Status);
             }
             catch (Exception ex)
             {
                 dbTransaction.Rollback();
-                _logger.LogError(ex, "Transfer başarısız: {Message}", ex.Message);
+                _logger.LogError(ex, "❌ Transfer başarısız: {Message}", ex.Message);
                 throw;
             }
         }
@@ -124,6 +142,42 @@ namespace Vireon.BusinessLayer.Concrete
         public Account? GetAccountByNumber(string accountNumber)
         {
             return _context.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+        }
+
+        public void Deposit(string accountNumber, decimal amount, string? description)
+        {
+            if (amount <= 0) throw new InvalidOperationException("Deposit amount must be greater than 0.");
+
+            using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            try
+            {
+                var account = _context.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
+                if (account == null) throw new InvalidOperationException("Account not found.");
+
+                decimal previousBalance = account.Balance;
+                account.Balance += amount;
+
+                _context.LedgerEntries.Add(new LedgerEntry
+                {
+                    AccountId = account.Id,
+                    Amount = amount,
+                    PreviousBalance = previousBalance,
+                    NewBalance = account.Balance,
+                    Description = description ?? "Deposit",
+                    CreatedAt = DateTime.Now
+                });
+
+                _context.SaveChanges();
+                dbTransaction.Commit();
+                
+                _logger.LogInformation("💰 Deposit successful: {Amount} TRY to {AccountNumber}", amount, accountNumber);
+            }
+            catch (Exception ex)
+            {
+                dbTransaction.Rollback();
+                _logger.LogError(ex, "❌ Deposit failed for {AccountNumber}", accountNumber);
+                throw;
+            }
         }
     }
 }
