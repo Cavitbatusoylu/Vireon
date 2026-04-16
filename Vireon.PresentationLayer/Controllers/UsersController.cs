@@ -97,7 +97,7 @@ namespace Vireon.PresentationLayer.Controllers
                     Name = model.Name.Trim(),
                     Surname = string.IsNullOrWhiteSpace(model.Surname) ? model.Name.Trim() : model.Surname.Trim(),
                     Email = model.Email.Trim().ToLowerInvariant(),
-                    Password = model.Password,
+                    Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                     AccountNumber = accountNumber,
                     CreatedAt = DateTime.Now
                 };
@@ -180,7 +180,7 @@ namespace Vireon.PresentationLayer.Controllers
                 return Unauthorized(new { message = "E-posta veya şifre hatalı." });
             }
 
-            if (user.Password != model.Password)
+            if (!BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             {
                 _logger.LogWarning("⚠️ Şifre hatalı: {Email}", emailInput);
                 return Unauthorized(new { message = "E-posta veya şifre hatalı." });
@@ -227,7 +227,7 @@ namespace Vireon.PresentationLayer.Controllers
                 existing.Email = emailNormalized;
             }
 
-            if (!string.IsNullOrWhiteSpace(model.Password)) existing.Password = model.Password;
+            if (!string.IsNullOrWhiteSpace(model.Password)) existing.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
             _context.SaveChanges();
             _logger.LogInformation("✅ Kullanıcı güncellendi: {Id} - {Name}", id, existing.Name);

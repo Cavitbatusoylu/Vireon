@@ -129,6 +129,8 @@ namespace Vireon.DataAccessLayer.Migrations
 
                     b.HasIndex("AccountId");
 
+                    b.HasIndex("CreatedAt");
+
                     b.ToTable("LedgerEntries");
                 });
 
@@ -161,9 +163,11 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("pending");
+                        .HasDefaultValue("Pending");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("ReceiverAccountId");
 

@@ -11,8 +11,8 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 namespace Vireon.DataAccessLayer.Migrations
 {
     [DbContext(typeof(VireonContext))]
-    [Migration("20260415133445_SQLiteInitialCreate")]
-    partial class SQLiteInitialCreate
+    [Migration("20260416155014_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,6 +132,8 @@ namespace Vireon.DataAccessLayer.Migrations
 
                     b.HasIndex("AccountId");
 
+                    b.HasIndex("CreatedAt");
+
                     b.ToTable("LedgerEntries");
                 });
 
@@ -164,9 +166,11 @@ namespace Vireon.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(20)
                         .HasColumnType("TEXT")
-                        .HasDefaultValue("pending");
+                        .HasDefaultValue("Pending");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("ReceiverAccountId");
 

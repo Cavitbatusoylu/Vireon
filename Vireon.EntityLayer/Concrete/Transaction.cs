@@ -7,7 +7,7 @@ namespace Vireon.EntityLayer.Concrete
         public int SenderAccountId { get; set; } // Gönderici hesap kimliği
         public int ReceiverAccountId { get; set; } // Alıcı hesap kimliği
         public decimal Amount { get; set; } // Transfer edilen miktar
-        public string Status { get; set; } = "pending"; // İşlem durumu (pending, completed, failed)
+        public TransactionStatus Status { get; set; } = TransactionStatus.Pending; // İşlem durumu
         public DateTime Date { get; set; } // İşlem tarihi
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Kayıt oluşturulma zamanı
         public string? Description { get; set; } // İşlem açıklaması

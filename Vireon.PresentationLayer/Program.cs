@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
+using Vireon.PresentationLayer.Middleware;
 
 internal class Program
 {
@@ -132,6 +133,26 @@ internal class Program
                     logger.LogInformation("✅ Tüm kullanıcılara hesap numarası atandı!");
                 }
 
+                // ============================================================
+                // MEVCUT DÜZ METİN ŞİFRELERİ HASH'LE (Tek Seferlik Migration)
+                // BCrypt hash'leri "$2" ile başlar, düz metin şifreler başlamaz
+                // ============================================================
+                var usersWithPlainPassword = context.Users
+                    .Where(u => u.Password != null && !u.Password.StartsWith("$2"))
+                    .ToList();
+
+                if (usersWithPlainPassword.Any())
+                {
+                    logger.LogInformation("🔐 {Count} kullanıcının şifresi hash'leniyor...", usersWithPlainPassword.Count);
+                    foreach (var user in usersWithPlainPassword)
+                    {
+                        user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+                        logger.LogInformation("  → {Email} şifresi hash'lendi", user.Email);
+                    }
+                    context.SaveChanges();
+                    logger.LogInformation("✅ Tüm şifreler güvenli hale getirildi!");
+                }
+
                 logger.LogInformation("✅ Database hazır!");
             }
             catch (Exception ex)
@@ -150,6 +171,12 @@ internal class Program
         }
 
         // ============================================================
+        // GLOBAL ERROR HANDLING MIDDLEWARE
+        // Tüm yakalanmamış exception'ları standart JSON formatında döndürür
+        // ============================================================
+        app.UseMiddleware<ErrorHandlingMiddleware>();
+
+        // ============================================================
         // GÜVENLİK BAŞLIKLARI (Security Headers)
         // ============================================================
         app.Use(async (context, next) =>
@@ -164,17 +191,25 @@ internal class Program
         });
 
         // ============================================================
-        // CACHE KONTROL — CTRL+F5 SORUNUNU ÇÖZER
-        // Statik dosyalar (HTML/JS/CSS) için cache devre dışı bırakılır
+        // CACHE KONTROL — Akıllı Cache Stratejisi
+        // HTML: always fresh | JS/CSS: 1 hour | Images: 24 hours
         // ============================================================
         app.Use(async (context, next) =>
         {
             var path = context.Request.Path.Value ?? "";
-            if (path.EndsWith(".html") || path.EndsWith(".js") || path.EndsWith(".css") || path == "/")
+            if (path.EndsWith(".html") || path == "/")
             {
                 context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
                 context.Response.Headers["Pragma"] = "no-cache";
                 context.Response.Headers["Expires"] = "0";
+            }
+            else if (path.EndsWith(".js") || path.EndsWith(".css"))
+            {
+                context.Response.Headers["Cache-Control"] = "public, max-age=3600";
+            }
+            else if (path.EndsWith(".png") || path.EndsWith(".jpg") || path.EndsWith(".ico") || path.EndsWith(".webp"))
+            {
+                context.Response.Headers["Cache-Control"] = "public, max-age=86400";
             }
             await next();
         });
