@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Vireon.DataAccessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class SQLiteInitialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -128,7 +128,7 @@ namespace Vireon.DataAccessLayer.Migrations
                     SenderAccountId = table.Column<int>(type: "INTEGER", nullable: false),
                     ReceiverAccountId = table.Column<int>(type: "INTEGER", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, defaultValue: "pending"),
+                    Status = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, defaultValue: "Pending"),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true)
@@ -176,6 +176,16 @@ namespace Vireon.DataAccessLayer.Migrations
                 name: "IX_LedgerEntries_AccountId",
                 table: "LedgerEntries",
                 column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LedgerEntries_CreatedAt",
+                table: "LedgerEntries",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_CreatedAt",
+                table: "Transactions",
+                column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_ReceiverAccountId",

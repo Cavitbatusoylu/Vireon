@@ -78,11 +78,43 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 .HasIndex(u => u.AccountNumber)
                 .IsUnique();
 
-            // 7. Transaction -> Status default value
+            // 7. Transaction -> Status enum conversion (DB'de string olarak sakla)
             modelBuilder.Entity<Transaction>()
                 .Property(t => t.Status)
-                .HasDefaultValue("pending")
+                .HasConversion<string>()
+                .HasDefaultValue(Vireon.EntityLayer.Concrete.TransactionStatus.Pending)
                 .HasMaxLength(20);
+
+            // ============================================================
+            // 8. DATABASE INDEXLERI (Performans İyileştirmesi)
+            // ============================================================
+
+            // Transaction indexleri
+            modelBuilder.Entity<Transaction>()
+                .HasIndex(t => t.SenderAccountId);
+            modelBuilder.Entity<Transaction>()
+                .HasIndex(t => t.ReceiverAccountId);
+            modelBuilder.Entity<Transaction>()
+                .HasIndex(t => t.CreatedAt);
+
+            // Account -> UserId index
+            modelBuilder.Entity<Account>()
+                .HasIndex(a => a.UserId);
+
+            // LedgerEntry -> AccountId ve CreatedAt indexleri
+            modelBuilder.Entity<LedgerEntry>()
+                .HasIndex(l => l.AccountId);
+            modelBuilder.Entity<LedgerEntry>()
+                .HasIndex(l => l.CreatedAt);
+
+            // FraudLog -> AccountId index
+            modelBuilder.Entity<FraudLog>()
+                .HasIndex(f => f.AccountId);
+
+            // DailyLimit -> UserId index
+            modelBuilder.Entity<DailyLimit>()
+                .HasIndex(d => d.UserId)
+                .IsUnique();
         }
 
         // Veritabanı Tablo Tanımlamaları (DbSet)

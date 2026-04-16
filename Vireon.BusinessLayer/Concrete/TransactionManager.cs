@@ -20,7 +20,7 @@ namespace Vireon.BusinessLayer.Concrete
         public void ProcessTransaction(Transaction transaction)
         {
             // İşlem durumunu "pending" olarak başlat
-            transaction.Status = "pending";
+            transaction.Status = TransactionStatus.Pending;
 
             using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
             try
@@ -31,26 +31,26 @@ namespace Vireon.BusinessLayer.Concrete
 
                 if (senderAccount == null || receiverAccount == null)
                 {
-                    transaction.Status = "failed";
+                    transaction.Status = TransactionStatus.Failed;
                     throw new InvalidOperationException("Gönderici veya alıcı hesap bulunamadı.");
                 }
 
                 // 2. İş kuralları
                 if (transaction.SenderAccountId == transaction.ReceiverAccountId)
                 {
-                    transaction.Status = "failed";
+                    transaction.Status = TransactionStatus.Failed;
                     throw new InvalidOperationException("Kendi hesabınıza transfer yapamazsınız.");
                 }
 
                 if (transaction.Amount <= 0)
                 {
-                    transaction.Status = "failed";
+                    transaction.Status = TransactionStatus.Failed;
                     throw new InvalidOperationException("Transfer miktarı 0'dan büyük olmalıdır.");
                 }
 
                 if (senderAccount.Balance < transaction.Amount)
                 {
-                    transaction.Status = "failed";
+                    transaction.Status = TransactionStatus.Failed;
                     throw new InvalidOperationException("Yetersiz bakiye.");
                 }
 
@@ -67,7 +67,7 @@ namespace Vireon.BusinessLayer.Concrete
 
                     if (dailyLimit.UsedLimit + transaction.Amount > dailyLimit.MaxDailyLimit)
                     {
-                        transaction.Status = "failed";
+                        transaction.Status = TransactionStatus.Failed;
                         throw new InvalidOperationException($"Günlük limit aşıldı. Kalan: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} TRY");
                     }
 
@@ -84,7 +84,7 @@ namespace Vireon.BusinessLayer.Concrete
                 // 5. Transaction kaydı
                 transaction.Date = DateTime.Now;
                 transaction.CreatedAt = DateTime.Now;
-                transaction.Status = "completed";
+                transaction.Status = TransactionStatus.Completed;
                 if (string.IsNullOrWhiteSpace(transaction.Description))
                 {
                     transaction.Description = $"Transfer: {senderAccount.AccountNumber} → {receiverAccount.AccountNumber}";
