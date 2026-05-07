@@ -9,4 +9,4 @@ namespace Vireon.BusinessLayer.Abstract
         Account? GetAccountByNumber(string accountNumber);
         void Deposit(string accountNumber, decimal amount, string? description);
     }
-}
+}  
