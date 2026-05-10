@@ -11,9 +11,10 @@ const string sqlserverConn = "Server=.;Database=VireonDB;Trusted_Connection=True
 
 var providers = new Dictionary<string, DbContextOptions<VireonContext>>
 {
-    { "SQLite", new DbContextOptionsBuilder<VireonContext>().UseSqlite(sqliteConn).Options },
-    { "MySQL", new DbContextOptionsBuilder<VireonContext>().UseMySql(mysqlConn, ServerVersion.AutoDetect(mysqlConn)).Options },
-    { "SQL Server", new DbContextOptionsBuilder<VireonContext>().UseSqlServer(sqlserverConn).Options }
+    { "SQLite", new DbContextOptionsBuilder<VireonContext>().UseSqlite(sqliteConn).Options }
+    // Diğer veritabanları şimdilik yoruma alındı (çevrimdışı iseler AutoDetect çökmesin diye)
+    // { "MySQL", new DbContextOptionsBuilder<VireonContext>().UseMySql(mysqlConn, ServerVersion.AutoDetect(mysqlConn)).Options },
+    // { "SQL Server", new DbContextOptionsBuilder<VireonContext>().UseSqlServer(sqlserverConn).Options }
 };
 
 Console.WriteLine("--- Vireon Multi-DB Sync & Seed Tool ---");

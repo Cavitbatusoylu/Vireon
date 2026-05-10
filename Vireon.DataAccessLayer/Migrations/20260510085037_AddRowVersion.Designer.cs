@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 
@@ -10,9 +11,11 @@ using Vireon.DataAccessLayer.Concrete.EntityFramework;
 namespace Vireon.DataAccessLayer.Migrations
 {
     [DbContext(typeof(VireonContext))]
-    partial class VireonContextModelSnapshot : ModelSnapshot
+    [Migration("20260510085037_AddRowVersion")]
+    partial class AddRowVersion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.25");
@@ -203,10 +206,6 @@ namespace Vireon.DataAccessLayer.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
