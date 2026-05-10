@@ -68,6 +68,12 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 .HasIndex(a => a.AccountNumber)
                 .IsUnique();
 
+            // Eşzamanlılık (Concurrency) kontrolü için RowVersion ekle
+            modelBuilder.Entity<Account>()
+                .Property(a => a.RowVersion)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+
             // 5. User -> Email unique constraint
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
@@ -124,6 +130,17 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
         public DbSet<DailyLimit> DailyLimits { get; set; }       // Günlük limitler tablosu
         public DbSet<FraudLog> FraudLogs { get; set; }           // Dolandırıcılık kayıtları tablosu
         public DbSet<LedgerEntry> LedgerEntries { get; set; }    // Defter kayıtları tablosu
+    
+        public override int SaveChanges()
+        {
+            // Hesap bakiyesi güncellendiğinde veya yeni eklendiğinde RowVersion'ı yeni rastgele bir değerle değiştir
+            foreach (var entry in ChangeTracker.Entries<Account>().Where(e => e.State == EntityState.Modified || e.State == EntityState.Added))
+            {
+                entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
+            }
+            return base.SaveChanges();
+        }
+
     }
 }
 

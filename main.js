@@ -3,6 +3,11 @@ const path = require('path');
 
 let mainWindow;
 
+// İkonun Windows görev çubuğunda kesin görünmesi için App ID ayarlıyoruz
+if (process.platform === 'win32') {
+  app.setAppUserModelId("Vireon Bank");
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
@@ -10,7 +15,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 768,
     title: "Vireon - Immutable Ledger Digital Bank",
-    icon: path.join(__dirname, 'Vireon.PresentationLayer', 'wwwroot', 'images', 'vireon-logo-transparent-new.png'),
+    icon: path.join(__dirname, 'Vireon.PresentationLayer', 'wwwroot', 'images', 'vireon-logo-transparent-new.ico'),
     backgroundColor: '#0a0f1a',
     webPreferences: {
       nodeIntegration: false,
@@ -37,8 +42,32 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // Remove default menu
-  Menu.setApplicationMenu(null);
+  // Özel Bankacılık Menüsü Oluşturma (Electron Polish)
+  const template = [
+    {
+      label: 'Vireon Bank',
+      submenu: [
+        { label: 'Yenile', role: 'reload', accelerator: 'CmdOrCtrl+R' },
+        { label: 'Zorla Yenile', role: 'forceReload', accelerator: 'CmdOrCtrl+Shift+R' },
+        { type: 'separator' },
+        { label: 'Çıkış Yap', role: 'quit', accelerator: 'CmdOrCtrl+Q' }
+      ]
+    },
+    {
+      label: 'Görünüm',
+      submenu: [
+        { label: 'Tam Ekran', role: 'togglefullscreen', accelerator: 'F11' },
+        { label: 'Yakınlaştır', role: 'zoomIn', accelerator: 'CmdOrCtrl+Plus' },
+        { label: 'Uzaklaştır', role: 'zoomOut', accelerator: 'CmdOrCtrl+-' },
+        { label: 'Sıfırla', role: 'resetZoom', accelerator: 'CmdOrCtrl+0' },
+        { type: 'separator' },
+        { label: 'Geliştirici Araçları (DevTools)', role: 'toggleDevTools', accelerator: 'F12' }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 
   // Optional: Open DevTools in development
   // mainWindow.webContents.openDevTools();
