@@ -11,6 +11,7 @@ namespace Vireon.EntityLayer.Concrete
         public string Password { get; set; } = null!; // Giriş şifresi
         public string AccountNumber { get; set; } = null!; // Benzersiz hesap numarası (VR-XXXX)
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Kayıt tarihi
+        public string Role { get; set; } = "User"; // Kullanıcı rolü: "Admin" veya "User"
 
         // Navigation Properties (İlişkili Tablolar)
         public List<Account>? Accounts { get; set; } // Kullanıcıya ait hesaplar

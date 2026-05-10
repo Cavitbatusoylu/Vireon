@@ -153,6 +153,18 @@ internal class Program
                     logger.LogInformation("✅ Tüm şifreler güvenli hale getirildi!");
                 }
 
+                // ============================================================
+                // ADMIN HESABI ROL ATAMASI
+                // admin@vireon.com hesabının rolünü otomatik "Admin" yap
+                // ============================================================
+                var adminUser = context.Users.FirstOrDefault(u => u.Email == "admin@vireon.com");
+                if (adminUser != null && adminUser.Role != "Admin")
+                {
+                    adminUser.Role = "Admin";
+                    context.SaveChanges();
+                    logger.LogInformation("🛡️ Admin rolü atandı: {Email}", adminUser.Email);
+                }
+
                 logger.LogInformation("✅ Database hazır!");
             }
             catch (Exception ex)

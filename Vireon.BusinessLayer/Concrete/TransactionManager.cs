@@ -124,12 +124,33 @@ namespace Vireon.BusinessLayer.Concrete
                     });
                 }
 
+                var oneMinuteAgo = DateTime.Now.AddMinutes(-1);
+                var recentTransactionsCount = _context.Transactions
+                    .Count(t => t.SenderAccountId == senderAccount.Id && t.CreatedAt >= oneMinuteAgo);
+                if (recentTransactionsCount >= 3) // Bu işlemle birlikte 4. işlem olacaksa şüpheli say
+                {
+                    _context.FraudLogs.Add(new FraudLog
+                    {
+                        AccountId = senderAccount.Id,
+                        RiskType = "FREQUENT_TRANSACTIONS",
+                        Description = $"Olağandışı aktivite: Son 1 dakikada {recentTransactionsCount + 1} işlem denemesi.",
+                        LogDate = DateTime.Now
+                    });
+                }
+
                 // 8. Commit
                 _context.SaveChanges();
                 dbTransaction.Commit();
 
                 _logger.LogInformation("✅ Transfer başarılı: {Amount} TRY, {Sender} -> {Receiver} (Status: {Status})",
                     transaction.Amount, senderAccount.AccountNumber, receiverAccount.AccountNumber, transaction.Status);
+            }
+            // BURAYI EKLİYORUZ: Eşzamanlılık (Concurrency) Çakışması Yakalama
+            catch (DbUpdateConcurrencyException ex) 
+            {
+                dbTransaction.Rollback();
+                _logger.LogError(ex, "❌ Eşzamanlılık çakışması (Concurrency): Aynı hesaba aynı anda işlem yapıldı.");
+                throw new InvalidOperationException("İşleminiz sırasında bir çakışma oldu (aynı anda başka bir işlem yapılmış olabilir). Lütfen tekrar deneyin.");
             }
             catch (Exception ex)
             {
@@ -165,6 +186,16 @@ namespace Vireon.BusinessLayer.Concrete
                     NewBalance = account.Balance,
                     Description = description ?? "Deposit",
                     CreatedAt = DateTime.Now
+                });
+
+                _context.Transactions.Add(new Transaction
+                {
+                    SenderAccountId = account.Id, // Kendi kendine gibi gösteriyoruz
+                    ReceiverAccountId = account.Id,
+                    Amount = amount,
+                    Description = description ?? "Para Yatırma / Deposit",
+                    Date = DateTime.Now,
+                    Status = TransactionStatus.Completed
                 });
 
                 _context.SaveChanges();
