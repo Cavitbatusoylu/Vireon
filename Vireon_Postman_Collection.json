@@ -86,11 +86,162 @@
           }
         },
         {
+          "name": "Kullanıcı Kayıt (Register)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"Name\": \"Test\",\n  \"Surname\": \"User\",\n  \"Email\": \"test@vireon.com\",\n  \"Password\": \"test123\"\n}" },
+            "url": { "raw": "http://localhost:5202/api/Users/register", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "register"] }
+          }
+        },
+        {
+          "name": "Kullanıcı Giriş (Login)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"Email\": \"admin@vireon.com\",\n  \"Password\": \"admin123\"\n}" },
+            "url": { "raw": "http://localhost:5202/api/Users/login", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "login"] }
+          }
+        },
+        {
+          "name": "Hesap Numarasıyla Ara",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/Users/search?accountNumber=VR-00001", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "search"], "query": [{ "key": "accountNumber", "value": "VR-00001" }] }
+          }
+        },
+        {
+          "name": "Kullanıcı Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"Name\": \"Updated Name\",\n  \"Surname\": \"Updated Surname\",\n  \"Email\": \"updated@vireon.com\"\n}" },
+            "url": { "raw": "http://localhost:5202/api/Users/1", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "1"] }
+          }
+        },
+        {
           "name": "Kullanıcı Sil",
           "request": {
             "method": "DELETE",
             "header": [],
             "url": { "raw": "http://localhost:5202/api/Users/1", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "Para Transferi (ID ile)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"SenderAccountId\": 1,\n  \"ReceiverAccountId\": 2,\n  \"Amount\": 500.00,\n  \"Description\": \"Test transfer\"\n}" },
+            "url": { "raw": "http://localhost:5202/api/Transfers/send", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Transfers", "send"] }
+          }
+        },
+        {
+          "name": "Para Transferi (Hesap Numarası ile)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"SenderAccountNumber\": \"VR-00001\",\n  \"ReceiverAccountNumber\": \"VR-00002\",\n  \"Amount\": 1000.00,\n  \"Description\": \"Test transfer by account number\"\n}" },
+            "url": { "raw": "http://localhost:5202/api/Transfers/send-by-account", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Transfers", "send-by-account"] }
+          }
+        },
+        {
+          "name": "Para Yatırma (Deposit)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"AccountNumber\": \"VR-00001\",\n  \"Amount\": 5000.00,\n  \"Description\": \"Test deposit\"\n}" },
+            "url": { "raw": "http://localhost:5202/api/Transfers/deposit", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Transfers", "deposit"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Admin İstatistikleri",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/Users/admin-stats", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "admin-stats"] }
+          }
+        },
+        {
+          "name": "Admin Kullanıcı Listesi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/Users/admin-users", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "admin-users"] }
+          }
+        },
+        {
+          "name": "Admin İşlem Listesi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/Users/admin-transactions", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "Users", "admin-transactions"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "DailyLimits",
+      "item": [
+        {
+          "name": "Tüm Günlük Limitleri Getir",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/DailyLimits", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "DailyLimits"] }
+          }
+        },
+        {
+          "name": "Kullanıcı Limitini Getir",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/DailyLimits/1", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "DailyLimits", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "FraudLogs",
+      "item": [
+        {
+          "name": "Tüm Fraud Loglarını Getir",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/FraudLogs", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "FraudLogs"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "LedgerEntries",
+      "item": [
+        {
+          "name": "Tüm Ledger Kayıtlarını Getir",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/LedgerEntries", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "LedgerEntries"] }
+          }
+        },
+        {
+          "name": "Hesaba Göre Ledger Kayıtları",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "http://localhost:5202/api/LedgerEntries/account/1", "protocol": "http", "host": ["localhost"], "port": "5202", "path": ["api", "LedgerEntries", "account", "1"] }
           }
         }
       ]

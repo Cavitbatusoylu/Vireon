@@ -60,16 +60,16 @@
         <div class="navbar-right">
             <!-- Language Switcher -->
             <div class="lang-switcher">
-                <button class="lang-btn" id="langTR" onclick="switchLang('tr')">TR</button>
-                <button class="lang-btn active" id="langEN" onclick="switchLang('en')">EN</button>
+            <button class="lang-btn" id="langTR" data-action="switch-lang" data-lang="tr">TR</button>
+            <button class="lang-btn active" id="langEN" data-action="switch-lang" data-lang="en">EN</button>
             </div>
             <!-- Theme Toggle -->
-            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle theme">
+            <button class="theme-toggle" id="themeToggle" data-action="toggle-theme" title="Toggle Theme" aria-label="Toggle theme">
                 <span class="theme-icon-dark">🌙</span>
                 <span class="theme-icon-light">☀️</span>
             </button>
             <!-- Back to Home Button (visible only in dashboard) -->
-            <button class="login-btn" id="backToHomeBtn" onclick="backToMenu()" style="display: none;" aria-label="Back to home">
+            <button class="login-btn" id="backToHomeBtn" data-action="back-to-menu" style="display: none;" aria-label="Back to home">
                 <span class="login-icon">🏠</span>
                 <span data-tr="Ana Menü" data-en="Home">Home</span>
             </button>
@@ -84,12 +84,12 @@
                 <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
             </button>
             <!-- Logout Button (hidden by default) -->
-            <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;" aria-label="Logout">
+            <button class="login-btn" id="logoutBtn" data-action="logout" style="display: none;" aria-label="Logout">
                 <span class="login-icon">🚪</span>
                 <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
             </button>
             <!-- My Dashboard Button (Quick Access) -->
-            <button class="login-btn dash-quick-btn" id="homeDashboardBtn" onclick="showSection('dashboard')" style="display: none;" aria-label="Go to dashboard">
+            <button class="login-btn dash-quick-btn" id="homeDashboardBtn" data-action="show-section" data-section="dashboard" style="display: none;" aria-label="Go to dashboard">
                 <span class="login-icon">🚀</span>
                 <span data-tr="Dashboardım" data-en="My Dashboard">My Dashboard</span>
             </button>
@@ -99,13 +99,13 @@
     <!-- Login Modal -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeLoginModal()" aria-label="Close login modal">✕</button>
+            <button class="modal-close" data-action="close-login-modal" aria-label="Close login modal">✕</button>
             <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
             
             <h2 data-tr="Vireon'a Giriş Yap" data-en="Sign In to Vireon">Sign In to Vireon</h2>
             <p class="modal-subtitle" data-tr="Dijital banka çekirdek sisteminize erişin"
                 data-en="Access your digital bank core system">Access your digital bank core system</p>
-            <form class="login-form" onsubmit="handleLogin(event)">
+            <form class="login-form" data-action="submit-login">
                 <div class="form-group">
                     <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
                     <input type="email" id="loginEmail" placeholder="ornek@vireon.com" required>
@@ -119,14 +119,14 @@
                         <input type="checkbox" id="rememberMe">
                         <span data-tr="Beni Hatırla" data-en="Remember Me">Remember Me</span>
                     </label>
-                    <a href="#" onclick="openForgotPasswordModal(event)" class="forgot-link" data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot
+                    <a href="javascript:void(0)" data-action="open-forgot-password-modal" role="button" class="forgot-link" data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot
                         Password?</a>
                 </div>
                 <button type="submit" class="login-submit-btn" data-tr="Giriş Yap" data-en="Sign In">Sign In</button>
             </form>
             <p class="modal-footer-text">
                 <span data-tr="Hesabınız yok mu?" data-en="Don't have an account?">Don't have an account?</span>
-                <a href="#" onclick="openRegisterModal(event)" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</a>
+                <a href="javascript:void(0)" data-action="open-register-modal" role="button" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</a>
             </p>
         </div>
     </div>
@@ -134,13 +134,13 @@
     <!-- Register Modal -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeRegisterModal()" aria-label="Close register modal">✕</button>
+            <button class="modal-close" data-action="close-register-modal" aria-label="Close register modal">✕</button>
             <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
             
             <h2 data-tr="Vireon'a Kayıt Ol" data-en="Sign Up to Vireon">Sign Up to Vireon</h2>
             <p class="modal-subtitle" data-tr="Dijital banka sistemine katılın"
                 data-en="Join the digital bank system">Join the digital bank system</p>
-            <form class="login-form" onsubmit="handleRegister(event)">
+            <form class="login-form" data-action="submit-register">
                 <div class="form-group">
                     <label data-tr="Ad Soyad" data-en="Full Name">Full Name</label>
                     <input type="text" id="registerName" placeholder="John Doe" required>
@@ -161,7 +161,7 @@
             </form>
             <p class="modal-footer-text">
                 <span data-tr="Zaten hesabınız var mı?" data-en="Already have an account?">Already have an account?</span>
-                <a href="#" onclick="openLoginModalFromRegister(event)" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+                <a href="javascript:void(0)" data-action="open-login-from-register" role="button" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
             </p>
         </div>
     </div>
@@ -169,13 +169,13 @@
     <!-- Forgot Password Modal -->
     <div class="modal-overlay" id="forgotPasswordModal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close forgot password modal">✕</button>
+            <button class="modal-close" data-action="close-forgot-password-modal" aria-label="Close forgot password modal">✕</button>
             <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
             
             <h2 data-tr="Şifremi Unuttum" data-en="Forgot Password">Forgot Password</h2>
             <p class="modal-subtitle" data-tr="Şifrenizi sıfırlama bağlantısı için e-postanızı girin"
                 data-en="Enter your email to get a reset link">Enter your email to get a reset link</p>
-            <form class="login-form" onsubmit="handleForgotPassword(event)">
+            <form class="login-form" data-action="submit-forgot-password">
                 <div class="form-group">
                     <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
                     <input type="email" id="forgotPasswordEmail" placeholder="ornek@vireon.com" required>
@@ -184,7 +184,7 @@
             </form>
             <p class="modal-footer-text">
                 <span data-tr="Şifrenizi hatırladınız mı?" data-en="Remembered your password?">Remembered your password?</span>
-                <a href="#" onclick="openLoginModalFromForgot(event)" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+                <a href="javascript:void(0)" data-action="open-login-from-forgot" role="button" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
             </p>
         </div>
     </div>
@@ -203,30 +203,30 @@
 
         <!-- Menu Grid (Compact Version) -->
         <div class="menu-grid compact-grid" id="menuGrid">
-            <div class="menu-item initial-load" onclick="scrollToSection('section-introduction')">
-                <div class="menu-badge">IN</div>
+            <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-introduction" aria-label="Go to Introduction section">
+                <div class="menu-badge" aria-hidden="true">IN</div>
                 <div class="menu-title" data-tr="Tanıtım" data-en="Introduction">Introduction</div>
-            </div>
-            <div class="menu-item initial-load" onclick="scrollToSection('section-components')">
-                <div class="menu-badge">SV</div>
+            </button>
+            <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-components" aria-label="Go to Components section">
+                <div class="menu-badge" aria-hidden="true">SV</div>
                 <div class="menu-title" data-tr="Bileşenler" data-en="Components">Components</div>
-            </div>
-            <div class="menu-item initial-load" onclick="scrollToSection('section-architecture')">
-                <div class="menu-badge">AR</div>
+            </button>
+            <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-architecture" aria-label="Go to Architecture section">
+                <div class="menu-badge" aria-hidden="true">AR</div>
                 <div class="menu-title" data-tr="Mimari" data-en="Architecture">Architecture</div>
-            </div>
-            <div class="menu-item initial-load" onclick="scrollToSection('section-team')">
-                <div class="menu-badge">TM</div>
+            </button>
+            <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-team" aria-label="Go to Team section">
+                <div class="menu-badge" aria-hidden="true">TM</div>
                 <div class="menu-title" data-tr="Ekip" data-en="Team">Team</div>
-            </div>
-            <div class="menu-item initial-load" onclick="scrollToSection('section-about')">
-                <div class="menu-badge">AB</div>
+            </button>
+            <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-about" aria-label="Go to About section">
+                <div class="menu-badge" aria-hidden="true">AB</div>
                 <div class="menu-title" data-tr="Hakkında" data-en="About">About</div>
-            </div>
-            <div class="menu-item initial-load" onclick="scrollToSection('section-contact')">
-                <div class="menu-badge">CT</div>
+            </button>
+            <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-contact" aria-label="Go to Contact section">
+                <div class="menu-badge" aria-hidden="true">CT</div>
                 <div class="menu-title" data-tr="İletişim" data-en="Contact">Contact</div>
-            </div>
+            </button>
         </div>
 
         <!-- Content Sections -->
@@ -235,7 +235,7 @@
             <div class="content-section" id="dashboard">
                 <div class="dashboard-shell">
                     <div class="dashboard-topbar">
-                        <button type="button" class="back-btn dash-back" onclick="backToMenu()" data-tr="← Ana sayfa" data-en="← Home">← Home</button>
+                        <button type="button" class="back-btn dash-back" data-action="back-to-menu" data-tr="← Ana sayfa" data-en="← Home">← Home</button>
                     </div>
                     <div class="dashboard-wrapper">
                         <aside class="dash-sidebar">
@@ -246,59 +246,83 @@
                                 </div>
                             </div>
                             <nav class="sidebar-nav">
-                                <ul class="sidebar-menu">
-                                    <li class="active" data-dash="dash-overview" onclick="switchDashSection('dash-overview')">
-                                        <span class="sidebar-icon">📊</span>
-                                        <span data-tr="Genel Bakış" data-en="Overview">Overview</span>
+                                <ul class="sidebar-menu" role="navigation" aria-label="Dashboard navigation">
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn active" data-dash="dash-overview" data-action="switch-dash-section" aria-label="Overview section">
+                                            <span class="sidebar-icon" aria-hidden="true">📊</span>
+                                            <span data-tr="Genel Bakış" data-en="Overview">Overview</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-transfers" onclick="switchDashSection('dash-transfers')">
-                                        <span class="sidebar-icon">💸</span>
-                                        <span data-tr="Para Gönder" data-en="Send Money">Send Money</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-transfers" data-action="switch-dash-section" aria-label="Send Money section">
+                                            <span class="sidebar-icon" aria-hidden="true">💸</span>
+                                            <span data-tr="Para Gönder" data-en="Send Money">Send Money</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-deposit" onclick="switchDashSection('dash-deposit')">
-                                        <span class="sidebar-icon">💰</span>
-                                        <span data-tr="Para Yatır" data-en="Deposit">Deposit</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-deposit" data-action="switch-dash-section" aria-label="Deposit section">
+                                            <span class="sidebar-icon" aria-hidden="true">💰</span>
+                                            <span data-tr="Para Yatır" data-en="Deposit">Deposit</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-qr" onclick="switchDashSection('dash-qr')">
-                                        <span class="sidebar-icon">📱</span>
-                                        <span data-tr="QR Ödeme" data-en="QR Payment">QR Payment</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-qr" data-action="switch-dash-section" aria-label="QR Payment section">
+                                            <span class="sidebar-icon" aria-hidden="true">📱</span>
+                                            <span data-tr="QR Ödeme" data-en="QR Payment">QR Payment</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-history" onclick="switchDashSection('dash-history')">
-                                        <span class="sidebar-icon">📜</span>
-                                        <span data-tr="İşlem Geçmişi" data-en="History">History</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-history" data-action="switch-dash-section" aria-label="Transaction History section">
+                                            <span class="sidebar-icon" aria-hidden="true">📜</span>
+                                            <span data-tr="İşlem Geçmişi" data-en="History">History</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-limits" onclick="switchDashSection('dash-limits')">
-                                        <span class="sidebar-icon">⚡</span>
-                                        <span data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-limits" data-action="switch-dash-section" aria-label="Daily Limits section">
+                                            <span class="sidebar-icon" aria-hidden="true">⚡</span>
+                                            <span data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-db-explorer" onclick="switchDashSection('dash-db-explorer')">
-                                        <span class="sidebar-icon">🗄️</span>
-                                        <span data-tr="DB Explorer" data-en="DB Explorer">DB Explorer</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-db-explorer" data-action="switch-dash-section" aria-label="Database Explorer section">
+                                            <span class="sidebar-icon" aria-hidden="true">🗄️</span>
+                                            <span data-tr="DB Explorer" data-en="DB Explorer">DB Explorer</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-account-info" onclick="switchDashSection('dash-account-info')">
-                                        <span class="sidebar-icon">📋</span>
-                                        <span data-tr="Hesap Bilgileri" data-en="Account Info">Account Info</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-account-info" data-action="switch-dash-section" aria-label="Account Information section">
+                                            <span class="sidebar-icon" aria-hidden="true">📋</span>
+                                            <span data-tr="Hesap Bilgileri" data-en="Account Info">Account Info</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-ai-coach" onclick="switchDashSection('dash-ai-coach')">
-                                        <span class="sidebar-icon">🤖</span>
-                                        <span data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-ai-coach" data-action="switch-dash-section" aria-label="Neon AI Coach section">
+                                            <span class="sidebar-icon" aria-hidden="true">🤖</span>
+                                            <span data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-profile" onclick="switchDashSection('dash-profile')">
-                                        <span class="sidebar-icon">👤</span>
-                                        <span data-tr="Profil Ayarları" data-en="Profile">Profile</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-profile" data-action="switch-dash-section" aria-label="Profile Settings section">
+                                            <span class="sidebar-icon" aria-hidden="true">👤</span>
+                                            <span data-tr="Profil Ayarları" data-en="Profile">Profile</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-password" onclick="switchDashSection('dash-password')">
-                                        <span class="sidebar-icon">🔐</span>
-                                        <span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-password" data-action="switch-dash-section" aria-label="Change Password section">
+                                            <span class="sidebar-icon" aria-hidden="true">🔐</span>
+                                            <span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span>
+                                        </button>
                                     </li>
-                                    <li data-dash="dash-admin" onclick="switchDashSection('dash-admin')" id="adminMenuItem" style="display:none;">
-                                        <span class="sidebar-icon">🛡️</span>
-                                        <span data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</span>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-admin" data-action="switch-dash-section" id="adminMenuItem" style="display:none;" aria-label="Admin Panel section">
+                                            <span class="sidebar-icon" aria-hidden="true">🛡️</span>
+                                            <span data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</span>
+                                        </button>
                                     </li>
                                 </ul>
                             </nav>
                             <div class="sidebar-footer">
-                                <button type="button" class="logout-btn" onclick="backToMenu()" data-tr="Çıkış" data-en="Logout">Logout</button>
+                                <button type="button" class="logout-btn" data-action="back-to-menu" data-tr="Çıkış" data-en="Logout">Logout</button>
                             </div>
                         </aside>
                         <main class="dash-content">
@@ -346,7 +370,7 @@
                                 <div class="glass-card db-preview-card">
                                     <div class="card-header-modern">
                                         <h4 data-tr="Banka Verileri (Live)" data-en="Bank Data (Live)">Bank Data (Live)</h4>
-                                        <button class="refresh-btn-mini" onclick="fetchDatabaseStats()"><i class="fas fa-sync"></i></button>
+                                        <button class="refresh-btn-mini" data-action="refresh-database-stats"><i class="fas fa-sync"></i></button>
                                     </div>
                                     <div class="vireon-table-scroll">
                                         <table id="dbUsersTable" class="vireon-table-modern">
@@ -370,8 +394,8 @@
                                         </div>
                                     </div>
                                     <div class="ai-chat-footer">
-                                        <input type="text" id="aiInput" placeholder="Neon'a sor..." onkeypress="if(event.key==='Enter') sendAiMessage()">
-                                        <button class="ai-send-btn" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button>
+                                        <input type="text" id="aiInput" placeholder="Neon'a sor..." data-enter-action="send-ai-message">
+                                        <button class="ai-send-btn" data-action="send-ai-message"><i class="fas fa-paper-plane"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -432,7 +456,7 @@
                                             <label data-tr="Not (isteğe bağlı)" data-en="Note (optional)">Note (optional)</label>
                                             <input type="text" id="depositNote" class="neon-input" placeholder="">
                                         </div>
-                                        <button type="button" class="login-submit-btn" onclick="handleDepositRequest()" data-tr="Yatırım talebi oluştur" data-en="Submit deposit request">Submit deposit request</button>
+                                        <button type="button" class="login-submit-btn" data-action="deposit-request" data-tr="Yatırım talebi oluştur" data-en="Submit deposit request">Submit deposit request</button>
                                         <p class="dash-hint" data-tr="Bu işlem demo modundadır; gerçek ödeme altyapısı bağlı değildir." data-en="Demo only — no real payment rail connected.">Demo only — no real payment rail connected.</p>
                                     </div>
                                 </div>
@@ -445,7 +469,7 @@
                                         <img id="qrPaymentImg" src="" alt="QR" class="qr-image" width="200" height="200">
                                     </div>
                                     <p class="qr-meta"><span data-tr="Hesap:" data-en="Account:">Account:</span> <span id="qrAccountLabel">-</span></p>
-                                    <button type="button" class="login-submit-btn" onclick="refreshQrCode()" data-tr="QR yenile" data-en="Refresh QR">Refresh QR</button>
+                                    <button type="button" class="login-submit-btn" data-action="refresh-qr-code" data-tr="QR yenile" data-en="Refresh QR">Refresh QR</button>
                                 </div>
                             </div>
                             <div class="dash-sub-section" id="dash-transfers">
@@ -464,7 +488,7 @@
                                             <label data-tr="Açıklama" data-en="Description">Description</label>
                                             <input type="text" id="transferDesc" placeholder="Optional" class="neon-input">
                                         </div>
-                                        <button type="button" class="login-submit-btn" onclick="handleSendTransfer()" id="sendBtn" data-tr="Gönder" data-en="Send">Send</button>
+                                        <button type="button" class="login-submit-btn" data-action="send-transfer" id="sendBtn" data-tr="Gönder" data-en="Send">Send</button>
                                     </div>
                                 </div>
                             </div>
@@ -484,7 +508,7 @@
                                             <label data-tr="E-posta" data-en="Email">Email</label>
                                             <input type="email" id="profileEmail" class="neon-input" autocomplete="email">
                                         </div>
-                                        <button type="button" class="login-submit-btn" onclick="handleProfileSave()" data-tr="Kaydet" data-en="Save">Save</button>
+                                        <button type="button" class="login-submit-btn" data-action="save-profile" data-tr="Kaydet" data-en="Save">Save</button>
                                     </div>
                                 </div>
                             </div>
@@ -504,7 +528,7 @@
                                             <label data-tr="Yeni şifre (tekrar)" data-en="Confirm new password">Confirm new password</label>
                                             <input type="password" id="pwdConfirm" class="neon-input" autocomplete="new-password">
                                         </div>
-                                        <button type="button" class="login-submit-btn" onclick="handlePasswordChange()" data-tr="Şifreyi güncelle" data-en="Update password">Update password</button>
+                                        <button type="button" class="login-submit-btn" data-action="change-password" data-tr="Şifreyi güncelle" data-en="Update password">Update password</button>
                                     </div>
                                 </div>
                             </div>
@@ -514,7 +538,7 @@
                                     <div class="dash-card limit-card">
                                         <h4 data-tr="Maksimum Limit" data-en="Max Daily Limit">Max Daily Limit</h4>
                                         <div class="limit-value">₺<span id="maxLimit">0</span></div>
-                                        <button type="button" class="edit-limit-btn" onclick="toggleLimitEdit()" data-tr="Düzenle" data-en="Edit">Edit</button>
+                                        <button type="button" class="edit-limit-btn" data-action="toggle-limit-edit" data-tr="Düzenle" data-en="Edit">Edit</button>
                                     </div>
                                     <div class="dash-card limit-card">
                                         <h4 data-tr="Kullanılan Limit" data-en="Used Limit">Used Limit</h4>
@@ -530,7 +554,7 @@
                                             <label data-tr="Yeni Günlük Limit (₺)" data-en="New Daily Limit (₺)">New Daily Limit (₺)</label>
                                             <input type="number" id="newMaxLimit" class="neon-input" placeholder="50000">
                                         </div>
-                                        <button type="button" class="login-submit-btn" onclick="handleUpdateLimit()" data-tr="Güncelle" data-en="Update">Update</button>
+                                        <button type="button" class="login-submit-btn" data-action="update-limit" data-tr="Güncelle" data-en="Update">Update</button>
                                     </div>
                                 </div>
                             </div>
@@ -639,7 +663,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
 
                 <!-- Hero Banner -->
                 <div class="intro-hero">
@@ -791,7 +815,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
 
                 <div class="section-header">
                     <h2 class="section-title" data-tr="Sistem Bileşenleri" data-en="System Components">System Components</h2>
@@ -801,11 +825,11 @@
 
                 <div class="tabs-container">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab(this, 'backend')" data-tr="Backend" data-en="Backend">Backend</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'database')" data-tr="Veritabanı" data-en="Database">Database</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'architecture')" data-tr="Mimari" data-en="Architecture">Architecture</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'security')" data-tr="Güvenlik" data-en="Security">Security</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'desktop')" data-tr="Masaüstü" data-en="Desktop">Desktop</button>
+                        <button class="tab-btn active" data-action="switch-tab" data-tab="backend" data-tr="Backend" data-en="Backend">Backend</button>
+                        <button class="tab-btn" data-action="switch-tab" data-tab="database" data-tr="Veritabanı" data-en="Database">Database</button>
+                        <button class="tab-btn" data-action="switch-tab" data-tab="architecture" data-tr="Mimari" data-en="Architecture">Architecture</button>
+                        <button class="tab-btn" data-action="switch-tab" data-tab="security" data-tr="Güvenlik" data-en="Security">Security</button>
+                        <button class="tab-btn" data-action="switch-tab" data-tab="desktop" data-tr="Masaüstü" data-en="Desktop">Desktop</button>
                     </div>
 
                     <div class="tab-content">
@@ -970,7 +994,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
                 
                 <div class="section-header">
                     <h2 class="section-title" data-tr="Sistem Mimarisi" data-en="System Architecture">System Architecture</h2>
@@ -1045,7 +1069,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
                 
                 <div class="section-header">
                     <h2 class="section-title" data-tr="Proje Ekibi" data-en="Project Team">Project Team</h2>
@@ -1087,7 +1111,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
 
                 <div class="section-header">
                     <h2 class="section-title" data-tr="Vireon Masaüstü" data-en="Vireon Desktop">Vireon Desktop</h2>
@@ -1137,7 +1161,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main
                     Menu</button>
 
                 <div class="section-header">
@@ -1224,7 +1248,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main
                     Menu</button>
 
                 <div class="section-header">
@@ -1268,7 +1292,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main
                     Menu</button>
 
                 <div class="section-header">
@@ -1327,7 +1351,7 @@
         </div>
 
         <!-- Neon AI Floating Button -->
-        <button type="button" class="ai-chat-launcher" id="aiLauncher" onclick="toggleAIChat()" aria-label="Open Neon AI assistant" aria-expanded="false" aria-controls="aiChatWindow">
+        <button type="button" class="ai-chat-launcher" id="aiLauncher" data-action="toggle-ai-chat" aria-label="Open Neon AI assistant" aria-expanded="false" aria-controls="aiChatWindow">
             <span class="ai-orbit" aria-hidden="true"></span>
             <span class="ai-icon" aria-hidden="true">💬</span>
         </button>
@@ -1342,7 +1366,7 @@
                         <p class="ai-header-sub" data-tr="Canlı Asistan" data-en="Live Assistant">Canlı Asistan</p>
                     </div>
                 </div>
-                <button type="button" class="ai-close-btn" onclick="toggleAIChat()" aria-label="Close chat">✕</button>
+                <button type="button" class="ai-close-btn" data-action="toggle-ai-chat" aria-label="Close chat">✕</button>
             </div>
             <div class="ai-chat-body" id="aiChatBody">
                 <div class="ai-message bot">
@@ -1350,8 +1374,8 @@
                 </div>
             </div>
             <div class="ai-chat-footer">
-                <input type="text" id="floatingAiInput" class="ai-input" placeholder="Mesajınızı yazın..." autocomplete="off" onkeydown="if(event.key === 'Enter') { event.preventDefault(); sendAIMessage(); }">
-                <button type="button" class="ai-send-btn" onclick="sendAIMessage()" aria-label="Send message">➤</button>
+                <input type="text" id="floatingAiInput" class="ai-input" placeholder="Mesajınızı yazın..." autocomplete="off" data-enter-action="send-floating-ai-message">
+                <button type="button" class="ai-send-btn" data-action="send-floating-ai-message" aria-label="Send message">➤</button>
             </div>
         </div>
 

@@ -19,7 +19,7 @@ function showToast(message, type = 'info') {
     toast.innerHTML = `
         <span class="toast-icon">${icon}</span>
         <span class="toast-message">${message}</span>
-        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+        <button class="toast-close" data-action="close-toast">×</button>
     `;
     
     toastContainer.appendChild(toast);
@@ -36,6 +36,9 @@ function createToastContainer() {
     const container = document.createElement('div');
     container.id = 'toastContainer';
     container.className = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    container.setAttribute('aria-atomic', 'false');
+    container.setAttribute('role', 'status');
     document.body.appendChild(container);
     return container;
 }
@@ -109,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
        }
 
        initNavigation();
+       initSidebarNavigation();
        initInteractions();
        console.log("NEON AI: Systems Initialized Successfully");
    } catch (e) {
@@ -116,18 +120,103 @@ document.addEventListener('DOMContentLoaded', () => {
    }
 });
 
+// ========== CENTRALIZED EVENT DELEGATION ==========
+document.addEventListener('click', function(e) {
+   const el = e.target.closest('[data-action]');
+   if (!el) return;
+   const action = el.getAttribute('data-action');
+   const actionFn = actionHandlers[action];
+   if (actionFn) actionFn(el, e);
+});
+
+document.addEventListener('submit', function(e) {
+   const form = e.target.closest('[data-action]');
+   if (!form) return;
+   const action = form.getAttribute('data-action');
+   const actionFn = actionHandlers[action];
+   if (actionFn) { e.preventDefault(); actionFn(form, e); }
+});
+
+document.addEventListener('keydown', function(e) {
+   if (e.key !== 'Enter') return;
+   const el = e.target.closest('[data-enter-action]');
+   if (!el) return;
+   const action = el.getAttribute('data-enter-action');
+   const actionFn = actionHandlers[action];
+   if (actionFn) actionFn(el, e);
+});
+
+const actionHandlers = {};
+
+function registerAction(name, fn) {
+   actionHandlers[name] = fn;
+}
+
+// Click/action handlers registration
+(function registerAllActions() {
+   // Toast
+   registerAction('close-toast', (el) => el.parentElement.remove());
+
+   // Language & Theme
+   registerAction('switch-lang', (el) => switchLang(el.getAttribute('data-lang')));
+   registerAction('toggle-theme', () => toggleTheme());
+
+   // Navigation
+   registerAction('back-to-menu', () => backToMenu());
+   registerAction('logout', () => handleLogout());
+   registerAction('show-section', (el) => showSection(el.getAttribute('data-section')));
+   registerAction('scroll-to-section', (el) => scrollToSection(el.getAttribute('data-section')));
+
+   // Modals
+   registerAction('close-login-modal', () => closeLoginModal());
+   registerAction('open-register-modal', () => openRegisterModal());
+   registerAction('close-register-modal', () => closeRegisterModal());
+   registerAction('open-login-from-register', () => openLoginModalFromRegister());
+   registerAction('open-forgot-password-modal', () => openForgotPasswordModal());
+   registerAction('close-forgot-password-modal', () => closeForgotPasswordModal());
+   registerAction('open-login-from-forgot', () => openLoginModalFromForgot());
+
+   // Forms
+  registerAction('submit-login', (form, e) => handleLogin(e, form));
+  registerAction('submit-register', (form, e) => handleRegister(e, form));
+  registerAction('submit-forgot-password', (form, e) => handleForgotPassword(e));
+
+   // Dashboard
+   registerAction('switch-dash-section', (el) => switchDashSection(el.getAttribute('data-dash') || el.dataset.dash));
+   registerAction('deposit-request', () => handleDepositRequest());
+   registerAction('send-transfer', () => handleSendTransfer());
+   registerAction('save-profile', () => handleProfileSave());
+   registerAction('change-password', () => handlePasswordChange());
+   registerAction('toggle-limit-edit', () => toggleLimitEdit());
+   registerAction('update-limit', () => handleUpdateLimit());
+   registerAction('refresh-qr-code', () => refreshQrCode());
+   registerAction('refresh-database-stats', () => fetchDatabaseStats());
+
+   // Tabs
+   registerAction('switch-tab', (el) => switchTab(el, el.getAttribute('data-tab')));
+
+   // AI Chat
+   registerAction('toggle-ai-chat', () => toggleAIChat());
+   registerAction('send-ai-message', () => sendAiMessage());
+   registerAction('send-floating-ai-message', () => sendAIMessage());
+})();
+
 function initNavigation() {
-   document.querySelectorAll('.menu-item').forEach(item => {
-      item.addEventListener('click', function() {
-         const onclick = this.getAttribute('onclick');
-         if (onclick) {
-            const match = onclick.match(/scrollToSection\('([^']+)'\)/);
-            if (match && match[1]) {
-               scrollToSection(match[1]);
+   // Main menu items - event delegation for better performance
+   const menuGrid = document.getElementById('menuGrid');
+   if (menuGrid) {
+      menuGrid.addEventListener('click', (e) => {
+         const button = e.target.closest('.menu-item');
+         if (button) {
+            const section = button.getAttribute('data-section');
+            if (section) {
+               scrollToSection(section);
             }
          }
       });
-   });
+   }
+   
+   console.log('Vireon Event System: Active');
 }
 
 function smoothScrollTo(id) {
@@ -460,7 +549,7 @@ function handleForgotPassword(e) {
 }
 
 // ========== AUTHENTICATION ==========
-async function handleLogin(event) {
+async function handleLogin(event, form) {
     event.preventDefault();
     
     const email = getEl('loginEmail')?.value?.trim();
@@ -472,7 +561,7 @@ async function handleLogin(event) {
         return;
     }
     
-    const btn = event.target.querySelector('button[type="submit"]');
+    const btn = (form || event.target).querySelector('button[type="submit"]');
     const originalText = btn ? btn.innerHTML : '';
     if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
     
@@ -508,7 +597,7 @@ async function handleLogin(event) {
     }
 }
 
-async function handleRegister(event) {
+async function handleRegister(event, form) {
     event.preventDefault();
     const lang = window.currentLang || 'en';
     
@@ -536,7 +625,7 @@ async function handleRegister(event) {
     const name = nameParts[0] || 'User';
     const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : name;
     
-    const btn = event.target.querySelector('button[type="submit"]');
+    const btn = (form || event.target).querySelector('button[type="submit"]');
     const originalText = btn ? btn.innerHTML : '';
     if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
     
@@ -634,9 +723,13 @@ function escapeHtml(s) {
 
 // ========== DASHBOARD NAVIGATION ==========
 function switchDashSection(targetId) {
-   document.querySelectorAll('.sidebar-menu li').forEach(li => {
-      const dash = li.getAttribute('data-dash');
-      li.classList.toggle('active', dash === targetId);
+   document.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
+      const dash = btn.getAttribute('data-dash');
+      if (dash === targetId) {
+         btn.classList.add('active');
+      } else {
+         btn.classList.remove('active');
+      }
    });
 
    document.querySelectorAll('.dash-sub-section').forEach(sec => sec.classList.remove('active'));
@@ -647,6 +740,22 @@ function switchDashSection(targetId) {
    if (targetId === 'dash-db-explorer') fetchDatabaseStats();
    if (targetId === 'dash-account-info') loadAccountInfo();
    if (targetId === 'dash-admin') loadAdminPanel();
+}
+
+// Initialize sidebar navigation
+function initSidebarNavigation() {
+   const sidebar = document.querySelector('.sidebar-menu');
+   if (sidebar) {
+      sidebar.addEventListener('click', (e) => {
+         const button = e.target.closest('.sidebar-menu-btn');
+         if (button) {
+            const targetSection = button.getAttribute('data-dash');
+            if (targetSection) {
+               switchDashSection(targetSection);
+            }
+         }
+      });
+   }
 }
 
 // ========== DASHBOARD DATA ==========
@@ -1065,43 +1174,6 @@ async function handlePasswordChange() {
       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
    }
 }
-// ========== DASHBOARD ACCOUNT INFO ==========
-async function loadAccountInfo() {
-    if (!currentUser) return;
-    
-    // Yükleme sırasında spinner veya - gösterelim
-    const setValue = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
-    
-    try {
-        setValue('infoAccountNumber', currentUser.accountNumber || '-');
-        setValue('infoFullName', (currentUser.name + ' ' + (currentUser.surname || '')).trim());
-        setValue('infoEmail', currentUser.email || '-');
-        
-        if (currentUser.createdAt) {
-            const d = new Date(currentUser.createdAt);
-            setValue('infoCreatedAt', d.toLocaleDateString('tr-TR'));
-        } else {
-            setValue('infoCreatedAt', '-');
-        }
-
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
-        const userAccount = accounts.find(a => a.userId === currentUser.id);
-        
-        if (userAccount) {
-            setValue('infoBalance', '₺' + userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
-            setValue('infoCurrency', userAccount.currency || 'TRY');
-            
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
-            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
-            setValue('infoTxCount', userTxs.length.toString());
-        }
-    } catch (err) {
-        console.error('Account Info Error:', err);
-    }
-}
-
 // ========== TRANSFERS ==========
 async function handleSendTransfer() {
     if (!currentUser || !currentUser.accountNumber) {
