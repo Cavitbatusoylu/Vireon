@@ -24,7 +24,67 @@ https://templatemo.com/tm-603-nexaverse
 	--glass-border: rgba(255, 255, 255, 0.08);
 	--glow-cyan: rgba(0, 180, 216, 0.4);
 	--glow-magenta: rgba(30, 58, 138, 0.4);
+	--focus-ring: 0 0 0 3px rgba(0, 180, 216, 0.4);
+	--focus-ring-offset: 2px;
     scroll-behavior: smooth;
+}
+
+/* ========== GLOBAL FOCUS MANAGEMENT ========== */
+/* Remove default outline and use custom focus-visible */
+*:focus {
+	outline: none;
+}
+
+/* Modern focus-visible standard for keyboard navigation */
+*:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: var(--focus-ring-offset);
+	box-shadow: var(--focus-ring);
+	border-radius: 4px;
+}
+
+/* Button-specific focus styles */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 2px;
+	box-shadow: var(--focus-ring);
+}
+
+/* Input-specific focus styles */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 1px;
+	box-shadow: var(--focus-ring);
+}
+
+/* ========== REDUCED MOTION SUPPORT ========== */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+	
+	.orb {
+		animation: none !important;
+	}
+	
+	.loader-ring::before,
+	.loader-ring::after {
+		animation: none !important;
+	}
+	
+	.menu-item {
+		animation: none !important;
+		transition: none !important;
+	}
 }
 
 body {
@@ -354,6 +414,12 @@ body.dashboard-active .container {
 	opacity: 0;
 	transform: translateY(30px) scale(0.9);
 	transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	/* Button reset for semantic HTML */
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+	text-align: center;
+	width: 100%;
 }
 
 /* Glossy effect overlay */
@@ -1440,10 +1506,11 @@ body.dashboard-active .container {
 
 /* About Section */
 .about-content {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 40px;
+	display: flex;
+	flex-direction: column;
 	align-items: center;
+	justify-content: center;
+	gap: 20px;
 }
 
 .about-text h3 {
@@ -2816,6 +2883,11 @@ body.dashboard-active .container {
 }
 
 .sidebar-menu li {
+    margin-bottom: 4px;
+}
+
+.sidebar-menu-btn {
+    width: 100%;
     padding: 12px 18px;
     border-radius: 15px;
     display: flex;
@@ -2824,16 +2896,20 @@ body.dashboard-active .container {
     cursor: pointer;
     transition: all 0.3s ease;
     color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 4px;
     font-size: 13px;
+    /* Button reset */
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    text-align: left;
 }
 
-.sidebar-menu li:hover {
+.sidebar-menu-btn:hover {
     background: rgba(255, 255, 255, 0.05);
     color: #fff;
 }
 
-.sidebar-menu li.active {
+.sidebar-menu-btn.active {
     background: linear-gradient(90deg, rgba(0, 180, 216, 0.15), transparent);
     color: var(--primary);
     border-left: 3px solid var(--primary);
@@ -4011,6 +4087,7 @@ body.dashboard-active .container {
     flex-direction: column;
     gap: 12px;
     pointer-events: none;
+    /* Accessibility: announce toasts to screen readers */
 }
 
 .toast {
@@ -4813,4 +4890,32 @@ body.admin-mode ::-webkit-scrollbar-thumb {
 body.admin-mode #adminMenuItem {
     background: rgba(220, 38, 38, 0.08);
     border-left: 3px solid var(--admin-red);
+}
+
+/* ========== ABOUT SECTION TEXT CENTERING ========== */
+.about-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	gap: 0;
+}
+
+.about-text {
+	text-align: center;
+	max-width: 900px;
+	margin: 0 auto;
+	width: 100%;
+}
+
+.about-text h3 {
+	text-align: center;
+	margin-bottom: 1.5rem;
+}
+
+.about-text p {
+	text-align: center;
+	margin-bottom: 1.2rem;
+	line-height: 1.8;
 }
