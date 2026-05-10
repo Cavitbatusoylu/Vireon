@@ -585,6 +585,25 @@ function updateNavbarForLoggedInUser() {
     if (loginBtn) loginBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
     if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
+
+    // Admin menü öğesini göster/gizle
+    const adminMenu = getEl('adminMenuItem');
+    if (adminMenu) {
+        adminMenu.style.display = (currentUser && currentUser.role === 'Admin') ? 'flex' : 'none';
+    }
+
+    // Admin kırmızı tema
+    if (currentUser && currentUser.role === 'Admin') {
+        document.body.classList.add('admin-mode');
+    } else {
+        document.body.classList.remove('admin-mode');
+    }
+
+    // DB Explorer'da kullanıcı tablosunu sadece admin görsün
+    const dbUsersCard = document.querySelector('#dash-db-explorer .db-preview-card');
+    if (dbUsersCard) {
+        dbUsersCard.style.display = (currentUser && currentUser.role === 'Admin') ? 'block' : 'none';
+    }
 }
 
 function updateNavbarForLoggedOutUser() {
@@ -601,6 +620,7 @@ function handleLogout() {
     const lang = window.currentLang || 'en';
     currentUser = null;
     localStorage.removeItem('vireonUser');
+    document.body.classList.remove('admin-mode');
     showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
     updateNavbarForLoggedOutUser();
     backToMenu();
@@ -626,6 +646,7 @@ function switchDashSection(targetId) {
    if (targetId === 'dash-qr') refreshQrCode();
    if (targetId === 'dash-db-explorer') fetchDatabaseStats();
    if (targetId === 'dash-account-info') loadAccountInfo();
+   if (targetId === 'dash-admin') loadAdminPanel();
 }
 
 // ========== DASHBOARD DATA ==========
@@ -751,6 +772,8 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
 
 async function fetchDatabaseStats() {
     try {
+        const isAdmin = currentUser && currentUser.role === 'Admin';
+        
         const [users, accounts, transactions] = await Promise.all([
             fetch('/api/users').then(r => r.json()),
             fetch('/api/accounts').then(r => r.json()),
@@ -766,19 +789,27 @@ async function fetchDatabaseStats() {
             `;
         }
 
-        const tbody = document.querySelector('#dbUsersTable tbody');
-        if (tbody) {
-            tbody.innerHTML = users.slice(0, 10).map(u => {
-                const acc = accounts.find(a => a.userId === u.id);
-                return `
-                    <tr>
-                        <td>${u.id}</td>
-                        <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
-                        <td>${u.accountNumber || '-'}</td>
-                        <td class="bal-text">₺${acc ? acc.balance.toLocaleString() : '0'}</td>
-                    </tr>
-                `;
-            }).join('');
+        // Kullanıcı tablosunu sadece admin görebilir
+        const userTableParent = document.querySelector('#dbUsersTable')?.closest('.db-preview-card');
+        if (userTableParent) {
+            userTableParent.style.display = isAdmin ? 'block' : 'none';
+        }
+
+        if (isAdmin) {
+            const tbody = document.querySelector('#dbUsersTable tbody');
+            if (tbody) {
+                tbody.innerHTML = users.slice(0, 10).map(u => {
+                    const acc = accounts.find(a => a.userId === u.id);
+                    return `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
+                            <td>${u.accountNumber || '-'}</td>
+                            <td class="bal-text">₺${acc ? acc.balance.toLocaleString() : '0'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
     } catch (e) { console.error('DB Explorer error:', e); }
 }
@@ -1152,16 +1183,26 @@ function updateTransactionList(txs, accountId, listElement) {
    }
    const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing';
    const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming';
+   const depositLabel = lang === 'tr' ? 'Para Yatırma' : 'Deposit';
    listElement.innerHTML = txs.slice().reverse().map(tx => {
-      const isOut = tx.senderAccountId === accountId;
-      const amountClass = isOut ? 'tx-out' : 'tx-in';
-      const symbol = isOut ? '-' : '+';
-      const statusBadge = tx.status ? `<span class="tx-status tx-status-${tx.status}">${tx.status}</span>` : '';
+      const isDeposit = tx.senderAccountId === tx.receiverAccountId;
+      const isOut = !isDeposit && tx.senderAccountId === accountId;
+      const amountClass = isDeposit ? 'tx-in' : (isOut ? 'tx-out' : 'tx-in');
+      const symbol = isDeposit ? '+' : (isOut ? '-' : '+');
+      const label = isDeposit ? depositLabel : (isOut ? outLabel : inLabel);
+      const icon = isDeposit ? '💰' : (isOut ? '📤' : '📥');
+      const statusText = typeof tx.status === 'number' ? ['Pending','Completed','Failed','Cancelled'][tx.status] || '' : (tx.status || '');
+      const statusBadge = statusText ? `<span class="tx-status tx-status-${statusText}">${statusText}</span>` : '';
+      const desc = tx.description ? `<span class="tx-detail">${escapeHtml(tx.description)}</span>` : '';
       return `
             <div class="tx-item">
                 <div class="tx-info">
-                    <span class="tx-date">${new Date(tx.date).toLocaleDateString('tr-TR')}</span>
-                    <span class="tx-desc">${isOut ? outLabel : inLabel}</span>
+                    <span class="tx-icon">${icon}</span>
+                    <div class="tx-meta">
+                        <span class="tx-desc">${label}</span>
+                        ${desc}
+                        <span class="tx-date">${new Date(tx.date).toLocaleDateString('tr-TR', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
                     ${statusBadge}
                 </div>
                 <div class="tx-amount ${amountClass}">${symbol}₺${tx.amount.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</div>
@@ -1332,5 +1373,64 @@ async function loadAccountInfo() {
         }
     } catch (err) {
         console.error('Account info error:', err);
+    }
+}
+
+// ========== ADMIN PANEL ==========
+async function loadAdminPanel() {
+    if (!currentUser || currentUser.role !== 'Admin') return;
+
+    try {
+        // 1. Admin Stats
+        const statsRes = await fetch('/api/users/admin-stats');
+        const stats = await statsRes.json();
+
+        const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
+        setVal('adminTotalUsers', stats.totalUsers);
+        setVal('adminTotalAccounts', stats.totalAccounts);
+        setVal('adminTotalTx', stats.totalTransactions);
+        setVal('adminTotalBalance', '₺' + stats.totalBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+        setVal('adminTotalFraud', stats.totalFraudLogs);
+        setVal('adminTotalLedger', stats.totalLedgerEntries);
+
+        // 2. All Users
+        const usersRes = await fetch('/api/users/admin-users');
+        const users = await usersRes.json();
+        const usersBody = getEl('adminUsersBody');
+        if (usersBody) {
+            usersBody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
+                    <td>${escapeHtml(u.email)}</td>
+                    <td>${u.accountNumber || '-'}</td>
+                    <td class="bal-text">₺${(u.balance || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td>${u.transactionCount || 0}</td>
+                    <td><span class="role-badge role-${(u.role || 'User').toLowerCase()}">${u.role || 'User'}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // 3. All Transactions
+        const txRes = await fetch('/api/users/admin-transactions');
+        const txs = await txRes.json();
+        const txBody = getEl('adminTxBody');
+        if (txBody) {
+            txBody.innerHTML = txs.map(tx => `
+                <tr>
+                    <td>${tx.id}</td>
+                    <td><span class="type-badge type-${tx.type.toLowerCase()}">${tx.type}</span></td>
+                    <td>${escapeHtml(tx.senderName || tx.senderAccount || '-')}</td>
+                    <td>${escapeHtml(tx.receiverName || tx.receiverAccount || '-')}</td>
+                    <td class="bal-text">₺${tx.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td>${escapeHtml(tx.description || '-')}</td>
+                    <td>${new Date(tx.date).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                    <td><span class="tx-status tx-status-${tx.status}">${tx.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+    } catch (err) {
+        console.error('Admin panel error:', err);
     }
 }
