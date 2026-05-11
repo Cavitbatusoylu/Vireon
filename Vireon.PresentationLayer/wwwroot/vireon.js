@@ -370,33 +370,52 @@ function smoothScrollTo(id) {
     }
 }
 
-function scrollToSection(id) {
-    console.log('scrollToSection called with:', id);
-    
-    document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
+function ensureLandingLayout() {
+    // Hide full-screen app sections (like dashboard)
+    document.querySelectorAll('.content-section').forEach(sec => {
         sec.classList.remove('active');
         sec.style.display = 'none';
         sec.style.visibility = 'hidden';
+    });
+    
+    // Show all landing sections on the home page
+    document.querySelectorAll('.landing-content-section').forEach(sec => {
+        sec.classList.add('active');
+        sec.style.display = 'block';
+        sec.style.visibility = 'visible';
+        sec.style.opacity = '1';
     });
 
     const menuGrid = getEl('menuGrid');
     const mainHeader = getEl('mainHeader');
     const mainFooter = getEl('mainFooter');
+    const contentArea = getEl('contentArea');
 
-    if (menuGrid) { menuGrid.style.display = 'none'; menuGrid.style.visibility = 'hidden'; }
-    if (mainHeader) { mainHeader.style.display = 'none'; mainHeader.style.visibility = 'hidden'; }
-    if (mainFooter) { mainFooter.style.display = 'none'; mainFooter.style.visibility = 'hidden'; }
+    // Restore visibility of landing components
+    if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
+    if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
+    if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
+    if (contentArea) contentArea.style.display = 'block';
 
+    document.body.classList.remove('dashboard-active');
+    
+    const backBtn = getEl('backToHomeBtn');
+    if (backBtn) backBtn.style.display = 'none';
+}
+
+function scrollToSection(id) {
+    console.log('scrollToSection called with:', id);
+    
+    // Ensure all sections are visible first (single-page behavior)
+    ensureLandingLayout();
+
+    // Scroll to the target section
     const el = document.getElementById(id);
     if (el) {
-        el.classList.add('active');
-        el.style.display = 'block';
-        el.style.opacity = '1';
-        el.style.visibility = 'visible';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        smoothScrollTo(id);
         if (id === 'section-introduction') setTimeout(animateStats, 500);
     } else {
-        backToMenu();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -539,36 +558,7 @@ function showSection(sectionId) {
 }
 
 function backToMenu() {
-   document.querySelectorAll('.content-section').forEach(sec => {
-      sec.classList.remove('active');
-      sec.style.display = 'none';
-      sec.style.visibility = 'hidden';
-   });
-   
-   document.querySelectorAll('.landing-content-section').forEach(sec => {
-      sec.classList.add('active');
-      sec.style.display = 'block';
-      sec.style.visibility = 'visible';
-      sec.style.opacity = '1';
-   });
-
-   const menuGrid = getEl('menuGrid');
-   const mainHeader = getEl('mainHeader');
-   const mainFooter = getEl('mainFooter');
-
-   if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
-   if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
-   if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
-
-   // Ensure overall layout wrapper is visible
-   const contentArea = getEl('contentArea');
-   if (contentArea) contentArea.style.display = 'block';
-
-   document.body.classList.remove('dashboard-active');
-   
-   const backBtn = getEl('backToHomeBtn');
-   if (backBtn) backBtn.style.display = 'none';
-   
+   ensureLandingLayout();
    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
