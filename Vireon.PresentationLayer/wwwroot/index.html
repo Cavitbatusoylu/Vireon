@@ -32,6 +32,7 @@
 </head>
 
 <body>
+    <a class="skip-link" href="#contentArea" data-tr="İçeriğe geç" data-en="Skip to content">Skip to content</a>
     <!-- Loading Screen -->
     <div class="loading-screen show" id="loadingScreen">
         <img src="images/vireon-logo-transparent-new.png" alt="Vireon Logo" class="loading-logo">
@@ -112,15 +113,17 @@
                 </div>
                 <div class="form-group">
                     <label data-tr="Şifre" data-en="Password">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                    <div class="password-group">
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <button type="button" class="toggle-password" data-action="toggle-password-visibility" data-target="loginPassword">👁️‍🗨️</button>
+                    </div>
                 </div>
                 <div class="form-row">
                     <label class="checkbox-label">
                         <input type="checkbox" id="rememberMe">
                         <span data-tr="Beni Hatırla" data-en="Remember Me">Remember Me</span>
                     </label>
-                    <a href="javascript:void(0)" data-action="open-forgot-password-modal" role="button" class="forgot-link" data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot
-                        Password?</a>
+                    <a href="javascript:void(0)" data-action="open-forgot-password-modal" role="button" class="forgot-link" data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot Password?</a>
                 </div>
                 <button type="submit" class="login-submit-btn" data-tr="Giriş Yap" data-en="Sign In">Sign In</button>
             </form>
@@ -151,11 +154,17 @@
                 </div>
                 <div class="form-group">
                     <label data-tr="Şifre" data-en="Password">Password</label>
-                    <input type="password" id="registerPassword" placeholder="••••••••" required>
+                    <div class="password-group">
+                        <input type="password" id="registerPassword" placeholder="••••••••" required>
+                        <button type="button" class="toggle-password" data-action="toggle-password-visibility" data-target="registerPassword">👁️‍🗨️</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label data-tr="Şifre Tekrar" data-en="Confirm Password">Confirm Password</label>
-                    <input type="password" id="registerConfirmPassword" placeholder="••••••••" required>
+                    <div class="password-group">
+                        <input type="password" id="registerConfirmPassword" placeholder="••••••••" required>
+                        <button type="button" class="toggle-password" data-action="toggle-password-visibility" data-target="registerConfirmPassword">👁️‍🗨️</button>
+                    </div>
                 </div>
                 <button type="submit" class="login-submit-btn" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</button>
             </form>
@@ -198,7 +207,13 @@
                 
             </div>
             <h1 class="brand-name">Vireon</h1>
+            <p class="header-kicker" data-tr="Yeni nesil dijital bankacılık vitrini" data-en="Next-gen digital banking showcase">Next-gen digital banking showcase</p>
             <p class="tagline">IMMUTABLE LEDGER</p>
+            <p class="header-summary"
+               data-tr="Sunum katmanını sade, güven veren ve mobilde daha dengeli bir deneyimle yeniden düzenlenmiş modern bankacılık arayüzü."
+               data-en="A refined banking interface with clearer storytelling, stronger trust signals, and a more balanced mobile experience.">
+                A refined banking interface with clearer storytelling, stronger trust signals, and a more balanced mobile experience.
+            </p>
         </div>
 
         <!-- Menu Grid (Compact Version) -->
@@ -206,26 +221,45 @@
             <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-introduction" aria-label="Go to Introduction section">
                 <div class="menu-badge" aria-hidden="true">IN</div>
                 <div class="menu-title" data-tr="Tanıtım" data-en="Introduction">Introduction</div>
+                <div class="menu-desc" data-tr="Vireon vizyonu, temel değerler ve ürün anlatısı." data-en="Vireon's vision, core values, and product story.">Vireon's vision, core values, and product story.</div>
             </button>
             <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-components" aria-label="Go to Components section">
                 <div class="menu-badge" aria-hidden="true">SV</div>
                 <div class="menu-title" data-tr="Bileşenler" data-en="Components">Components</div>
+                <div class="menu-desc" data-tr="Backend, veritabanı ve masaüstü modüllerinin özeti." data-en="Overview of backend, database, and desktop modules.">Overview of backend, database, and desktop modules.</div>
             </button>
             <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-architecture" aria-label="Go to Architecture section">
                 <div class="menu-badge" aria-hidden="true">AR</div>
                 <div class="menu-title" data-tr="Mimari" data-en="Architecture">Architecture</div>
+                <div class="menu-desc" data-tr="Katmanlar, veri akışı ve güvenlik prensipleri." data-en="Layers, data flow, and security principles.">Layers, data flow, and security principles.</div>
             </button>
             <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-team" aria-label="Go to Team section">
                 <div class="menu-badge" aria-hidden="true">TM</div>
                 <div class="menu-title" data-tr="Ekip" data-en="Team">Team</div>
+                <div class="menu-desc" data-tr="Projeye katkı veren ekip ve roller." data-en="The team behind the project and their roles.">The team behind the project and their roles.</div>
             </button>
             <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-about" aria-label="Go to About section">
                 <div class="menu-badge" aria-hidden="true">AB</div>
                 <div class="menu-title" data-tr="Hakkında" data-en="About">About</div>
+                <div class="menu-desc" data-tr="Projenin kapsamı, amacı ve akademik bağlamı." data-en="Scope, goals, and academic context of the project.">Scope, goals, and academic context of the project.</div>
             </button>
             <button type="button" class="menu-item initial-load" data-action="scroll-to-section" data-section="section-contact" aria-label="Go to Contact section">
                 <div class="menu-badge" aria-hidden="true">CT</div>
                 <div class="menu-title" data-tr="İletişim" data-en="Contact">Contact</div>
+                <div class="menu-desc" data-tr="Ekip ile iletişim ve proje hakkında geri bildirim." data-en="Reach the team and share feedback about the project.">Reach the team and share feedback about the project.</div>
+            </button>
+
+            <!-- ROLE-BASED DASHBOARD ENTRY CARDS -->
+            <button type="button" class="menu-item dashboard-card" id="landingDashboardCard" style="display:none;" data-action="show-section" data-section="dashboard">
+                <div class="menu-badge" style="background: linear-gradient(135deg, rgba(0, 180, 216, 0.3), rgba(30, 58, 138, 0.4));" aria-hidden="true">DB</div>
+                <div class="menu-title" data-tr="Hesap Paneli" data-en="Dashboard">Dashboard</div>
+                <div class="menu-desc" data-tr="Hesabınızı yönetin, bakiye ve işlemleri görün." data-en="Manage your account, view balance and transactions.">Manage your account, view balance and transactions.</div>
+            </button>
+
+            <button type="button" class="menu-item admin-card" id="landingAdminCard" style="display:none;" data-action="show-section" data-section="dashboard">
+                <div class="menu-badge" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(153, 27, 27, 0.4));" aria-hidden="true">🛡️</div>
+                <div class="menu-title" data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</div>
+                <div class="menu-desc" data-tr="Sistem yönetimi, kullanıcı denetimi ve güvenlik merkezi." data-en="System management, user auditing, and security center.">System management, user auditing, and security center.</div>
             </button>
         </div>
 
@@ -246,75 +280,122 @@
                                 </div>
                             </div>
                             <nav class="sidebar-nav">
-                                <ul class="sidebar-menu" role="navigation" aria-label="Dashboard navigation">
+                                <!-- ========== USER SIDEBAR MENU ========== -->
+                                <ul class="sidebar-menu sidebar-menu-user" id="userSidebarMenu" role="navigation" aria-label="User dashboard navigation">
+                                    <li class="sidebar-category" data-tr="FİNANS" data-en="FINANCE">FINANCE</li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn active" data-dash="dash-overview" data-action="switch-dash-section" aria-label="Overview section">
+                                        <button type="button" class="sidebar-menu-btn active" data-dash="dash-overview" data-action="switch-dash-section" aria-label="Overview">
                                             <span class="sidebar-icon" aria-hidden="true">📊</span>
                                             <span data-tr="Genel Bakış" data-en="Overview">Overview</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-transfers" data-action="switch-dash-section" aria-label="Send Money section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-transfers" data-action="switch-dash-section" aria-label="Send Money">
                                             <span class="sidebar-icon" aria-hidden="true">💸</span>
                                             <span data-tr="Para Gönder" data-en="Send Money">Send Money</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-deposit" data-action="switch-dash-section" aria-label="Deposit section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-deposit" data-action="switch-dash-section" aria-label="Deposit">
                                             <span class="sidebar-icon" aria-hidden="true">💰</span>
                                             <span data-tr="Para Yatır" data-en="Deposit">Deposit</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-qr" data-action="switch-dash-section" aria-label="QR Payment section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-qr" data-action="switch-dash-section" aria-label="QR Payment">
                                             <span class="sidebar-icon" aria-hidden="true">📱</span>
                                             <span data-tr="QR Ödeme" data-en="QR Payment">QR Payment</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-history" data-action="switch-dash-section" aria-label="Transaction History section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-history" data-action="switch-dash-section" aria-label="Transaction History">
                                             <span class="sidebar-icon" aria-hidden="true">📜</span>
                                             <span data-tr="İşlem Geçmişi" data-en="History">History</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-limits" data-action="switch-dash-section" aria-label="Daily Limits section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-limits" data-action="switch-dash-section" aria-label="Daily Limits">
                                             <span class="sidebar-icon" aria-hidden="true">⚡</span>
                                             <span data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</span>
                                         </button>
                                     </li>
+                                    <li class="sidebar-category" data-tr="HESAP" data-en="ACCOUNT">ACCOUNT</li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-db-explorer" data-action="switch-dash-section" aria-label="Database Explorer section">
-                                            <span class="sidebar-icon" aria-hidden="true">🗄️</span>
-                                            <span data-tr="DB Explorer" data-en="DB Explorer">DB Explorer</span>
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-account-info" data-action="switch-dash-section" aria-label="Account Information section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-account-info" data-action="switch-dash-section" aria-label="Account Info">
                                             <span class="sidebar-icon" aria-hidden="true">📋</span>
                                             <span data-tr="Hesap Bilgileri" data-en="Account Info">Account Info</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-ai-coach" data-action="switch-dash-section" aria-label="Neon AI Coach section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-ai-coach" data-action="switch-dash-section" aria-label="Neon AI">
                                             <span class="sidebar-icon" aria-hidden="true">🤖</span>
-                                            <span data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</span>
+                                            <span data-tr="Neon AI" data-en="Neon AI">Neon AI</span>
                                         </button>
                                     </li>
+                                    <li class="sidebar-category" data-tr="AYARLAR" data-en="SETTINGS">SETTINGS</li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-profile" data-action="switch-dash-section" aria-label="Profile Settings section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-profile" data-action="switch-dash-section" aria-label="Profile">
                                             <span class="sidebar-icon" aria-hidden="true">👤</span>
                                             <span data-tr="Profil Ayarları" data-en="Profile">Profile</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-password" data-action="switch-dash-section" aria-label="Change Password section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-password" data-action="switch-dash-section" aria-label="Change Password">
+                                            <span class="sidebar-icon" aria-hidden="true">🔐</span>
+                                            <span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span>
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <!-- ========== ADMIN SIDEBAR MENU ========== -->
+                                <ul class="sidebar-menu sidebar-menu-admin" id="adminSidebarMenu" role="navigation" aria-label="Admin dashboard navigation" style="display:none;">
+                                    <li class="sidebar-category admin-cat" data-tr="SİSTEM YÖNETİMİ" data-en="SYSTEM MANAGEMENT">SYSTEM MANAGEMENT</li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn active" data-dash="dash-admin-overview" data-action="switch-dash-section" aria-label="Users Overview">
+                                            <span class="sidebar-icon" aria-hidden="true">📊</span>
+                                            <span data-tr="Kullanıcı Genel Bakış" data-en="Users Overview">Users Overview</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-admin-transactions" data-action="switch-dash-section" aria-label="Transaction Logs">
+                                            <span class="sidebar-icon" aria-hidden="true">📜</span>
+                                            <span data-tr="İşlem Kayıtları" data-en="Transaction Logs">Transaction Logs</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-db-explorer" data-action="switch-dash-section" aria-label="DB Explorer">
+                                            <span class="sidebar-icon" aria-hidden="true">🗄️</span>
+                                            <span data-tr="Veritabanı" data-en="DB Explorer">DB Explorer</span>
+                                        </button>
+                                    </li>
+                                    <li class="sidebar-category admin-cat" data-tr="KULLANICI YÖNETİMİ" data-en="USER MANAGEMENT">USER MANAGEMENT</li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-admin-accounts" data-action="switch-dash-section" aria-label="All Accounts">
+                                            <span class="sidebar-icon" aria-hidden="true">👥</span>
+                                            <span data-tr="Tüm Hesaplar" data-en="All Accounts">All Accounts</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-admin-ai" data-action="switch-dash-section" aria-label="AI Settings">
+                                            <span class="sidebar-icon" aria-hidden="true">🤖</span>
+                                            <span data-tr="AI Ayarları" data-en="Neon AI Settings">Neon AI Settings</span>
+                                        </button>
+                                    </li>
+                                    <li class="sidebar-category admin-cat" data-tr="HESAP & GÜVENLİK" data-en="ACCOUNT & SECURITY">ACCOUNT & SECURITY</li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-profile" data-action="switch-dash-section" aria-label="Profile">
+                                            <span class="sidebar-icon" aria-hidden="true">👤</span>
+                                            <span data-tr="Profil Ayarları" data-en="Profile">Profile</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-password" data-action="switch-dash-section" aria-label="Change Password">
                                             <span class="sidebar-icon" aria-hidden="true">🔐</span>
                                             <span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span>
                                         </button>
                                     </li>
                                     <li>
-                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-admin" data-action="switch-dash-section" id="adminMenuItem" style="display:none;" aria-label="Admin Panel section">
+                                        <button type="button" class="sidebar-menu-btn" data-dash="dash-admin" data-action="switch-dash-section" id="adminMenuItem" aria-label="Admin Panel">
                                             <span class="sidebar-icon" aria-hidden="true">🛡️</span>
                                             <span data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</span>
                                         </button>
@@ -326,6 +407,36 @@
                             </div>
                         </aside>
                         <main class="dash-content">
+                            <div class="dash-overview-bar">
+                                <div class="glass-card dash-welcome-card">
+                                    <div class="dash-welcome-copy">
+                                        <span class="dash-overline" data-tr="Dashboard Workspace" data-en="Dashboard Workspace">Dashboard Workspace</span>
+                                        <h3>
+                                            <span data-tr="Tekrar hoş geldin" data-en="Welcome back">Welcome back</span>,
+                                            <span id="dashWelcomeName">Guest</span>
+                                        </h3>
+                                        <p id="dashWelcomeRole" data-tr="Hesap özeti ve günlük işlem görünürlüğü burada yer alır." data-en="Your account summary and daily activity stay visible here.">Your account summary and daily activity stay visible here.</p>
+                                    </div>
+                                    <div class="dash-welcome-actions">
+                                        <button type="button" class="dash-shortcut-btn" data-action="switch-dash-section" data-dash="dash-transfers" data-tr="Transfer" data-en="Transfer">Transfer</button>
+                                        <button type="button" class="dash-shortcut-btn" data-action="switch-dash-section" data-dash="dash-history" data-tr="Geçmiş" data-en="History">History</button>
+                                    </div>
+                                </div>
+                                <div class="dash-mini-stats">
+                                    <div class="glass-card dash-mini-stat">
+                                        <span class="dash-mini-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                        <strong id="dashQuickTxCount">0</strong>
+                                    </div>
+                                    <div class="glass-card dash-mini-stat">
+                                        <span class="dash-mini-label" data-tr="Gelen Tutar" data-en="Incoming Total">Incoming Total</span>
+                                        <strong id="dashQuickIn">₺0.00</strong>
+                                    </div>
+                                    <div class="glass-card dash-mini-stat">
+                                        <span class="dash-mini-label" data-tr="Giden Tutar" data-en="Outgoing Total">Outgoing Total</span>
+                                        <strong id="dashQuickOut">₺0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="dash-sub-section active" id="dash-overview">
                                 <h2 class="sub-section-title" data-tr="Hesap Özeti" data-en="Account Overview">Account Overview</h2>
                                 <div class="dashboard-grid-modern">
@@ -444,23 +555,60 @@
                                 </div>
                             </div>
 
-                            <div class="dash-sub-section" id="dash-deposit">
-                                <h2 class="sub-section-title" data-tr="Para Yatır" data-en="Deposit Funds">Deposit Funds</h2>
-                                <div class="glass-card transfer-card">
-                                    <div class="transfer-form">
-                                        <div class="form-group">
-                                            <label data-tr="Yatırılacak Tutar (₺)" data-en="Amount (₺)">Amount (₺)</label>
-                                            <input type="number" id="depositAmount" class="neon-input" placeholder="0.00" min="0" step="0.01">
+                            <div class="dash-sub-section" id="dash-transfers">
+                                <h2 class="sub-section-title" data-tr="Para Gönder & Yatır" data-en="Send & Deposit">Send & Deposit</h2>
+                                
+                                <div class="glass-card transfer-combined-card">
+                                    <div class="transfer-tabs">
+                                        <button class="transfer-tab active" data-action="switch-transfer-tab" data-target="tab-send" data-tr="Para Gönder" data-en="Send Money">Send Money</button>
+                                        <button class="transfer-tab" data-action="switch-transfer-tab" data-target="tab-deposit" data-tr="Para Yatır" data-en="Deposit">Deposit</button>
+                                    </div>
+                                    
+                                    <!-- Send Money Tab -->
+                                    <div class="transfer-tab-content active" id="tab-send">
+                                        <div class="transfer-form">
+                                            <div class="quick-recipients" style="margin-bottom: 20px;">
+                                                <p class="dash-hint" data-tr="Hızlı Gönder" data-en="Quick Send">Quick Send</p>
+                                                <div class="recipient-avatars">
+                                                    <div class="avatar-circle" onclick="document.getElementById('transferTarget').value='VR-0002'">AY</div>
+                                                    <div class="avatar-circle" onclick="document.getElementById('transferTarget').value='VR-0003'">BK</div>
+                                                    <div class="avatar-circle" onclick="document.getElementById('transferTarget').value='VR-0004'">ME</div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label data-tr="Alıcı Hesap Numarası" data-en="Receiver Account Number">Receiver Account Number</label>
+                                                <input type="text" id="transferTarget" placeholder="VR-0001" class="neon-input">
+                                            </div>
+                                            <div class="form-group">
+                                                <label data-tr="Miktar (₺)" data-en="Amount (₺)">Amount (₺)</label>
+                                                <input type="number" id="transferAmount" placeholder="0.00" class="neon-input">
+                                            </div>
+                                            <div class="form-group">
+                                                <label data-tr="Açıklama" data-en="Description">Description</label>
+                                                <input type="text" id="transferDesc" placeholder="Optional" class="neon-input">
+                                            </div>
+                                            <button type="button" class="login-submit-btn" data-action="send-transfer" id="sendBtn" data-tr="Gönder" data-en="Send">Send</button>
                                         </div>
-                                        <div class="form-group">
-                                            <label data-tr="Not (isteğe bağlı)" data-en="Note (optional)">Note (optional)</label>
-                                            <input type="text" id="depositNote" class="neon-input" placeholder="">
+                                    </div>
+
+                                    <!-- Deposit Tab -->
+                                    <div class="transfer-tab-content" id="tab-deposit" style="display: none;">
+                                        <div class="transfer-form">
+                                            <div class="form-group">
+                                                <label data-tr="Yatırılacak Tutar (₺)" data-en="Amount (₺)">Amount (₺)</label>
+                                                <input type="number" id="depositAmount" class="neon-input" placeholder="0.00" min="0" step="0.01">
+                                            </div>
+                                            <div class="form-group">
+                                                <label data-tr="Not (isteğe bağlı)" data-en="Note (optional)">Note (optional)</label>
+                                                <input type="text" id="depositNote" class="neon-input" placeholder="">
+                                            </div>
+                                            <button type="button" class="login-submit-btn" data-action="deposit-request" data-tr="Yatırım talebi oluştur" data-en="Submit deposit request">Submit deposit request</button>
+                                            <p class="dash-hint" data-tr="Bu işlem demo modundadır; gerçek ödeme altyapısı bağlı değildir." data-en="Demo only — no real payment rail connected.">Demo only — no real payment rail connected.</p>
                                         </div>
-                                        <button type="button" class="login-submit-btn" data-action="deposit-request" data-tr="Yatırım talebi oluştur" data-en="Submit deposit request">Submit deposit request</button>
-                                        <p class="dash-hint" data-tr="Bu işlem demo modundadır; gerçek ödeme altyapısı bağlı değildir." data-en="Demo only — no real payment rail connected.">Demo only — no real payment rail connected.</p>
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="dash-sub-section" id="dash-qr">
                                 <h2 class="sub-section-title" data-tr="QR ile Ödeme" data-en="QR Payment">QR Payment</h2>
                                 <div class="glass-card qr-card">
@@ -470,26 +618,6 @@
                                     </div>
                                     <p class="qr-meta"><span data-tr="Hesap:" data-en="Account:">Account:</span> <span id="qrAccountLabel">-</span></p>
                                     <button type="button" class="login-submit-btn" data-action="refresh-qr-code" data-tr="QR yenile" data-en="Refresh QR">Refresh QR</button>
-                                </div>
-                            </div>
-                            <div class="dash-sub-section" id="dash-transfers">
-                                <h2 class="sub-section-title" data-tr="Para Gönder" data-en="Send Money">Send Money</h2>
-                                <div class="glass-card transfer-card">
-                                    <div class="transfer-form">
-                                        <div class="form-group">
-                                            <label data-tr="Alıcı Hesap Numarası" data-en="Receiver Account Number">Receiver Account Number</label>
-                                            <input type="text" id="transferTarget" placeholder="VR-0001" class="neon-input">
-                                        </div>
-                                        <div class="form-group">
-                                            <label data-tr="Miktar (₺)" data-en="Amount (₺)">Amount (₺)</label>
-                                            <input type="number" id="transferAmount" placeholder="0.00" class="neon-input">
-                                        </div>
-                                        <div class="form-group">
-                                            <label data-tr="Açıklama" data-en="Description">Description</label>
-                                            <input type="text" id="transferDesc" placeholder="Optional" class="neon-input">
-                                        </div>
-                                        <button type="button" class="login-submit-btn" data-action="send-transfer" id="sendBtn" data-tr="Gönder" data-en="Send">Send</button>
-                                    </div>
                                 </div>
                             </div>
                             <div class="dash-sub-section" id="dash-profile">
@@ -563,6 +691,266 @@
                                 <div class="dash-card transactions-card">
                                     <div class="tx-list" id="fullTransactionHistory">
                                         <p data-tr="Henüz işlem bulunamadı." data-en="No transactions found.">No transactions found.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========== ADMIN: USERS OVERVIEW ========== -->
+                            <div class="dash-sub-section" id="dash-admin-overview">
+                                <h2 class="sub-section-title" data-tr="📊 Kullanıcı Genel Bakış" data-en="📊 Users Overview">📊 Users Overview</h2>
+                                <div class="admin-stats-grid" id="adminOverviewStatsGrid">
+                                    <div class="glass-card admin-stat-card accent-cyan">
+                                        <span class="admin-stat-icon">👥</span>
+                                        <span class="admin-stat-value" id="aoTotalUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Kullanıcı" data-en="Total Users">Total Users</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-green">
+                                        <span class="admin-stat-icon">✅</span>
+                                        <span class="admin-stat-value" id="aoActiveUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Aktif Kullanıcı" data-en="Active Users">Active Users</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-blue">
+                                        <span class="admin-stat-icon">🟢</span>
+                                        <span class="admin-stat-value" id="aoOnlineUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Çevrimiçi" data-en="Online Now">Online Now</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-purple">
+                                        <span class="admin-stat-icon">🆕</span>
+                                        <span class="admin-stat-value" id="aoNewUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Yeni Kayıt (7g)" data-en="New (7d)">New (7d)</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-amber">
+                                        <span class="admin-stat-icon">💰</span>
+                                        <span class="admin-stat-value" id="aoTotalBalance">₺0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Bakiye" data-en="Total Balance">Total Balance</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-red">
+                                        <span class="admin-stat-icon">📊</span>
+                                        <span class="admin-stat-value" id="aoTotalTx">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                    </div>
+                                </div>
+
+                                <!-- System Activity Feed -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Sistem Özeti" data-en="System Summary">System Summary</h4>
+                                    <div class="admin-summary-grid">
+                                        <div class="summary-item">
+                                            <span class="summary-icon">🚨</span>
+                                            <div class="summary-info">
+                                                <strong id="aoFraudCount">0</strong>
+                                                <span data-tr="Fraud Kayıtları" data-en="Fraud Logs">Fraud Logs</span>
+                                            </div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-icon">📝</span>
+                                            <div class="summary-info">
+                                                <strong id="aoLedgerCount">0</strong>
+                                                <span data-tr="Muhasebe Kayıtları" data-en="Ledger Entries">Ledger Entries</span>
+                                            </div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-icon">🔐</span>
+                                            <div class="summary-info">
+                                                <strong id="aoAdminCount">0</strong>
+                                                <span data-tr="Admin Sayısı" data-en="Admin Count">Admin Count</span>
+                                            </div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <span class="summary-icon">⏱️</span>
+                                            <div class="summary-info">
+                                                <strong id="aoServerUptime">—</strong>
+                                                <span data-tr="Sunucu Durumu" data-en="Server Status">Server Status</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recent Registrations -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Son Kayıt Olan Kullanıcılar" data-en="Recently Registered Users">Recently Registered Users</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="aoRecentUsersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th data-tr="Ad Soyad" data-en="Name">Name</th>
+                                                    <th data-tr="E-posta" data-en="Email">Email</th>
+                                                    <th data-tr="Kayıt Tarihi" data-en="Registered">Registered</th>
+                                                    <th data-tr="Rol" data-en="Role">Role</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="aoRecentUsersBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========== ADMIN: TRANSACTION LOGS ========== -->
+                            <div class="dash-sub-section" id="dash-admin-transactions">
+                                <h2 class="sub-section-title" data-tr="📜 İşlem Kayıtları" data-en="📜 Transaction Logs">📜 Transaction Logs</h2>
+                                
+                                <!-- Search & Filter Bar -->
+                                <div class="glass-card admin-filter-bar">
+                                    <div class="filter-row">
+                                        <div class="filter-group">
+                                            <input type="text" id="adminTxSearch" class="neon-input" placeholder="Search by name, email, account..." data-tr-placeholder="İsim, e-posta, hesap ile ara..." data-en-placeholder="Search by name, email, account...">
+                                        </div>
+                                        <div class="filter-group">
+                                            <select id="adminTxTypeFilter" class="neon-input">
+                                                <option value="all" data-tr="Tüm Türler" data-en="All Types">All Types</option>
+                                                <option value="Transfer">Transfer</option>
+                                                <option value="Deposit" data-tr="Para Yatırma" data-en="Deposit">Deposit</option>
+                                                <option value="Withdrawal" data-tr="Çekim" data-en="Withdrawal">Withdrawal</option>
+                                            </select>
+                                        </div>
+                                        <div class="filter-group">
+                                            <select id="adminTxStatusFilter" class="neon-input">
+                                                <option value="all" data-tr="Tüm Durumlar" data-en="All Status">All Status</option>
+                                                <option value="Completed" data-tr="Tamamlandı" data-en="Completed">Completed</option>
+                                                <option value="Pending" data-tr="Beklemede" data-en="Pending">Pending</option>
+                                                <option value="Failed" data-tr="Başarısız" data-en="Failed">Failed</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="dash-shortcut-btn" data-action="admin-filter-transactions" data-tr="Filtrele" data-en="Filter">Filter</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Transaction Analytics -->
+                                <div class="admin-tx-analytics" style="margin-top: 20px;">
+                                    <div class="glass-card admin-stat-card accent-cyan">
+                                        <span class="admin-stat-icon">📊</span>
+                                        <span class="admin-stat-value" id="atTotalCount">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Tx">Total Tx</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-green">
+                                        <span class="admin-stat-icon">💰</span>
+                                        <span class="admin-stat-value" id="atTotalVolume">₺0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Hacim" data-en="Total Volume">Total Volume</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-amber">
+                                        <span class="admin-stat-icon">📈</span>
+                                        <span class="admin-stat-value" id="atAvgAmount">₺0</span>
+                                        <span class="admin-stat-label" data-tr="Ortalama Tutar" data-en="Avg Amount">Avg Amount</span>
+                                    </div>
+                                </div>
+
+                                <!-- All Transactions Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="Tüm İşlem Kayıtları" data-en="All Transaction Records">All Transaction Records</h4>
+                                    </div>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminAllTxTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th data-tr="Tür" data-en="Type">Type</th>
+                                                    <th data-tr="Gönderen" data-en="Sender">Sender</th>
+                                                    <th data-tr="Alıcı" data-en="Receiver">Receiver</th>
+                                                    <th data-tr="Tutar" data-en="Amount">Amount</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                    <th data-tr="Durum" data-en="Status">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminAllTxBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========== ADMIN: ALL ACCOUNTS ========== -->
+                            <div class="dash-sub-section" id="dash-admin-accounts">
+                                <h2 class="sub-section-title" data-tr="👥 Tüm Hesaplar" data-en="👥 All Accounts">👥 All Accounts</h2>
+                                
+                                <!-- Search Bar -->
+                                <div class="glass-card admin-filter-bar">
+                                    <div class="filter-row">
+                                        <div class="filter-group" style="flex:1;">
+                                            <input type="text" id="adminUserSearch" class="neon-input" placeholder="Search by name, email..." data-tr-placeholder="İsim veya e-posta ile ara..." data-en-placeholder="Search by name, email...">
+                                        </div>
+                                        <div class="filter-group">
+                                            <select id="adminRoleFilter" class="neon-input">
+                                                <option value="all" data-tr="Tüm Roller" data-en="All Roles">All Roles</option>
+                                                <option value="Admin">Admin</option>
+                                                <option value="User" data-tr="Kullanıcı" data-en="User">User</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="dash-shortcut-btn" data-action="admin-filter-users" data-tr="Ara" data-en="Search">Search</button>
+                                    </div>
+                                </div>
+
+                                <!-- All Users Table with Management -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="Kullanıcı Yönetimi" data-en="User Management">User Management</h4>
+                                        <span class="admin-badge" id="aaUserCount">0 users</span>
+                                    </div>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminAllUsersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th data-tr="Ad Soyad" data-en="Name">Name</th>
+                                                    <th data-tr="E-posta" data-en="Email">Email</th>
+                                                    <th data-tr="Hesap No" data-en="Account No">Account No</th>
+                                                    <th data-tr="Bakiye" data-en="Balance">Balance</th>
+                                                    <th data-tr="İşlem" data-en="Tx Count">Tx Count</th>
+                                                    <th data-tr="Rol" data-en="Role">Role</th>
+                                                    <th data-tr="Kayıt" data-en="Registered">Registered</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminAllUsersBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========== ADMIN: NEON AI SETTINGS ========== -->
+                            <div class="dash-sub-section" id="dash-admin-ai">
+                                <h2 class="sub-section-title" data-tr="🤖 Neon AI Ayarları" data-en="🤖 Neon AI Settings">🤖 Neon AI Settings</h2>
+                                
+                                <!-- AI Stats -->
+                                <div class="admin-stats-grid">
+                                    <div class="glass-card admin-stat-card accent-purple">
+                                        <span class="admin-stat-icon">💬</span>
+                                        <span class="admin-stat-value" id="aiTotalChats">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Sohbet" data-en="Total Chats">Total Chats</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-cyan">
+                                        <span class="admin-stat-icon">🪙</span>
+                                        <span class="admin-stat-value" id="aiTokenUsage">0</span>
+                                        <span class="admin-stat-label" data-tr="Token Kullanımı" data-en="Token Usage">Token Usage</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card accent-green">
+                                        <span class="admin-stat-icon">📊</span>
+                                        <span class="admin-stat-value" id="aiAvgResponse">—</span>
+                                        <span class="admin-stat-label" data-tr="Ort. Yanıt Süresi" data-en="Avg Response">Avg Response</span>
+                                    </div>
+                                </div>
+
+                                <!-- AI Configuration -->
+                                <div class="glass-card transfer-card" style="margin-top: 24px;">
+                                    <div class="transfer-form">
+                                        <h3 data-tr="AI Model Ayarları" data-en="AI Model Settings">AI Model Settings</h3>
+                                        <div class="form-group">
+                                            <label data-tr="Aktif Model" data-en="Active Model">Active Model</label>
+                                            <select id="aiModelSelect" class="neon-input">
+                                                <option value="neon-v1">Neon v1 (Default)</option>
+                                                <option value="neon-v2">Neon v2 (Advanced)</option>
+                                                <option value="neon-lite">Neon Lite (Fast)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Maksimum Token" data-en="Max Tokens">Max Tokens</label>
+                                            <input type="number" id="aiMaxTokens" class="neon-input" value="2048" min="256" max="8192">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Sistem Promptu" data-en="System Prompt">System Prompt</label>
+                                            <textarea id="aiSystemPrompt" class="neon-input" rows="4" placeholder="You are Neon, a helpful banking assistant..."></textarea>
+                                        </div>
+                                        <button type="button" class="login-submit-btn" data-action="save-ai-settings" data-tr="Kaydet" data-en="Save Settings">Save Settings</button>
                                     </div>
                                 </div>
                             </div>
@@ -680,6 +1068,11 @@
                             Database-centric digital bank core system simulation ensuring secure, consistent, and
                             traceable financial transaction management.
                         </p>
+                        <div class="intro-feature-list">
+                            <div class="intro-feature-pill" data-tr="ACID destekli işlem akışı" data-en="ACID-backed transaction flow">ACID-backed transaction flow</div>
+                            <div class="intro-feature-pill" data-tr="Canlı dashboard deneyimi" data-en="Live dashboard experience">Live dashboard experience</div>
+                            <div class="intro-feature-pill" data-tr="Mobil uyumlu sunum katmanı" data-en="Mobile-ready presentation layer">Mobile-ready presentation layer</div>
+                        </div>
                         <div class="intro-cta-group">
                             <button class="intro-cta-primary" data-tr="Sistemi Keşfet" data-en="Explore System">
                                 Explore
@@ -710,6 +1103,10 @@
                                 Immutable
                                 Ledger
                             </span>
+                        </div>
+                        <div class="intro-insight-card glass-card">
+                            <span class="insight-eyebrow" data-tr="Sunum Katmanı" data-en="Presentation Layer">Presentation Layer</span>
+                            <strong data-tr="Net akış, daha iyi okunabilirlik ve güven odaklı modern düzen." data-en="Clearer flow, better readability, and a trust-first modern layout.">Clearer flow, better readability, and a trust-first modern layout.</strong>
                         </div>
                         <div class="intro-orb"></div>
                     </div>
@@ -795,10 +1192,6 @@
                             <span class="tech-item">FluentValidation</span>
                             <span class="tech-item">Web API</span>
                             <span class="tech-item">AutoMapper</span>
-                            <span class="tech-item">ASP.NET Core</span>
-                            <span class="tech-item">C#</span>
-                            <span class="tech-item">MySQL</span>
-                            <span class="tech-item">EF Core</span>
                         </div>
                     </div>
                 </div>
@@ -821,6 +1214,24 @@
                     <h2 class="section-title" data-tr="Sistem Bileşenleri" data-en="System Components">System Components</h2>
                     <p class="section-subtitle" data-tr="Vireon çekirdek bankacılık sistemi modülleri"
                         data-en="Vireon core banking system modules">Vireon core banking system modules</p>
+                </div>
+
+                <div class="component-highlights">
+                    <div class="glass-card component-highlight-card">
+                        <span class="component-highlight-icon">⚙️</span>
+                        <h3 data-tr="İş Kuralları" data-en="Business Rules">Business Rules</h3>
+                        <p data-tr="Transfer, limit ve fraud akışları tek merkezden yönetilir." data-en="Transfers, limits, and fraud flows are coordinated from one core layer.">Transfers, limits, and fraud flows are coordinated from one core layer.</p>
+                    </div>
+                    <div class="glass-card component-highlight-card">
+                        <span class="component-highlight-icon">🗄️</span>
+                        <h3 data-tr="Veri Tutarlılığı" data-en="Data Consistency">Data Consistency</h3>
+                        <p data-tr="Hesap, işlem ve ledger yapıları birlikte okunur ve izlenir." data-en="Accounts, transactions, and ledger entities are presented as one connected story.">Accounts, transactions, and ledger entities are presented as one connected story.</p>
+                    </div>
+                    <div class="glass-card component-highlight-card">
+                        <span class="component-highlight-icon">🖥️</span>
+                        <h3 data-tr="Çoklu Deneyim" data-en="Multi-Experience">Multi-Experience</h3>
+                        <p data-tr="Web ve masaüstü anlatısı tek bir modern vitrinde birleşir." data-en="Web and desktop narratives come together in one polished showcase.">Web and desktop narratives come together in one polished showcase.</p>
+                    </div>
                 </div>
 
                 <div class="tabs-container">
@@ -1002,6 +1413,24 @@
                         data-en="Data flow between database and API layers">Data flow between database and API layers</p>
                 </div>
 
+                <div class="architecture-pillars">
+                    <div class="glass-card architecture-pillar">
+                        <span class="architecture-pillar-label" data-tr="Odak" data-en="Focus">Focus</span>
+                        <strong data-tr="Tutarlılık" data-en="Consistency">Consistency</strong>
+                        <p data-tr="Finansal veriler katmanlar arasında düzenli ve izlenebilir ilerler." data-en="Financial data moves across layers in a clean and traceable way.">Financial data moves across layers in a clean and traceable way.</p>
+                    </div>
+                    <div class="glass-card architecture-pillar">
+                        <span class="architecture-pillar-label" data-tr="Öncelik" data-en="Priority">Priority</span>
+                        <strong data-tr="Güvenlik" data-en="Security">Security</strong>
+                        <p data-tr="Fraud kontrolü ve güvenlik başlıkları kullanıcıya net biçimde yansıtılır." data-en="Fraud controls and security posture are surfaced clearly in the UI.">Fraud controls and security posture are surfaced clearly in the UI.</p>
+                    </div>
+                    <div class="glass-card architecture-pillar">
+                        <span class="architecture-pillar-label" data-tr="Deneyim" data-en="Experience">Experience</span>
+                        <strong data-tr="Okunabilirlik" data-en="Readability">Readability</strong>
+                        <p data-tr="Teknik yapıyı fazla karmaşıklaştırmadan anlaşılır anlatım sunar." data-en="Explains technical structure without overwhelming the viewer.">Explains technical structure without overwhelming the viewer.</p>
+                    </div>
+                </div>
+
                 <div class="architecture-content">
                     <div class="arch-diagram glass-card">
                         <h3 data-tr="Katmanlı Mimari" data-en="Layered Architecture">Layered Architecture</h3>
@@ -1082,6 +1511,7 @@
                         <img src="images/about-our-team.jpg" alt="Team" class="team-photo">
                         <div class="team-info">
                             <h4>Cavit Batu Soylu</h4>
+                            <span class="team-role-badge">Lead UI</span>
                             <p>Full Stack Developer</p>
                         </div>
                     </div>
@@ -1089,6 +1519,7 @@
                         <img src="images/design-screen.jpg" alt="Team" class="team-photo">
                         <div class="team-info">
                             <h4>Enes Kaya</h4>
+                            <span class="team-role-badge">API Core</span>
                             <p>Backend Developer</p>
                         </div>
                     </div>
@@ -1096,144 +1527,8 @@
                         <img src="images/brand-identity.jpg" alt="Team" class="team-photo">
                         <div class="team-info">
                             <h4>Kerem Arslan</h4>
+                            <span class="team-role-badge">Data Layer</span>
                             <p>Database Specialist</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Desktop App Version Section -->
-            <div class="landing-content-section" id="section-desktop">
-                <div class="section-header-small">
-                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
-                    <div class="small-brand">
-                        <h3>VIREON</h3>
-                        <p>Immutable Ledger</p>
-                    </div>
-                </div>
-                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
-
-                <div class="section-header">
-                    <h2 class="section-title" data-tr="Vireon Masaüstü" data-en="Vireon Desktop">Vireon Desktop</h2>
-                    <p class="section-subtitle" data-tr="Electron altyapısı ile yerleşik deneyim"
-                        data-en="Native desktop experience powered by Electron">Native desktop experience powered by Electron</p>
-                </div>
-
-                <div class="desktop-showcase">
-                    <div class="desktop-mockup">
-                        <div class="mockup-header">
-                            <div class="mockup-dots"><span></span><span></span><span></span></div>
-                            <div class="mockup-title">Vireon.exe</div>
-                        </div>
-                        <div class="mockup-screen">
-                            <img src="images/vireon-logo-transparent-new.png" alt="Desktop Logo" class="mockup-logo">
-                            <h3 data-tr="Masaüstü Gücü" data-en="Desktop Power">Desktop Power</h3>
-                            <p data-tr="Hız, güvenlik ve yerel entegrasyon." data-en="Speed, security, and native integration.">Speed, security, and native integration.</p>
-                        </div>
-                    </div>
-                    <div class="desktop-features">
-                        <div class="d-feature">
-                            <span class="d-icon">🚀</span>
-                            <div class="d-text">
-                                <h4 data-tr="Yüksek Performans" data-en="High Performance">High Performance</h4>
-                                <p data-tr="Hızlı yükleme ve düşük bellek kullanımı." data-en="Fast loading and low memory footprint.">Fast loading and low memory footprint.</p>
-                            </div>
-                        </div>
-                        <div class="d-feature">
-                            <span class="d-icon">🎨</span>
-                            <div class="d-text">
-                                <h4 data-tr="Özel İkon" data-en="Custom Branding">Custom Branding</h4>
-                                <p data-tr="Masaüstünde Vireon logosu ile yerleşik görünüm." data-en="Official Vireon icon on your taskbar.">Official Vireon icon on your taskbar.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            </div>
-
-            <!-- Testimonials / Team Section -->
-            <div class="content-section" id="testimonials">
-                <div class="section-header-small">
-                    <div class="small-logo"><img src="images/vireon_robot.png" alt="Vireon" class="small-logo-img"></div>
-                    <div class="small-brand">
-                        <h3>VIREON</h3>
-                        <p>Immutable Ledger</p>
-                    </div>
-                </div>
-                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main
-                    Menu</button>
-
-                <div class="section-header">
-                    <h2 class="section-title" data-tr="Ekibimiz" data-en="Our Team">Our Team</h2>
-                    <p class="section-subtitle" data-tr="Proje ekibi ve sorumlulukları"
-                        data-en="Project team and responsibilities">Project team and responsibilities</p>
-                </div>
-
-                <div class="testimonials-grid">
-                    <div class="testimonial-card">
-                        <p class="testimonial-text"
-                            data-tr="Projenin frontend tarafı, WPF masaüstü uygulaması, TransferService (ACID/Rollback/Concurrency) ve veritabanı bağlantı konfigürasyonundan sorumluyum."
-                            data-en="Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and database connection configuration.">
-                            Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and
-                            database connection configuration.</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <div class="avatar-placeholder">CBS</div>
-                            </div>
-                            <div class="author-info">
-                                <h5>Cavit Batu Soylu</h5>
-                                <p>Frontend & DB Connection</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card">
-                        <p class="testimonial-text"
-                            data-tr="AccountService, FraudService, LedgerService ve tüm API Controller yazımından sorumluyum. Backend servis katmanı benim görev alanım."
-                            data-en="Responsible for AccountService, FraudService, LedgerService, and all API Controllers. Backend service layer is my domain.">
-                            Responsible for AccountService, FraudService, LedgerService, and all API Controllers.
-                            Backend service layer is my domain.</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <div class="avatar-placeholder">EK</div>
-                            </div>
-                            <div class="author-info">
-                                <h5>Enes Kaya</h5>
-                                <p>Backend Services</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card">
-                        <p class="testimonial-text"
-                            data-tr="Entity modellerin yazılması, DbContext tanımı, DailyLimit servisi ve seed data hazırlanmasından sorumluyum."
-                            data-en="Responsible for entity models, DbContext definition, DailyLimit service, and seed data preparation.">
-                            Responsible for entity models, DbContext definition, DailyLimit service, and seed data
-                            preparation.</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <div class="avatar-placeholder">KA</div>
-                            </div>
-                            <div class="author-info">
-                                <h5>Kerem Arslan</h5>
-                                <p>Entity Models & Data</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testimonial-card">
-                        <p class="testimonial-text"
-                            data-tr="Vireon; ASP.NET Core Web API, Entity Framework Core, MySQL ve modern web teknolojileri ile geliştirilmiş kapsamlı bir dijital banka çekirdek sistemi simülasyonudur."
-                            data-en="Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web API, Entity Framework Core, MySQL, and modern web technologies.">
-                            Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web
-                            API, Entity Framework Core, MySQL, and modern web technologies.</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <div class="avatar-placeholder">VP</div>
-                            </div>
-                            <div class="author-info">
-                                <h5 data-tr="Proje Özeti" data-en="Project Summary">Project Summary</h5>
-                                <p data-tr="Bilgisayar Mühendisliği" data-en="Computer Engineering">Computer Engineering
-                                </p>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1248,8 +1543,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main
-                    Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
 
                 <div class="section-header">
                     <h2 class="section-title" data-tr="Hakkımızda" data-en="About">About</h2>
@@ -1259,8 +1553,12 @@
 
                 <div class="about-content">
                     <div class="about-text">
-                        <h3 data-tr="Dijital Banka Çekirdek Sistemi" data-en="Digital Bank Core System">Digital Bank
-                            Core System</h3>
+                        <h3 data-tr="Dijital Banka Çekirdek Sistemi" data-en="Digital Bank Core System">Digital Bank Core System</h3>
+                        <div class="about-highlight-row">
+                            <div class="about-highlight-chip" data-tr="Veritabanı merkezli yapı" data-en="Database-centric design">Database-centric design</div>
+                            <div class="about-highlight-chip" data-tr="Modern sunum katmanı" data-en="Modern presentation layer">Modern presentation layer</div>
+                            <div class="about-highlight-chip" data-tr="Akademik proje odağı" data-en="Academic project focus">Academic project focus</div>
+                        </div>
                         <p data-tr="Vireon, finansal işlemlerin güvenli, tutarlı ve izlenebilir biçimde yönetilmesini modelleyen, veritabanı merkezli bir dijital banka çekirdek sistemi simülasyonudur."
                             data-en="Vireon is a database-centric digital bank core system simulation that models secure, consistent, and traceable financial transaction management.">
                             Vireon is a database-centric digital bank core system simulation that models secure,
@@ -1292,8 +1590,7 @@
                         <p>Immutable Ledger</p>
                     </div>
                 </div>
-                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main
-                    Menu</button>
+                <button class="back-btn" data-action="back-to-menu" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
 
                 <div class="section-header">
                     <h2 class="section-title" data-tr="İletişim" data-en="Contact">Contact</h2>
@@ -1322,6 +1619,13 @@
                         <button class="submit-btn" data-tr="Gönder" data-en="Send">Send</button>
                     </div>
                     <div class="contact-info">
+                        <div class="contact-item contact-callout">
+                            <div class="contact-icon">⏱️</div>
+                            <div class="contact-details">
+                                <h4 data-tr="İletişim Notu" data-en="Response Note">Response Note</h4>
+                                <p data-tr="Sunum, mimari ve kullanıcı deneyimi geri bildirimleri için uygun bir vitrin alanı." data-en="A focused touchpoint for presentation, architecture, and user experience feedback.">A focused touchpoint for presentation, architecture, and user experience feedback.</p>
+                            </div>
+                        </div>
                         <div class="contact-item">
                             <div class="contact-icon">🎓</div>
                             <div class="contact-details">
@@ -1414,6 +1718,9 @@
             });
 
             localStorage.setItem('vireon-lang', lang);
+            if (typeof window.refreshFrontendCopy === 'function') {
+                window.refreshFrontendCopy();
+            }
         }
 
         // ========== THEME TOGGLE ==========
@@ -1438,7 +1745,13 @@
                 const lModal = document.getElementById('loginModal');
                 if (lModal) {
                     lModal.addEventListener('click', function (e) {
-                        if (e.target === this) closeLoginModal();
+                        if (e.target === this) {
+                           if (typeof window.closeLoginModal === 'function') {
+                               window.closeLoginModal();
+                           } else {
+                               lModal.classList.remove('active');
+                           }
+                        }
                     });
                 }
             } catch (e) { console.error("Pref Load Error", e); }
