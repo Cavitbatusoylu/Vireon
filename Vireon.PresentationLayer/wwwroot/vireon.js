@@ -87,6 +87,97 @@ window.addEventListener('load', () => {
 let isTransitioning = false;
 let currentUser = null;
 let deferredPrompt; 
+let lastDashboardContext = { account: null, transactions: [] };
+
+// ========== RATE LIMITING ==========
+const loginAttempts = { count: 0, firstAttempt: 0, lockedUntil: 0 };
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_LOCKOUT = 60000; // 1 minute lockout
+
+function checkRateLimit() {
+    const now = Date.now();
+    if (now < loginAttempts.lockedUntil) {
+        const remaining = Math.ceil((loginAttempts.lockedUntil - now) / 1000);
+        return { allowed: false, remaining };
+    }
+    if (now - loginAttempts.firstAttempt > RATE_LIMIT_WINDOW) {
+        loginAttempts.count = 0;
+        loginAttempts.firstAttempt = now;
+    }
+    if (loginAttempts.count >= RATE_LIMIT_MAX) {
+        loginAttempts.lockedUntil = now + RATE_LIMIT_LOCKOUT;
+        loginAttempts.count = 0;
+        return { allowed: false, remaining: Math.ceil(RATE_LIMIT_LOCKOUT / 1000) };
+    }
+    return { allowed: true };
+}
+
+function recordLoginAttempt() {
+    if (loginAttempts.count === 0) loginAttempts.firstAttempt = Date.now();
+    loginAttempts.count++;
+}
+
+// ========== SESSION TIMEOUT ==========
+let sessionTimer = null;
+const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+function resetSessionTimer() {
+    if (sessionTimer) clearTimeout(sessionTimer);
+    if (!currentUser) return;
+    sessionTimer = setTimeout(() => {
+        const lang = window.currentLang || 'en';
+        showToast(lang === 'tr' ? 'Oturum zaman aşımına uğradı.' : 'Session timed out due to inactivity.', 'warning');
+        handleLogout();
+    }, SESSION_TIMEOUT);
+}
+
+// Track user activity for session timeout
+['click', 'keydown', 'mousemove', 'scroll', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, () => {
+        if (currentUser) resetSessionTimer();
+    }, { passive: true });
+});
+
+// ========== INLINE VALIDATION ==========
+function showFieldError(inputEl, message) {
+    clearFieldError(inputEl);
+    inputEl.classList.add('input-error');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error-msg';
+    errorDiv.textContent = message;
+    inputEl.parentElement.appendChild(errorDiv);
+}
+
+function clearFieldError(inputEl) {
+    inputEl.classList.remove('input-error');
+    const existing = inputEl.parentElement.querySelector('.field-error-msg');
+    if (existing) existing.remove();
+}
+
+function clearAllFieldErrors(form) {
+    if (!form) return;
+    form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    form.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+}
+
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function getPasswordStrength(password) {
+    let score = 0;
+    if (password.length >= 6) score++;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    if (score <= 1) return { level: 'weak', label: 'Weak', percent: 20 };
+    if (score <= 2) return { level: 'fair', label: 'Fair', percent: 40 };
+    if (score <= 3) return { level: 'good', label: 'Good', percent: 65 };
+    if (score <= 4) return { level: 'strong', label: 'Strong', percent: 85 };
+    return { level: 'excellent', label: 'Excellent', percent: 100 };
+}
 
 // Safely get elements
 const getEl = (id) => document.getElementById(id);
@@ -95,25 +186,28 @@ const getEls = (selector) => document.querySelectorAll(selector);
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
    try {
-       // Restore user from localStorage
-       const savedUser = localStorage.getItem('vireonUser');
+       // Restore user from localStorage or sessionStorage
+       const savedUser = localStorage.getItem('vireonUser') || sessionStorage.getItem('vireonUser');
        if (savedUser) {
            try {
                currentUser = JSON.parse(savedUser);
-               console.log('User restored from localStorage:', currentUser.name);
+               console.log('User restored:', currentUser.name);
                updateNavbarForLoggedInUser();
+               resetSessionTimer();
                
                // Restore to dashboard immediately if session exists
                showSection('dashboard');
                fetchDashboardData();
            } catch (e) {
                localStorage.removeItem('vireonUser');
+               sessionStorage.removeItem('vireonUser');
            }
        }
 
        initNavigation();
        initSidebarNavigation();
        initInteractions();
+       initFormValidation();
        console.log("NEON AI: Systems Initialized Successfully");
    } catch (e) {
        console.error("NEON AI: Init Error", e);
@@ -124,6 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('click', function(e) {
    const el = e.target.closest('[data-action]');
    if (!el) return;
+
+   const tagName = el.tagName.toLowerCase();
+   const isForm = tagName === 'form';
+   if (isForm) return;
+
    const action = el.getAttribute('data-action');
    const actionFn = actionHandlers[action];
    if (actionFn) actionFn(el, e);
@@ -139,11 +238,18 @@ document.addEventListener('submit', function(e) {
 
 document.addEventListener('keydown', function(e) {
    if (e.key !== 'Enter') return;
+   
+   // If in a form, let the browser handle it via 'submit' unless it's a specific data-enter-action
    const el = e.target.closest('[data-enter-action]');
-   if (!el) return;
-   const action = el.getAttribute('data-enter-action');
-   const actionFn = actionHandlers[action];
-   if (actionFn) actionFn(el, e);
+   if (el) {
+       const action = el.getAttribute('data-enter-action');
+       const actionFn = actionHandlers[action];
+       if (actionFn) actionFn(el, e);
+       return;
+   }
+
+   // Special case: If Enter is pressed in login/register form, we let the 'submit' event handle it.
+   // We don't want to trigger login manually here if it's already handled by form submit.
 });
 
 const actionHandlers = {};
@@ -183,14 +289,36 @@ function registerAction(name, fn) {
 
    // Dashboard
    registerAction('switch-dash-section', (el) => switchDashSection(el.getAttribute('data-dash') || el.dataset.dash));
-   registerAction('deposit-request', () => handleDepositRequest());
-   registerAction('send-transfer', () => handleSendTransfer());
-   registerAction('save-profile', () => handleProfileSave());
-   registerAction('change-password', () => handlePasswordChange());
-   registerAction('toggle-limit-edit', () => toggleLimitEdit());
-   registerAction('update-limit', () => handleUpdateLimit());
-   registerAction('refresh-qr-code', () => refreshQrCode());
-   registerAction('refresh-database-stats', () => fetchDatabaseStats());
+    registerAction('switch-transfer-tab', (el) => {
+        const targetId = el.getAttribute('data-target');
+        const container = el.closest('.transfer-combined-card');
+        if (!container) return;
+        
+        container.querySelectorAll('.transfer-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        
+        container.querySelectorAll('.transfer-tab-content').forEach(c => {
+            c.classList.remove('active');
+            c.style.display = 'none';
+        });
+        
+        const target = getEl(targetId);
+        if (target) {
+            target.classList.add('active');
+            target.style.display = 'block';
+        }
+    });
+    registerAction('deposit-request', () => handleDepositRequest());
+    registerAction('send-transfer', () => handleSendTransfer());
+    registerAction('save-profile', () => handleProfileSave());
+    registerAction('change-password', () => handlePasswordChange());
+    registerAction('toggle-limit-edit', () => toggleLimitEdit());
+    registerAction('update-limit', () => handleUpdateLimit());
+    registerAction('refresh-qr-code', () => refreshQrCode());
+    registerAction('refresh-database-stats', () => fetchDatabaseStats());
+    registerAction('admin-filter-transactions', () => loadAdminTransactions());
+    registerAction('admin-filter-users', () => loadAdminAccounts());
+    registerAction('save-ai-settings', () => showToast('AI Settings saved successfully (Demo)', 'success'));
 
    // Tabs
    registerAction('switch-tab', (el) => switchTab(el, el.getAttribute('data-tab')));
@@ -199,6 +327,19 @@ function registerAction(name, fn) {
    registerAction('toggle-ai-chat', () => toggleAIChat());
    registerAction('send-ai-message', () => sendAiMessage());
    registerAction('send-floating-ai-message', () => sendAIMessage());
+
+   // Password Toggle
+   registerAction('toggle-password-visibility', (el) => {
+       const inputId = el.getAttribute('data-target');
+       const input = document.getElementById(inputId);
+       if (input) {
+           const isPassword = input.type === 'password';
+           input.type = isPassword ? 'text' : 'password';
+           // Use modern icons
+           el.innerHTML = isPassword ? '👁️' : '🔒';
+           el.classList.toggle('visible', isPassword);
+       }
+   });
 })();
 
 function initNavigation() {
@@ -379,6 +520,12 @@ function showSection(sectionId) {
          document.body.classList.remove('dashboard-active');
          backToMenu();
       } else {
+         const isAdmin = currentUser.role === 'Admin';
+         if (isAdmin) {
+             switchDashSection('dash-admin-overview');
+         } else {
+             switchDashSection('dash-overview');
+         }
          fetchDashboardData();
          window.scrollTo(0, 0);
       }
@@ -548,24 +695,128 @@ function handleForgotPassword(e) {
     closeForgotPasswordModal();
 }
 
+// ========== FORM VALIDATION INIT ==========
+function initFormValidation() {
+    // Real-time validation on blur
+    const loginEmail = getEl('loginEmail');
+    const loginPassword = getEl('loginPassword');
+    const regName = getEl('registerName');
+    const regEmail = getEl('registerEmail');
+    const regPassword = getEl('registerPassword');
+    const regConfirm = getEl('registerConfirmPassword');
+
+    if (loginEmail) {
+        loginEmail.addEventListener('blur', () => {
+            const val = loginEmail.value.trim();
+            if (val && !validateEmail(val)) {
+                showFieldError(loginEmail, window.currentLang === 'tr' ? 'Geçersiz e-posta' : 'Invalid email');
+            } else { clearFieldError(loginEmail); }
+        });
+        loginEmail.addEventListener('input', () => clearFieldError(loginEmail));
+    }
+    if (loginPassword) {
+        loginPassword.addEventListener('input', () => clearFieldError(loginPassword));
+    }
+    if (regEmail) {
+        regEmail.addEventListener('blur', () => {
+            const val = regEmail.value.trim();
+            if (val && !validateEmail(val)) {
+                showFieldError(regEmail, window.currentLang === 'tr' ? 'Geçersiz e-posta' : 'Invalid email');
+            } else { clearFieldError(regEmail); }
+        });
+        regEmail.addEventListener('input', () => clearFieldError(regEmail));
+    }
+    if (regPassword) {
+        regPassword.addEventListener('input', () => {
+            clearFieldError(regPassword);
+            updatePasswordStrengthMeter(regPassword);
+        });
+    }
+    if (regConfirm) {
+        regConfirm.addEventListener('blur', () => {
+            if (regPassword && regConfirm.value && regConfirm.value !== regPassword.value) {
+                showFieldError(regConfirm, window.currentLang === 'tr' ? 'Şifreler eşleşmiyor' : 'Passwords do not match');
+            } else { clearFieldError(regConfirm); }
+        });
+        regConfirm.addEventListener('input', () => clearFieldError(regConfirm));
+    }
+    [regName, regEmail, regPassword, regConfirm].forEach(el => {
+        if (el) el.addEventListener('input', () => clearFieldError(el));
+    });
+}
+
+function updatePasswordStrengthMeter(inputEl) {
+    const parent = inputEl.closest('.form-group');
+    if (!parent) return;
+    let meter = parent.querySelector('.password-strength-meter');
+    const val = inputEl.value;
+    if (!val) { if (meter) meter.remove(); return; }
+    if (!meter) {
+        meter = document.createElement('div');
+        meter.className = 'password-strength-meter';
+        meter.innerHTML = '<div class="strength-bar"><div class="strength-fill"></div></div><span class="strength-label"></span>';
+        parent.appendChild(meter);
+    }
+    const strength = getPasswordStrength(val);
+    const fill = meter.querySelector('.strength-fill');
+    const label = meter.querySelector('.strength-label');
+    if (fill) { fill.style.width = strength.percent + '%'; fill.className = 'strength-fill strength-' + strength.level; }
+    if (label) { label.textContent = strength.label; label.className = 'strength-label strength-' + strength.level; }
+}
+
 // ========== AUTHENTICATION ==========
 async function handleLogin(event, form) {
-    event.preventDefault();
+    if (event) event.preventDefault();
+    clearAllFieldErrors(form);
     
-    const email = getEl('loginEmail')?.value?.trim();
-    const password = getEl('loginPassword')?.value;
+    const emailEl = getEl('loginEmail');
+    const passwordEl = getEl('loginPassword');
+    const rememberMeEl = getEl('rememberMe');
+    
+    const email = emailEl?.value?.trim();
+    const password = passwordEl?.value;
     const lang = window.currentLang || 'en';
     
-    if (!email || !password) {
-        showToast(lang === 'tr' ? 'Lütfen tüm alanları doldurun.' : 'Please fill all fields.', 'warning');
+    // 1. Rate Limiting Check
+    const rateCheck = checkRateLimit();
+    if (!rateCheck.allowed) {
+        showToast(lang === 'tr' 
+            ? `Çok fazla deneme. ${rateCheck.remaining} saniye bekleyin.` 
+            : `Too many attempts. Please wait ${rateCheck.remaining} seconds.`, 'error');
         return;
     }
     
-    const btn = (form || event.target).querySelector('button[type="submit"]');
-    const originalText = btn ? btn.innerHTML : '';
-    if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
+    // 2. Inline Validation
+    let hasError = false;
+    if (!email) {
+        showFieldError(emailEl, lang === 'tr' ? 'E-posta gerekli' : 'Email is required');
+        hasError = true;
+    } else if (!validateEmail(email)) {
+        showFieldError(emailEl, lang === 'tr' ? 'Geçerli bir e-posta girin' : 'Enter a valid email');
+        hasError = true;
+    }
+    if (!password) {
+        showFieldError(passwordEl, lang === 'tr' ? 'Şifre gerekli' : 'Password is required');
+        hasError = true;
+    } else if (password.length < 6) {
+        showFieldError(passwordEl, lang === 'tr' ? 'En az 6 karakter' : 'At least 6 characters');
+        hasError = true;
+    }
+    if (hasError) return;
+    
+    // 3. Loading State
+    const btn = form.querySelector('button[type="submit"]');
+    if (!btn) return;
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="loader-tiny"></span> ${lang === 'tr' ? 'Giriş Yapılıyor...' : 'Signing In...'}`;
+    btn.disabled = true;
+    btn.classList.add('loading');
     
     try {
+        recordLoginAttempt();
+        await new Promise(resolve => setTimeout(resolve, 600));
+
         const response = await fetch('/api/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -575,61 +826,105 @@ async function handleLogin(event, form) {
         if (response.ok) {
             const user = await response.json();
             currentUser = user;
-            localStorage.setItem('vireonUser', JSON.stringify(user));
+            loginAttempts.count = 0; // Reset on success
             
-            showToast(lang === 'tr' ? `Hoş geldin ${user.name}!` : `Welcome ${user.name}!`, 'success');
-            closeLoginModal();
+            // Remember Me logic
+            if (rememberMeEl && rememberMeEl.checked) {
+                localStorage.setItem('vireonUser', JSON.stringify(user));
+                localStorage.setItem('rememberVireon', 'true');
+            } else {
+                sessionStorage.setItem('vireonUser', JSON.stringify(user));
+                localStorage.removeItem('vireonUser');
+                localStorage.removeItem('rememberVireon');
+            }
+            
+            showToast(lang === 'tr' ? `Hoş geldin, ${user.name}!` : `Welcome back, ${user.name}!`, 'success');
+            
+            const modal = getEl('loginModal');
+            if (modal) modal.classList.remove('active');
+            
             updateNavbarForLoggedInUser();
+            resetSessionTimer();
             
             setTimeout(() => {
                 showSection('dashboard');
                 fetchDashboardData();
-            }, 300);
+                document.body.style.overflow = '';
+            }, 400);
         } else {
             const error = await response.json().catch(() => ({}));
-            showToast(error.message || (lang === 'tr' ? 'E-posta veya şifre hatalı.' : 'Invalid email or password.'), 'error');
+            const msg = error.message || (lang === 'tr' ? 'E-posta veya şifre hatalı.' : 'Invalid email or password.');
+            showToast(msg, 'error');
+            showFieldError(passwordEl, msg);
+            if (passwordEl) { passwordEl.value = ''; passwordEl.focus(); }
         }
     } catch (err) {
         console.error('Login error:', err);
         showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Could not connect to server.', 'error');
     } finally {
-        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.classList.remove('loading');
     }
 }
 
 async function handleRegister(event, form) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     const lang = window.currentLang || 'en';
     
-    const fullName = getEl('registerName')?.value?.trim();
-    const email = getEl('registerEmail')?.value?.trim();
-    const password = getEl('registerPassword')?.value;
-    const confirmPassword = getEl('registerConfirmPassword')?.value;
+    const fullNameEl = getEl('registerName');
+    const emailEl = getEl('registerEmail');
+    const passwordEl = getEl('registerPassword');
+    const confirmPasswordEl = getEl('registerConfirmPassword');
+
+    const fullName = fullNameEl?.value?.trim();
+    const email = emailEl?.value?.trim();
+    const password = passwordEl?.value;
+    const confirmPassword = confirmPasswordEl?.value;
     
+    // 1. Validation
     if (!fullName || !email || !password || !confirmPassword) {
         showToast(lang === 'tr' ? 'Lütfen tüm alanları doldurun.' : 'Please fill all fields.', 'warning');
         return;
     }
-    
-    if (password !== confirmPassword) {
-        showToast(lang === 'tr' ? 'Şifreler eşleşmiyor.' : 'Passwords do not match.', 'error');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast(lang === 'tr' ? 'Geçerli bir e-posta adresi girin.' : 'Please enter a valid email address.', 'warning');
+        if (emailEl) emailEl.focus();
         return;
     }
     
     if (password.length < 6) {
         showToast(lang === 'tr' ? 'Şifre en az 6 karakter olmalı.' : 'Password must be at least 6 characters.', 'warning');
+        if (passwordEl) passwordEl.focus();
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showToast(lang === 'tr' ? 'Şifreler eşleşmiyor.' : 'Passwords do not match.', 'error');
+        if (confirmPasswordEl) {
+            confirmPasswordEl.value = '';
+            confirmPasswordEl.focus();
+        }
         return;
     }
     
     const nameParts = fullName.split(/\s+/).filter(Boolean);
     const name = nameParts[0] || 'User';
-    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : name;
+    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ' ';
     
-    const btn = (form || event.target).querySelector('button[type="submit"]');
-    const originalText = btn ? btn.innerHTML : '';
-    if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
+    // 2. Loading State
+    const btn = form.querySelector('button[type="submit"]');
+    if (!btn) return;
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="loader-tiny"></span> ${lang === 'tr' ? 'Kaydediliyor...' : 'Creating Account...'}`;
+    btn.disabled = true;
     
     try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         const response = await fetch('/api/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -641,27 +936,33 @@ async function handleRegister(event, form) {
             showToast(
                 lang === 'tr'
                     ? `Kayıt başarılı! Hesap No: ${result.accountNumber}`
-                    : `Account created! Account No: ${result.accountNumber}`,
+                    : `Account created successfully! Your Account No: ${result.accountNumber}`,
                 'success'
             );
-            closeRegisterModal();
+            
+            // Transition to Login
+            const regModal = getEl('registerModal');
+            if (regModal) regModal.classList.remove('active');
             
             setTimeout(() => {
                 const loginEmail = getEl('loginEmail');
                 const loginPassword = getEl('loginPassword');
                 if (loginEmail) loginEmail.value = email;
                 if (loginPassword) loginPassword.value = password;
+                
                 openLoginModal();
-            }, 1500);
+                showToast(lang === 'tr' ? 'Şimdi giriş yapabilirsiniz.' : 'You can now sign in.', 'info');
+            }, 1000);
         } else {
             const error = await response.json().catch(() => ({}));
-            showToast(error.message || (lang === 'tr' ? 'Kayıt başarısız.' : 'Registration failed.'), 'error');
+            showToast(error.message || (lang === 'tr' ? 'Kayıt başarısız. Bu e-posta zaten kullanımda olabilir.' : 'Registration failed. This email might already be in use.'), 'error');
         }
     } catch (err) {
         console.error('Register error:', err);
         showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Connection error.', 'error');
     } finally {
-        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
 
@@ -670,28 +971,29 @@ function updateNavbarForLoggedInUser() {
     const loginBtn = getEl('loginBtn');
     const logoutBtn = getEl('logoutBtn');
     const dashboardBtn = getEl('homeDashboardBtn');
+    const landingDashCard = getEl('landingDashboardCard');
+    const landingAdminCard = getEl('landingAdminCard');
     
     if (loginBtn) loginBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
     if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
 
-    // Admin menü öğesini göster/gizle
-    const adminMenu = getEl('adminMenuItem');
-    if (adminMenu) {
-        adminMenu.style.display = (currentUser && currentUser.role === 'Admin') ? 'flex' : 'none';
-    }
+    const isAdmin = currentUser && currentUser.role === 'Admin';
+    const userMenu = getEl('userSidebarMenu');
+    const adminMenu = getEl('adminSidebarMenu');
 
-    // Admin kırmızı tema
-    if (currentUser && currentUser.role === 'Admin') {
+    if (isAdmin) {
         document.body.classList.add('admin-mode');
+        if (userMenu) userMenu.style.display = 'none';
+        if (adminMenu) adminMenu.style.display = 'block';
+        if (landingDashCard) landingDashCard.style.display = 'none';
+        if (landingAdminCard) landingAdminCard.style.display = 'flex';
     } else {
         document.body.classList.remove('admin-mode');
-    }
-
-    // DB Explorer'da kullanıcı tablosunu sadece admin görsün
-    const dbUsersCard = document.querySelector('#dash-db-explorer .db-preview-card');
-    if (dbUsersCard) {
-        dbUsersCard.style.display = (currentUser && currentUser.role === 'Admin') ? 'block' : 'none';
+        if (userMenu) userMenu.style.display = 'block';
+        if (adminMenu) adminMenu.style.display = 'none';
+        if (landingDashCard) landingDashCard.style.display = 'flex';
+        if (landingAdminCard) landingAdminCard.style.display = 'none';
     }
 }
 
@@ -699,19 +1001,85 @@ function updateNavbarForLoggedOutUser() {
     const loginBtn = getEl('loginBtn');
     const logoutBtn = getEl('logoutBtn');
     const dashboardBtn = getEl('homeDashboardBtn');
+    const landingDashCard = getEl('landingDashboardCard');
+    const landingAdminCard = getEl('landingAdminCard');
     
     if (loginBtn) loginBtn.style.display = 'inline-flex';
     if (logoutBtn) logoutBtn.style.display = 'none';
     if (dashboardBtn) dashboardBtn.style.display = 'none';
+
+    if (landingDashCard) landingDashCard.style.display = 'none';
+    if (landingAdminCard) landingAdminCard.style.display = 'none';
+
+    const userMenu = getEl('userSidebarMenu');
+    const adminMenu = getEl('adminSidebarMenu');
+    if (userMenu) userMenu.style.display = 'none';
+    if (adminMenu) adminMenu.style.display = 'none';
 }
+
+function updateDashboardOverview(account, txs) {
+    const lang = window.currentLang || 'en';
+    const welcomeName = getEl('dashWelcomeName');
+    const welcomeRole = getEl('dashWelcomeRole');
+    const txCountEl = getEl('dashQuickTxCount');
+    const incomingEl = getEl('dashQuickIn');
+    const outgoingEl = getEl('dashQuickOut');
+
+    const txList = Array.isArray(txs) ? txs : [];
+    const accountId = account?.id;
+    const incomingTotal = accountId
+        ? txList.filter(t => t.receiverAccountId === accountId && t.senderAccountId !== accountId).reduce((sum, t) => sum + (t.amount || 0), 0)
+        : 0;
+    const outgoingTotal = accountId
+        ? txList.filter(t => t.senderAccountId === accountId && t.receiverAccountId !== accountId).reduce((sum, t) => sum + (t.amount || 0), 0)
+        : 0;
+
+    if (welcomeName) {
+        welcomeName.textContent = currentUser?.name || (lang === 'tr' ? 'Misafir' : 'Guest');
+    }
+
+    if (welcomeRole) {
+        if (!currentUser) {
+            welcomeRole.textContent = lang === 'tr'
+                ? 'Hesap özeti ve günlük işlem görünürlüğü burada yer alır.'
+                : 'Your account summary and daily activity stay visible here.';
+        } else if (currentUser.role === 'Admin') {
+            welcomeRole.textContent = lang === 'tr'
+                ? 'Admin görünümü aktif. Operasyon ve sistem özetleri tek akışta görünür.'
+                : 'Admin view is active. Operations and system summaries stay visible in one stream.';
+        } else {
+            welcomeRole.textContent = lang === 'tr'
+                ? `Hesap ${account?.accountNumber || '-'} icin guncel finansal gorunum`
+                : `Live financial snapshot for account ${account?.accountNumber || '-'}`;
+        }
+    }
+
+    if (txCountEl) {
+        txCountEl.textContent = txList.length.toLocaleString(lang === 'tr' ? 'tr-TR' : 'en-US');
+    }
+    if (incomingEl) {
+        incomingEl.textContent = `₺${incomingTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    if (outgoingEl) {
+        outgoingEl.textContent = `₺${outgoingTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+}
+
+window.refreshFrontendCopy = function () {
+    updateDashboardOverview(lastDashboardContext.account, lastDashboardContext.transactions);
+};
 
 function handleLogout() {
     const lang = window.currentLang || 'en';
     currentUser = null;
+    lastDashboardContext = { account: null, transactions: [] };
     localStorage.removeItem('vireonUser');
+    sessionStorage.removeItem('vireonUser');
+    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
     document.body.classList.remove('admin-mode');
     showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
     updateNavbarForLoggedOutUser();
+    updateDashboardOverview(null, []);
     backToMenu();
 }
 
@@ -736,16 +1104,22 @@ function switchDashSection(targetId) {
    const target = getEl(targetId);
    if (target) target.classList.add('active');
 
+   // User triggers
    if (targetId === 'dash-qr') refreshQrCode();
-   if (targetId === 'dash-db-explorer') fetchDatabaseStats();
    if (targetId === 'dash-account-info') loadAccountInfo();
-   if (targetId === 'dash-admin') loadAdminPanel();
+   
+   // Admin triggers
+   if (targetId === 'dash-admin') loadAdminPanel(); // Legacy/Settings
+   if (targetId === 'dash-db-explorer') fetchDatabaseStats();
+   if (targetId === 'dash-admin-overview') loadAdminOverview();
+   if (targetId === 'dash-admin-transactions') loadAdminTransactions();
+   if (targetId === 'dash-admin-accounts') loadAdminAccounts();
+   if (targetId === 'dash-admin-ai') loadAdminAI();
 }
 
 // Initialize sidebar navigation
 function initSidebarNavigation() {
-   const sidebar = document.querySelector('.sidebar-menu');
-   if (sidebar) {
+   document.querySelectorAll('.sidebar-menu').forEach(sidebar => {
       sidebar.addEventListener('click', (e) => {
          const button = e.target.closest('.sidebar-menu-btn');
          if (button) {
@@ -755,7 +1129,7 @@ function initSidebarNavigation() {
             }
          }
       });
-   }
+   });
 }
 
 // ========== DASHBOARD DATA ==========
@@ -781,6 +1155,7 @@ async function fetchDashboardData() {
             const txResponse = await fetch('/api/transactions');
             const transactions = await txResponse.json();
             const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
+            lastDashboardContext = { account: userAccount, transactions: userTxs };
             
             // Update overview transaction list
             const overviewList = getEl('overviewTransactions');
@@ -792,6 +1167,7 @@ async function fetchDashboardData() {
             
             initModernDashboardCharts(userTxs, userAccount.id, userAccount.balance);
             initOverviewChart(userTxs, userAccount.id);
+            updateDashboardOverview(userAccount, userTxs);
             refreshQrCode();
 
             // Update daily limits
@@ -806,6 +1182,9 @@ async function fetchDashboardData() {
                     if (usedEl) usedEl.textContent = userLimit.usedLimit.toLocaleString('tr-TR');
                 }
             } catch (e) { console.error('Limits fetch error:', e); }
+        } else {
+            lastDashboardContext = { account: null, transactions: [] };
+            updateDashboardOverview(null, []);
         }
 
         // Profile fields
@@ -1042,7 +1421,6 @@ function refreshQrCode() {
    }
 }
 
-// ========== DEPOSIT ==========
 // ========== DEPOSIT ==========
 async function handleDepositRequest() {
    if (!currentUser) return;
@@ -1448,47 +1826,63 @@ async function loadAccountInfo() {
     }
 }
 
-// ========== ADMIN PANEL ==========
-async function loadAdminPanel() {
+// ========== ADMIN PANEL FUNCTIONS ==========
+async function loadAdminOverview() {
     if (!currentUser || currentUser.role !== 'Admin') return;
-
     try {
-        // 1. Admin Stats
-        const statsRes = await fetch('/api/users/admin-stats');
+        const [statsRes, usersRes] = await Promise.all([
+            fetch('/api/users/admin-stats'),
+            fetch('/api/users/admin-users')
+        ]);
         const stats = await statsRes.json();
+        const users = await usersRes.json();
 
         const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
-        setVal('adminTotalUsers', stats.totalUsers);
-        setVal('adminTotalAccounts', stats.totalAccounts);
-        setVal('adminTotalTx', stats.totalTransactions);
-        setVal('adminTotalBalance', '₺' + stats.totalBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
-        setVal('adminTotalFraud', stats.totalFraudLogs);
-        setVal('adminTotalLedger', stats.totalLedgerEntries);
+        
+        setVal('aoTotalUsers', stats.totalUsers || users.length);
+        setVal('aoActiveUsers', Math.floor((stats.totalUsers || users.length) * 0.8)); // Mock
+        setVal('aoOnlineUsers', Math.floor(Math.random() * 10) + 1); // Mock
+        setVal('aoNewUsers', Math.floor(Math.random() * 5)); // Mock
+        setVal('aoTotalBalance', '₺' + (stats.totalBalance || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+        setVal('aoTotalTx', stats.totalTransactions || 0);
+        
+        setVal('aoFraudCount', stats.totalFraudLogs || 0);
+        setVal('aoLedgerCount', stats.totalLedgerEntries || 0);
+        setVal('aoAdminCount', users.filter(u => u.role === 'Admin').length);
+        setVal('aoServerUptime', '99.9%');
 
-        // 2. All Users
-        const usersRes = await fetch('/api/users/admin-users');
-        const users = await usersRes.json();
-        const usersBody = getEl('adminUsersBody');
-        if (usersBody) {
-            usersBody.innerHTML = users.map(u => `
+        const recentUsersBody = getEl('aoRecentUsersBody');
+        if (recentUsersBody) {
+            recentUsersBody.innerHTML = users.slice(-5).reverse().map(u => `
                 <tr>
                     <td>${u.id}</td>
                     <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                     <td>${escapeHtml(u.email)}</td>
-                    <td>${u.accountNumber || '-'}</td>
-                    <td class="bal-text">₺${(u.balance || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
-                    <td>${u.transactionCount || 0}</td>
+                    <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : 'New'}</td>
                     <td><span class="role-badge role-${(u.role || 'User').toLowerCase()}">${u.role || 'User'}</span></td>
                 </tr>
             `).join('');
         }
+    } catch (err) {
+        console.error('Admin overview error:', err);
+    }
+}
 
-        // 3. All Transactions
+async function loadAdminTransactions() {
+    if (!currentUser || currentUser.role !== 'Admin') return;
+    try {
         const txRes = await fetch('/api/users/admin-transactions');
         const txs = await txRes.json();
-        const txBody = getEl('adminTxBody');
+        
+        const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
+        setVal('atTotalCount', txs.length);
+        const totalVolume = txs.reduce((sum, tx) => sum + (tx.amount || 0), 0);
+        setVal('atTotalVolume', '₺' + totalVolume.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+        setVal('atAvgAmount', '₺' + (txs.length ? (totalVolume / txs.length) : 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+
+        const txBody = getEl('adminAllTxBody');
         if (txBody) {
-            txBody.innerHTML = txs.map(tx => `
+            txBody.innerHTML = txs.reverse().map(tx => `
                 <tr>
                     <td>${tx.id}</td>
                     <td><span class="type-badge type-${tx.type.toLowerCase()}">${tx.type}</span></td>
@@ -1501,8 +1895,52 @@ async function loadAdminPanel() {
                 </tr>
             `).join('');
         }
-
     } catch (err) {
-        console.error('Admin panel error:', err);
+        console.error('Admin transactions error:', err);
     }
+}
+
+async function loadAdminAccounts() {
+    if (!currentUser || currentUser.role !== 'Admin') return;
+    try {
+        const usersRes = await fetch('/api/users/admin-users');
+        const users = await usersRes.json();
+        
+        const countEl = getEl('aaUserCount');
+        if (countEl) countEl.textContent = `${users.length} users`;
+
+        const usersBody = getEl('adminAllUsersBody');
+        if (usersBody) {
+            usersBody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
+                    <td>${escapeHtml(u.email)}</td>
+                    <td>${u.accountNumber || '-'}</td>
+                    <td class="bal-text">₺${(u.balance || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td>${u.transactionCount || 0}</td>
+                    <td>
+                        <span class="role-badge role-${(u.role || 'User').toLowerCase()}">${u.role || 'User'}</span>
+                    </td>
+                    <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString('tr-TR') : '-'}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Admin accounts error:', err);
+    }
+}
+
+async function loadAdminAI() {
+    if (!currentUser || currentUser.role !== 'Admin') return;
+    // Mock data for AI settings
+    const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
+    setVal('aiTotalChats', Math.floor(Math.random() * 500) + 120);
+    setVal('aiTokenUsage', Math.floor(Math.random() * 50000) + 15000);
+    setVal('aiAvgResponse', '1.2s');
+}
+
+async function loadAdminPanel() {
+    // Legacy support if anything still links to dash-admin directly
+    loadAdminOverview();
 }
