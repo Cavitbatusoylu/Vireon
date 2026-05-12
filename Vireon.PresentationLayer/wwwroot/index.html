@@ -84,11 +84,7 @@
                 <span class="login-icon">🔐</span>
                 <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
             </button>
-            <!-- Logout Button (hidden by default) -->
-            <button class="login-btn" id="logoutBtn" data-action="logout" style="display: none;" aria-label="Logout">
-                <span class="login-icon">🚪</span>
-                <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
-            </button>
+
             <!-- My Dashboard Button (Quick Access) -->
             <button class="login-btn dash-quick-btn" id="homeDashboardBtn" data-action="show-section" data-section="dashboard" style="display: none;" aria-label="Go to dashboard">
                 <span class="login-icon">🚀</span>
@@ -403,7 +399,7 @@
                                 </ul>
                             </nav>
                             <div class="sidebar-footer">
-                                <button type="button" class="logout-btn" data-action="back-to-menu" data-tr="Çıkış" data-en="Logout">Logout</button>
+                                <button type="button" class="logout-btn" data-action="logout" data-tr="Çıkış" data-en="Logout">Logout</button>
                             </div>
                         </aside>
                         <main class="dash-content">
@@ -497,7 +493,7 @@
                             <!-- AI COACH (Local GPT: Kumru) -->
                             <div class="dash-sub-section" id="dash-ai-coach">
                                 <h2 class="sub-section-title" data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</h2>
-                                <div class="ai-chat-shell glass-card">
+                                <div class="ai-chat-shell">
                                     <div class="ai-chat-body" id="aiChatContent">
                                         <div class="bot-bubble">
                                             <div class="bubble-icon">🤖</div>

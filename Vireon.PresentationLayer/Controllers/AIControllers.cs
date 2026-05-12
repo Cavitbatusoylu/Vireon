@@ -20,7 +20,7 @@ namespace Vireon.PresentationLayer.Controllers
             if (string.IsNullOrWhiteSpace(request?.Message))
                 return BadRequest(new { message = "Mesaj boş olamaz." });
 
-            var result = await _neonAIService.GetResponseAsync(request.Message);
+            var result = await _neonAIService.GetResponseAsync(request.Message, request.History);
             return Ok(new { response = result });
         }
     }
@@ -28,5 +28,6 @@ namespace Vireon.PresentationLayer.Controllers
     public class ChatRequest
     {
         public string? Message { get; set; }
+        public List<NeonAIService.ChatMessage>? History { get; set; }
     }
 }
