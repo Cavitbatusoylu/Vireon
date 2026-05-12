@@ -8,11 +8,22 @@ var options = new DbContextOptionsBuilder<VireonContext>().UseSqlite(sqliteConn)
 try
 {
     using var ctx = new VireonContext(options, null!);
+    
+    // List all users
+    var allUsers = await ctx.Users.ToListAsync();
+    // Tüm şifreleri '123456' olarak sıfırla
+    foreach (var u in allUsers)
+    {
+        u.Password = "123456"; // Backend Program.cs bunu otomatik hash'leyecek
+        Console.WriteLine($"{u.Email} şifresi '123456' olarak ayarlandı.");
+    }
+    await ctx.SaveChangesAsync();
+
     var cavit = await ctx.Users.FirstOrDefaultAsync(u => u.Email == "cavit@vireon.com");
     if (cavit != null) {
-        cavit.Role = "Admin";
+        cavit.Role = "User";
         await ctx.SaveChangesAsync();
-        Console.WriteLine("Cavit role updated to Admin.");
+        Console.WriteLine("Cavit rolü 'User' olarak güncellendi.");
     }
 }
 catch (Exception ex) { Console.WriteLine(ex.Message); }

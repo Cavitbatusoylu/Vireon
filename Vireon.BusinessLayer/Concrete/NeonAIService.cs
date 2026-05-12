@@ -22,16 +22,32 @@ namespace Vireon.BusinessLayer.Concrete
         {
             { "merhaba", new[] {
                 "Merhaba! Ben Neon, Vireon bankacılık asistanınız. Size nasıl yardımcı olabilirim? 💳",
-                "Hoş geldiniz! Hesap bilgileri, transfer veya limit konularında yardımcı olabilirim.",
-                "Merhaba! Vireon dijital bankacılık sistemine hoş geldiniz. Bugün ne yapmak istersiniz?"
+                "Hoş geldiniz! Bugün bankacılık işlemlerinizde size eşlik etmekten mutluluk duyarım.",
+                "Selam! Vireon'un akıllı dünyasına hoş geldiniz. Ne yapmak istersiniz?"
             }},
+            { "selam", new[] { "Selam! Size nasıl yardımcı olabilirim?", "Merhaba! Ben Neon, bankacılık asistanınız." }},
+            { "naber", new[] { "İyiyim, teşekkürler! Sizlere Vireon sisteminde yardımcı olmak için buradayım. Siz nasılsınız?", "Harikayım! Sistemler tıkır tıkır çalışıyor. Bugün size nasıl destek olabilirim?" }},
+            { "nasılsın", new[] { "Çok iyiyim! Bir yapay zeka asistanı olarak her zaman yardıma hazırım. Sizin için neler yapabilirim?", "Sistemlerim %100 kapasiteyle çalışıyor, harikayım! Sizin gününüz nasıl geçiyor?" }},
+            { "hey", new[] { "Hey! Buradayım. Ne sormak istemiştiniz?", "Dinliyorum! Bir işlemde yardıma mı ihtiyacınız var?" }},
             { "bakiye", new[] {
                 "Bakiyenizi Dashboard > Genel Bakış sayfasından görebilirsiniz. Sol menüdeki 📊 simgesine tıklayın.",
                 "Hesap bakiyeniz ana panelde en üstte gösterilmektedir. Güncel bakiye bilgisi için sayfayı yenileyebilirsiniz."
             }},
+            { "para", new[] {
+                "Para transferi yapmak için 'Para Gönder' sekmesini kullanabilirsiniz. Yatırmak için 'Para Yatır' sekmesine göz atın.",
+                "Para işlemlerinizi sol menüdeki Finans kategorisinden yönetebilirsiniz. Hangi işlemi yapmak istersiniz?"
+            }},
             { "transfer", new[] {
                 "Para göndermek için sol menüden 💸 Para Gönder sekmesine gidin. Alıcı hesap numarası (VR-XXXXX) ve tutarı girin.",
                 "Transfer işlemi ACID uyumlu olarak gerçekleşir. Günlük limitinizi aşmamaya dikkat edin. Limitleri ⚡ sekmesinden görebilirsiniz."
+            }},
+            { "gönder", new[] {
+                "Para göndermek için 'Para Gönder' sayfasını kullanın. Alıcı hesap numarasını VR-XXXX formatında girmeyi unutmayın.",
+                "Hemen para göndermek istiyorsanız sol menüdeki 💸 simgesine tıklayın!"
+            }},
+            { "yatır", new[] {
+                "Para yatırmak için 'Para Yatır' sekmesine gidin. Demo modunda olduğumuz için tutar girmeniz yeterlidir.",
+                "Bakiyenizi artırmak için sol menüdeki 💰 Para Yatır seçeneğini kullanabilirsiniz."
             }},
             { "limit", new[] {
                 "Günlük transfer limitiniz varsayılan olarak 50.000₺'dir. ⚡ Günlük Limitler sekmesinden düzenleyebilirsiniz.",
@@ -46,8 +62,14 @@ namespace Vireon.BusinessLayer.Concrete
                 "Güvenlik önlemlerimiz: BCrypt şifreleme, ACID transaction'lar, Fraud analizi ve ML.NET tabanlı risk puanlama sistemi."
             }},
             { "yardım", new[] {
-                "Size yardımcı olabileceğim konular:\n• 💰 Bakiye sorgulama\n• 💸 Para transferi\n• ⚡ Limit bilgileri\n• 📋 Hesap detayları\n• 🔐 Güvenlik\n• 📊 İşlem geçmişi",
-                "Neon AI olarak bankacılık işlemlerinizde rehberlik edebilirim. Bir konu seçin veya sorunuzu doğrudan yazın!"
+                "Size şu konularda detaylı yardımcı olabilirim:\n\n" +
+                "• 💰 **Bakiye Sorgulama:** Mevcut bakiyenizi dashboard üzerinden anlık görebilirsiniz.\n" +
+                "• 💸 **Para Transferi:** VR-XXXX formatlı hesaplara hızlı gönderim yapabilirsiniz.\n" +
+                "• ⚡ **Günlük Limitler:** Transfer limitlerinizi kontrol edebilir ve güncelleyebilirsiniz.\n" +
+                "• 📊 **İşlem Geçmişi:** Tüm hesap hareketlerinizi Ledger sayfasından takip edebilirsiniz.\n" +
+                "• 🔐 **Güvenlik & Fraud:** Şüpheli işlemlerin nasıl engellendiğini öğrenebilirsiniz.\n" +
+                "• 📋 **Hesap Detayları:** IBAN ve hesap numaranızı görüntüleyebilirsiniz.\n\n" +
+                "Hangi konuda daha fazla bilgi istersiniz?"
             }},
             { "fraud", new[] {
                 "Vireon, kural tabanlı ve ML.NET destekli yapay zeka ile şüpheli işlemleri otomatik olarak tespit eder. Yüksek tutarlı veya sık tekrarlayan işlemler FraudLogs tablosuna kaydedilir.",
@@ -62,7 +84,7 @@ namespace Vireon.BusinessLayer.Concrete
             _httpClient.Timeout = TimeSpan.FromMinutes(2);
         }
 
-        public async Task<string> GetResponseAsync(string message)
+        public async Task<string> GetResponseAsync(string message, List<ChatMessage>? history = null)
         {
             var opt = _options.Value;
             
@@ -72,18 +94,31 @@ namespace Vireon.BusinessLayer.Concrete
 
             try
             {
+                var messages = new List<object>
+                {
+                    new
+                    {
+                        role = "system",
+                        content = "Sen Vireon dijital bankasının yapay zeka asistanı Neon'sun. Türkçe yanıt ver. Bankacılık, para transferi, hesap işlemleri ve finansal konularda yardımcı ol. Kısa, net ve profesyonel yanıtlar ver. Sohbet geçmişini hatırla ve buna göre yanıt ver."
+                    }
+                };
+
+                // Geçmişi ekle (son 10 mesaj)
+                if (history != null)
+                {
+                    foreach (var h in history.TakeLast(10))
+                    {
+                        messages.Add(new { role = h.Role, content = h.Content });
+                    }
+                }
+
+                // Mevcut mesajı ekle
+                messages.Add(new { role = "user", content = message });
+
                 var requestBody = new
                 {
                     model = opt.ModelId.Trim(),
-                    messages = new object[]
-                    {
-                        new
-                        {
-                            role = "system",
-                            content = "Sen Vireon dijital bankasının yapay zeka asistanı Neon'sun. Türkçe yanıt ver. Bankacılık, para transferi, hesap işlemleri ve finansal konularda yardımcı ol. Kısa, net ve profesyonel yanıtlar ver."
-                        },
-                        new { role = "user", content = message }
-                    },
+                    messages = messages.ToArray(),
                     max_tokens = 350,
                     temperature = 0.7
                 };
@@ -111,6 +146,12 @@ namespace Vireon.BusinessLayer.Concrete
             }
         }
 
+        public class ChatMessage
+        {
+            public string Role { get; set; } = "user";
+            public string Content { get; set; } = "";
+        }
+
         private static string GetOfflineResponse(string message)
         {
             var lower = message.ToLowerInvariant();
@@ -127,9 +168,10 @@ namespace Vireon.BusinessLayer.Concrete
             // Genel fallback
             var generalResponses = new[]
             {
-                $"Anladım, \"{message}\" hakkında bilgi istiyorsunuz. Vireon bankacılık sistemi olarak size hesap yönetimi, para transferi, limit ayarları ve güvenlik konularında yardımcı olabilirim. Daha spesifik bir soru sormak ister misiniz?",
-                "Bu konuda size yardımcı olmak isterim! Vireon panelinizdeki sol menüden ilgili bölüme giderek işleminizi gerçekleştirebilirsiniz. Detaylı yardım için 'yardım' yazabilirsiniz.",
-                "Neon AI olarak şu an offline modda çalışıyorum. Temel bankacılık sorularınızı yanıtlayabilirim: bakiye, transfer, limit, hesap, güvenlik gibi konularda soru sorabilirsiniz! 🤖"
+                "Anladım. Tam olarak ne yapmak istediğinizi söylerseniz size daha iyi rehberlik edebilirim. Örneğin: 'Para göndermek istiyorum' veya 'Bakiyem ne kadar?'",
+                "Bu konuda henüz detaylı bilgim yok ama size temel bankacılık işlemlerinde (transfer, limit, bakiye) kesinlikle yardımcı olabilirim! 🚀",
+                "Neon AI olarak her zaman yanınızdayım! Eğer bir sorunuz varsa 'yardım' yazarak neler yapabileceğimi listeleyebilirim.",
+                "Söylediğinizi tam kavrayamadım ama Vireon panelindeki menüleri kullanarak çoğu işleminizi kolayca yapabilirsiniz. Başka bir sorunuz var mı?"
             };
 
             return generalResponses[Random.Shared.Next(generalResponses.Length)];

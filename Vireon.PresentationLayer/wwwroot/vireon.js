@@ -1308,29 +1308,42 @@ function toggleAIChat() {
    }
 }
 
+let chatHistory = [];
+
 async function sendAiMessage() {
     const input = getEl('aiInput');
     const display = getEl('aiChatContent');
     if (!input || !display || !input.value.trim()) return;
 
-    const userText = escapeHtml(input.value.trim());
+    const userText = input.value.trim();
     input.value = '';
 
-    display.innerHTML += `<div class="user-bubble"><div class="bubble-text">${userText}</div></div>`;
+    display.innerHTML += `<div class="user-bubble"><div class="bubble-text">${escapeHtml(userText)}</div></div>`;
     display.scrollTop = display.scrollHeight;
 
     try {
         const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText })
+            body: JSON.stringify({ 
+                message: userText,
+                history: chatHistory 
+            })
         });
         const data = await response.json();
+        const botResponse = data.response || 'Hata oluştu.';
         
+        // Geçmişe ekle
+        chatHistory.push({ role: "user", content: userText });
+        chatHistory.push({ role: "assistant", content: botResponse });
+        
+        // Sınırı koru (son 10 mesaj çifti)
+        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
         display.innerHTML += `
             <div class="bot-bubble">
                 <div class="bubble-icon">🤖</div>
-                <div class="bubble-text">${escapeHtml(data.response || 'Hata oluştu.')}</div>
+                <div class="bubble-text">${escapeHtml(botResponse)}</div>
             </div>
         `;
     } catch (err) {
