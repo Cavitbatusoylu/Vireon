@@ -22,6 +22,47 @@ namespace Vireon.BusinessLayer.Concrete
             // İşlem durumunu "pending" olarak başlat
             transaction.Status = TransactionStatus.Pending;
 
+            // 0. Fraud (Dolandırıcılık) kontrolü - İşlemi bloklamak ve logu kaydetmek için transaction dışına alıyoruz.
+            bool isFraudDetected = false;
+            string fraudMessage = "";
+
+            if (transaction.Amount > 10000)
+            {
+                isFraudDetected = true;
+                fraudMessage = $"Yüksek miktarlı transfer şüphesi: {transaction.Amount:N2} TRY";
+                _context.FraudLogs.Add(new FraudLog
+                {
+                    AccountId = transaction.SenderAccountId,
+                    RiskType = "HIGH_AMOUNT",
+                    Description = fraudMessage,
+                    LogDate = DateTime.Now
+                });
+            }
+
+            var oneMinuteAgo = DateTime.Now.AddMinutes(-1);
+            var recentTransactionsCount = _context.Transactions
+                .Count(t => t.SenderAccountId == transaction.SenderAccountId && t.CreatedAt >= oneMinuteAgo);
+            
+            if (recentTransactionsCount >= 3) // Bu işlemle birlikte 4. işlem olacaksa şüpheli say
+            {
+                isFraudDetected = true;
+                fraudMessage = $"Olağandışı aktivite: Son 1 dakikada {recentTransactionsCount + 1} işlem denemesi.";
+                _context.FraudLogs.Add(new FraudLog
+                {
+                    AccountId = transaction.SenderAccountId,
+                    RiskType = "FREQUENT_TRANSACTIONS",
+                    Description = fraudMessage,
+                    LogDate = DateTime.Now
+                });
+            }
+
+            if (isFraudDetected)
+            {
+                _context.SaveChanges(); // Fraud loglarını hemen veritabanına yaz
+                transaction.Status = TransactionStatus.Failed;
+                throw new InvalidOperationException($"Şüpheli işlem tespit edildi ve sistem tarafından engellendi: {fraudMessage}");
+            }
+
             using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
             try
             {
@@ -112,31 +153,7 @@ namespace Vireon.BusinessLayer.Concrete
                     CreatedAt = DateTime.Now
                 });
 
-                // 7. Fraud detection
-                if (transaction.Amount > 10000)
-                {
-                    _context.FraudLogs.Add(new FraudLog
-                    {
-                        AccountId = senderAccount.Id,
-                        RiskType = "HIGH_AMOUNT",
-                        Description = $"Yüksek miktarlı transfer: {transaction.Amount:N2} TRY",
-                        LogDate = DateTime.Now
-                    });
-                }
-
-                var oneMinuteAgo = DateTime.Now.AddMinutes(-1);
-                var recentTransactionsCount = _context.Transactions
-                    .Count(t => t.SenderAccountId == senderAccount.Id && t.CreatedAt >= oneMinuteAgo);
-                if (recentTransactionsCount >= 3) // Bu işlemle birlikte 4. işlem olacaksa şüpheli say
-                {
-                    _context.FraudLogs.Add(new FraudLog
-                    {
-                        AccountId = senderAccount.Id,
-                        RiskType = "FREQUENT_TRANSACTIONS",
-                        Description = $"Olağandışı aktivite: Son 1 dakikada {recentTransactionsCount + 1} işlem denemesi.",
-                        LogDate = DateTime.Now
-                    });
-                }
+                // 7. Fraud kontrolü artık transaction öncesinde yapılıyor.
 
                 // 8. Commit
                 _context.SaveChanges();
