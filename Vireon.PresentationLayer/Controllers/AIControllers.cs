@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Vireon.BusinessLayer.Concrete;
+using Vireon.DtoLayer.DTOs;
 
 namespace Vireon.PresentationLayer.Controllers
 {
@@ -25,8 +26,4 @@ namespace Vireon.PresentationLayer.Controllers
         }
     }
 
-    public class ChatRequest
-    {
-        public string? Message { get; set; }
-    }
 }

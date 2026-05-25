@@ -34,7 +34,7 @@
 - ✅ **Fraud Detection**: Gerçek zamanlı kural tabanlı risk analizi (ML.NET)
 - ✅ **Daily Limits**: Günlük işlem limiti kontrolü ve otomatik sıfırlama
 - ✅ **Modern UI/UX**: Responsive, PWA destekli web arayüzü
-- ✅ **AI Integration**: Neon AI Coach (Kumru AI - Hugging Face)
+- ✅ **AI Integration**: Neon AI Coach (Groq API - Llama 3.1)
 - ✅ **Real-time Charts**: Canlı bakiye ve işlem grafikleri (Chart.js)
 - ✅ **QR Payment**: QR kod ile ödeme sistemi
 - ✅ **Multi-language**: Türkçe/İngilizce dil desteği
@@ -94,7 +94,7 @@ Vireon, enterprise-grade performans ve güvenilirlik için modern teknolojiler k
 * ✅ **ACID Transactions:** Database-level transaction management with automatic rollback
 * ✅ **Immutable Ledger:** Append-only financial records for complete audit trail
 * ✅ **Fraud Detection:** ML.NET-powered risk analysis with real-time blocking
-* ✅ **AI Integration:** Kumru AI (Hugging Face) for banking assistance
+* ✅ **AI Integration:** Groq API (Llama 3.1) for banking assistance
 * ✅ **Real-time Updates:** Live balance and transaction tracking
 * ✅ **PWA Support:** Installable web application
 * ✅ **Multi-language:** Turkish/English support
@@ -291,8 +291,8 @@ Detaylı database dokümantasyonu için: [DATABASE_DOCUMENTATION.md](DATABASE_DO
 - Immutable audit trail
 
 ### 🤖 AI Integration
-- Neon AI Coach (Kumru AI)
-- Hugging Face entegrasyonu
+- Neon AI Coach (Groq API)
+- Llama 3.1 8B entegrasyonu
 - Doğal dil işleme
 - Bankacılık asistanı
 
