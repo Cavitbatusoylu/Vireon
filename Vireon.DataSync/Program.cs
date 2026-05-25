@@ -5,7 +5,7 @@ using Vireon.EntityLayer.Concrete;
 // Sync & Seed Tool for Vireon: SQLite, MySQL, SQL Server
 // Bu araç tüm veritabanlarını aynı test verileriyle (Ahmet, Ayşe, Admin) besler.
 
-const string sqliteConn = "Data Source=c:\\Users\\cavit\\OneDrive\\Desktop\\Vireon\\vireon_local.db";
+const string sqliteConn = "Data Source=c:\\Users\\cavit\\OneDrive\\Desktop\\Vireon\\Database\\vireon_local.db";
 const string mysqlConn = "Server=localhost;Database=VireonDB;Uid=root;Pwd=;";
 const string sqlserverConn = "Server=.;Database=VireonDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
 

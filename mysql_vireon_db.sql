@@ -91,18 +91,15 @@ CREATE TABLE IF NOT EXISTS `FraudLogs` (
 
 -- 8) AYNI TEST VERİLERİNİ (SEED DATA) MYSQL'E DE BASIYORUZ
 INSERT INTO `Users` (`Id`, `Name`, `Surname`, `Email`, `Password`, `AccountNumber`) VALUES
-(1, 'Ahmet', 'Yılmaz', 'ahmet.yilmaz@vireon.com', '$2a$11$eO.hK7q3G/eGq5i1L9P.hOGv7H1q7zV5a0Y6QjK6l8T1X3v2QGZmO', 'VR-1001'),
-(2, 'Ayşe', 'Demir', 'ayse.demir@vireon.com', '$2a$11$eO.hK7q3G/eGq5i1L9P.hOGv7H1q7zV5a0Y6QjK6l8T1X3v2QGZmO', 'VR-1002'),
-(3, 'Admin', 'Vireon', 'admin@vireon.com', '$2a$11$eO.hK7q3G/eGq5i1L9P.hOGv7H1q7zV5a0Y6QjK6l8T1X3v2QGZmO', 'VR-9999');
+(1, 'Cavit Batu', 'Soylu', 'cavit@vireon.com', '$2a$11$eO.hK7q3G/eGq5i1L9P.hOGv7H1q7zV5a0Y6QjK6l8T1X3v2QGZmO', 'VR-99999'),
+(2, 'Enes', 'Kaya', 'enes@vireon.com', '$2a$11$eO.hK7q3G/eGq5i1L9P.hOGv7H1q7zV5a0Y6QjK6l8T1X3v2QGZmO', 'VR-88888');
 
 INSERT INTO `Accounts` (`Id`, `UserId`, `AccountNumber`, `Balance`, `Currency`) VALUES
-(1, 1, 'TR1001', 50000.00, 'TRY'),
-(2, 2, 'TR1002', 75000.00, 'TRY'),
-(3, 3, 'TR9999', 9000000.00, 'TRY');
+(1, 1, 'VR-99999', 1000000.00, 'TRY'),
+(2, 2, 'VR-88888', 50000.00, 'TRY');
 
 INSERT INTO `DailyLimits` (`UserId`, `MaxDailyLimit`, `UsedLimit`) VALUES
-(1, 100000.00, 0.00),
-(2, 100000.00, 0.00),
-(3, 5000000.00, 0.00);
+(1, 5000000.00, 0.00),
+(2, 100000.00, 0.00);
 
 -- XAMPP MYSQL KURULUMU TAMAMLANMIŞTIR --
