@@ -57,26 +57,15 @@ function createToastContainer() {
     setTimeout(clearLoader, 3500);
 })();
 
-// Loading Screen & PWA Registration
+// PWA Service Worker devre dışı bırakıldı (Yerel geliştirme önbellek kilitlerini önlemek için)
 window.addEventListener('load', () => {
    if ('serviceWorker' in navigator) {
-      // Service worker'ı güncellemeye zorla
-      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
-         .then(reg => {
-            console.log('SW Registered', reg);
-            // Güncelleme varsa hemen uygula
-            reg.addEventListener('updatefound', () => {
-               const newWorker = reg.installing;
-               if (newWorker) {
-                  newWorker.addEventListener('statechange', () => {
-                     if (newWorker.state === 'activated') {
-                        console.log('New SW activated — cache refreshed');
-                     }
-                  });
-               }
-            });
-         })
-         .catch(err => console.log('SW Reg Error', err));
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+         for (let registration of registrations) {
+            registration.unregister();
+            console.log('SW Unregistered successfully — cache cleared.');
+         }
+      });
    }
 });
 

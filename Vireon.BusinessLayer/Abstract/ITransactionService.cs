@@ -8,5 +8,6 @@ namespace Vireon.BusinessLayer.Abstract
         void ProcessTransaction(Transaction transaction);
         Account? GetAccountByNumber(string accountNumber);
         void Deposit(string accountNumber, decimal amount, string? description);
+        int GetRecentTransactionCount(int accountId, int minutes);
     }
 }  
