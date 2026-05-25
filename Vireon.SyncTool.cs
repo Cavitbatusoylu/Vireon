@@ -6,7 +6,7 @@ using Vireon.EntityLayer.Concrete;
 // Sync Tool for Vireon: SQLite -> MySQL
 // Bu araç SQLite verilerini temizlenmiş olan MySQL veritabanına taşır.
 
-const string sqliteConn = "Data Source=c:\\Users\\cavit\\OneDrive\\Desktop\\Vireon\\vireon_local.db";
+const string sqliteConn = "Data Source=c:\\Users\\cavit\\OneDrive\\Desktop\\Vireon\\Database\\vireon_local.db";
 const string mysqlConn = "Server=localhost;Database=VireonDB;Uid=root;Pwd=;";
 
 var sqliteOptions = new DbContextOptionsBuilder<VireonContext>()

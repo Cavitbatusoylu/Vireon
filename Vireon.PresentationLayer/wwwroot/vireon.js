@@ -685,7 +685,18 @@ async function fetchDashboardData() {
                     if (maxEl) maxEl.textContent = userLimit.maxDailyLimit.toLocaleString('tr-TR');
                     if (usedEl) usedEl.textContent = userLimit.usedLimit.toLocaleString('tr-TR');
                 }
-            } catch (e) { console.error('Limits fetch error:', e); }
+            } catch (e) { 
+                console.error('Limits fetch error:', e); 
+            }
+        } else {
+            // Self-healing mechanism: clear corrupt or stale session if user ID is missing in the database
+            console.warn('Session user account not found in database. Clearing stale session.');
+            currentUser = null;
+            localStorage.removeItem('vireonUser');
+            showToast(lang === 'tr' ? 'Oturum süreniz doldu veya veritabanı sıfırlandı. Lütfen tekrar giriş yapın.' : 'Your session expired or database was reset. Please login again.', 'warning');
+            updateNavbarForLoggedOutUser();
+            backToMenu();
+            return;
         }
 
         // Profile fields

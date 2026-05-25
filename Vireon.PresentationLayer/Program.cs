@@ -191,17 +191,24 @@ internal class Program
                 logger.LogInformation("✅ Database hazır!");
 
                 // ============================================================
-                // SEED DATA — Test kullanıcıları (Sadece boş database'de çalışır)
-                // ============================================================
-                if (!context.Users.Any())
+                // SEED DATA — Cavit (Ana Admin) ve Enes
+                var hasCavit = context.Users.Any(u => u.Email == "cavit@vireon.com");
+                if (!hasCavit)
                 {
-                    logger.LogInformation("🌱 Seed data ekleniyor...");
+                    logger.LogInformation("🧹 Eski test verileri ve ilişkili tüm kayıtlar temizleniyor...");
+                    context.Database.ExecuteSqlRaw("DELETE FROM LedgerEntries;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM FraudLogs;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM Transactions;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM DailyLimits;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM Accounts;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM Users;");
+
+                    logger.LogInformation("🌱 Asıl Admin (Cavit) ve Enes ekleniyor...");
 
                     var seedUsers = new[]
                     {
-                        new { Name = "Admin", Surname = "Vireon", Email = "admin@vireon.com", Password = "admin123", AccountNo = "TR100001", Balance = 1000000m },
-                        new { Name = "Ahmet", Surname = "Yılmaz", Email = "ahmet@test.com", Password = "test123", AccountNo = "TR100002", Balance = 50000m },
-                        new { Name = "Ayşe", Surname = "Demir", Email = "ayse@test.com", Password = "test123", AccountNo = "TR100003", Balance = 75000m }
+                        new { Name = "Cavit Batu", Surname = "Soylu", Email = "cavit@vireon.com", Password = "admin123", AccountNo = "VR-99999", Balance = 1000000m, Role = "Admin" },
+                        new { Name = "Enes", Surname = "Kaya", Email = "enes@vireon.com", Password = "enes123", AccountNo = "VR-88888", Balance = 50000m, Role = "User" }
                     };
 
                     foreach (var s in seedUsers)
@@ -213,7 +220,8 @@ internal class Program
                             Email = s.Email,
                             Password = BCrypt.Net.BCrypt.HashPassword(s.Password),
                             AccountNumber = s.AccountNo,
-                            CreatedAt = DateTime.Now
+                            CreatedAt = DateTime.Now,
+                            Role = s.Role
                         };
                         context.Users.Add(user);
                         context.SaveChanges();
@@ -251,7 +259,7 @@ internal class Program
                         logger.LogInformation("  → {Name} ({Email}) → {Account} ({Balance:N2} TRY)", s.Name, s.Email, s.AccountNo, s.Balance);
                     }
 
-                    logger.LogInformation("✅ Seed data başarıyla eklendi! (3 kullanıcı)");
+                    logger.LogInformation("✅ Sistem sadece Ana Admin (Cavit) ve Enes ile hazırlandı!");
                 }
             }
             catch (Exception ex)
