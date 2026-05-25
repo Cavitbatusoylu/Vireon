@@ -8,5 +8,6 @@ namespace Vireon.BusinessLayer.Abstract
         Account? GetAccountByNumber(string accountNumber);
         void Deposit(string accountNumber, decimal amount, string? description);
         decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency);
+        int GetRecentTransactionCount(int accountId, int minutes);
     }
 }  

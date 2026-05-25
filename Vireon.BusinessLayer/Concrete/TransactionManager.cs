@@ -29,7 +29,7 @@ namespace Vireon.BusinessLayer.Concrete
         {
             transaction.Status = TransactionStatus.Pending;
 
-            using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            using var dbTransaction = _context.Database.BeginTransaction();
             try
             {
                 var senderAccount = _context.Accounts.FirstOrDefault(a => a.Id == transaction.SenderAccountId);
@@ -147,6 +147,31 @@ namespace Vireon.BusinessLayer.Concrete
                         LogDate = DateTime.Now
                     });
                 }
+                var currentHour = DateTime.Now.Hour;
+                if ((currentHour >= 0 && currentHour <= 5) && transaction.Amount > 5000)
+                {
+                    _context.FraudLogs.Add(new FraudLog
+                    {
+                        AccountId = senderAccount.Id,
+                        RiskType = "SUSPICIOUS_NIGHT_TRANSFER",
+                        Description = $"Gece yarısı yüksek tutarlı transfer denemesi: {transaction.Amount:N2} TRY (Saat: {currentHour:D2}:00)",
+                        LogDate = DateTime.Now
+                    });
+                }
+
+                var oneMinuteAgo = DateTime.Now.AddMinutes(-1);
+                var recentTransactionsCount = _context.Transactions
+                    .Count(t => t.SenderAccountId == senderAccount.Id && t.CreatedAt >= oneMinuteAgo);
+                if (recentTransactionsCount >= 3) // Bu işlemle birlikte 4. işlem olacaksa şüpheli say
+                {
+                    _context.FraudLogs.Add(new FraudLog
+                    {
+                        AccountId = senderAccount.Id,
+                        RiskType = "FREQUENT_TRANSACTIONS",
+                        Description = $"Olağandışı aktivite: Son 1 dakikada {recentTransactionsCount + 1} işlem denemesi.",
+                        LogDate = DateTime.Now
+                    });
+                }
 
                 _context.SaveChanges();
                 dbTransaction.Commit();
@@ -157,6 +182,13 @@ namespace Vireon.BusinessLayer.Concrete
 
                 _logger.LogInformation("✅ Transfer başarılı: {Amount}, {Sender} -> {Receiver} (Status: {Status})",
                     logCurrency, senderAccount.AccountNumber, receiverAccount.AccountNumber, transaction.Status);
+            }
+            // BURAYI EKLİYORUZ: Eşzamanlılık (Concurrency) Çakışması Yakalama
+            catch (DbUpdateConcurrencyException ex) 
+            {
+                dbTransaction.Rollback();
+                _logger.LogError(ex, "❌ Eşzamanlılık çakışması (Concurrency): Aynı hesaba aynı anda işlem yapıldı.");
+                throw new InvalidOperationException("İşleminiz sırasında bir çakışma oldu (aynı anda başka bir işlem yapılmış olabilir). Lütfen tekrar deneyin.");
             }
             catch (Exception ex)
             {
@@ -189,7 +221,7 @@ namespace Vireon.BusinessLayer.Concrete
         {
             if (amount <= 0) throw new InvalidOperationException("Deposit amount must be greater than 0.");
 
-            using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            using var dbTransaction = _context.Database.BeginTransaction();
             try
             {
                 var account = _context.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
@@ -208,6 +240,16 @@ namespace Vireon.BusinessLayer.Concrete
                     CreatedAt = DateTime.Now
                 });
 
+                _context.Transactions.Add(new Transaction
+                {
+                    SenderAccountId = account.Id, // Kendi kendine gibi gösteriyoruz
+                    ReceiverAccountId = account.Id,
+                    Amount = amount,
+                    Description = description ?? "Para Yatırma / Deposit",
+                    Date = DateTime.Now,
+                    Status = TransactionStatus.Completed
+                });
+
                 _context.SaveChanges();
                 dbTransaction.Commit();
 
@@ -219,6 +261,12 @@ namespace Vireon.BusinessLayer.Concrete
                 _logger.LogError(ex, "❌ Deposit failed for {AccountNumber}", accountNumber);
                 throw;
             }
+        }
+        public int GetRecentTransactionCount(int accountId, int minutes)
+        {
+            var timeLimit = DateTime.Now.AddMinutes(-minutes);
+            return _context.Transactions
+                .Count(t => t.SenderAccountId == accountId && t.CreatedAt >= timeLimit);
         }
     }
 }

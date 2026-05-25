@@ -4464,3 +4464,353 @@ body.dashboard-active .dashboard-wrapper {
         max-width: 100%;
     }
 }
+
+/* ========== ADMIN PANEL ========== */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.admin-stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px;
+}
+
+.admin-stat-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.admin-stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.admin-stat-label {
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+}
+
+/* Role & Type Badges */
+.role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.role-admin {
+    background: rgba(255, 165, 0, 0.15);
+    color: #ffa500;
+    border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.role-user {
+    background: rgba(0, 180, 216, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(0, 180, 216, 0.2);
+}
+
+.type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.type-deposit {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.type-transfer {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* ========== IMPROVED TRANSACTION LIST ========== */
+.tx-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.tx-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.tx-item:last-child {
+    border-bottom: none;
+}
+
+.tx-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.tx-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.tx-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tx-desc {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.tx-detail {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+.tx-date {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.tx-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.tx-amount.tx-in {
+    color: #22c55e;
+}
+
+.tx-amount.tx-out {
+    color: #ef4444;
+}
+
+.tx-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.tx-status-Completed {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.tx-status-Pending {
+    background: rgba(255, 165, 0, 0.1);
+    color: #ffa500;
+}
+
+.tx-status-Failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.tx-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.3);
+    padding: 30px;
+    font-style: italic;
+}
+
+/* ========== HOMEPAGE IMAGES ========== */
+.hero-image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+    opacity: 0.35;
+    z-index: 0;
+}
+
+.intro-hero-visual {
+    position: relative;
+}
+
+.intro-hero-visual .intro-floating-card {
+    z-index: 2;
+}
+
+.value-card-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 16px 16px 0 0;
+    margin: -30px -30px 20px -30px;
+    width: calc(100% + 60px);
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.value-card:hover .value-card-img {
+    opacity: 0.85;
+}
+
+.team-photo {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 16px 16px 0 0;
+    margin: -30px -30px 20px -30px;
+    width: calc(100% + 60px);
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.team-card:hover .team-photo {
+    opacity: 1;
+}
+
+/* ========== ADMIN RED THEME ========== */
+body.admin-mode {
+    --admin-red: #dc2626;
+    --admin-red-glow: rgba(220, 38, 38, 0.4);
+    --admin-red-subtle: rgba(220, 38, 38, 0.08);
+    --admin-red-border: rgba(220, 38, 38, 0.25);
+}
+
+/* Admin orb glow → red */
+body.admin-mode .orb-1 {
+    background: radial-gradient(circle, var(--admin-red-glow) 0%, transparent 70%);
+}
+
+body.admin-mode .orb-2 {
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.3) 0%, transparent 70%);
+}
+
+body.admin-mode .orb-3 {
+    background: radial-gradient(circle, rgba(185, 28, 28, 0.25) 0%, transparent 70%);
+}
+
+/* Admin sidebar → red accent */
+body.admin-mode .dash-sidebar {
+    border-right-color: var(--admin-red-border);
+    background: linear-gradient(180deg, rgba(220, 38, 38, 0.05) 0%, var(--dark-2) 100%);
+}
+
+body.admin-mode .sidebar-menu li.active {
+    background: var(--admin-red-subtle);
+    border-color: var(--admin-red);
+    color: #fff;
+}
+
+body.admin-mode .sidebar-menu li.active .sidebar-icon {
+    color: var(--admin-red);
+}
+
+body.admin-mode .sidebar-menu li:hover {
+    background: rgba(220, 38, 38, 0.06);
+}
+
+/* Admin balance hero → red border */
+body.admin-mode .balance-hero {
+    border-color: var(--admin-red-border);
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.1);
+}
+
+body.admin-mode .hero-label {
+    color: #f87171;
+}
+
+body.admin-mode .hero-amount {
+    background: linear-gradient(135deg, #f87171 0%, #ffffff 60%, #dc2626 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Admin top navbar highlight */
+body.admin-mode .top-navbar {
+    border-bottom-color: var(--admin-red-border);
+}
+
+body.admin-mode .navbar-brand {
+    color: #f87171;
+}
+
+/* Admin sidebar logo text */
+body.admin-mode .sidebar-header span {
+    color: #f87171;
+}
+
+/* Admin glass cards subtle red */
+body.admin-mode .glass-card {
+    border-color: rgba(220, 38, 38, 0.12);
+}
+
+body.admin-mode .glass-card:hover {
+    border-color: var(--admin-red-border);
+    box-shadow: 0 20px 40px rgba(220, 38, 38, 0.1);
+}
+
+/* Admin stat values → red */
+body.admin-mode .admin-stat-value {
+    color: #f87171;
+}
+
+/* Admin panel badge */
+body.admin-mode .sidebar-footer .logout-btn {
+    border-color: var(--admin-red-border);
+    color: #f87171;
+}
+
+body.admin-mode .sidebar-footer .logout-btn:hover {
+    background: rgba(220, 38, 38, 0.15);
+}
+
+/* Admin sub-section title */
+body.admin-mode .sub-section-title {
+    color: #f87171;
+}
+
+/* Admin chart color override */
+body.admin-mode .dash-card,
+body.admin-mode .limit-card {
+    border-color: rgba(220, 38, 38, 0.12);
+}
+
+/* Admin scrollbar */
+body.admin-mode ::-webkit-scrollbar-thumb {
+    background: rgba(220, 38, 38, 0.3);
+}
+
+/* Admin badge in sidebar */
+body.admin-mode #adminMenuItem {
+    background: rgba(220, 38, 38, 0.08);
+    border-left: 3px solid var(--admin-red);
+}

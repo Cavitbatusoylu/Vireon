@@ -43,7 +43,9 @@ namespace Vireon.PresentationLayer.Controllers
 
             // 2. YAPAY ZEKA ANALİZİ (ML.NET) - WOW FAKTÖRÜ
             // İşlemi iş katmanına göndermeden önce AI "Şüpheli mi?" diye kontrol ediyor
-            var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount);
+            var hour = DateTime.Now.Hour;
+            var frequency = _transactionService.GetRecentTransactionCount(requestDto.SenderAccountId, 60);
+            var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount, hour, frequency);
 
             if (isFraud && probability > 0.7) // %70 üzeri risk varsa işlemi engelle
             {
@@ -110,10 +112,23 @@ namespace Vireon.PresentationLayer.Controllers
                 if (receiverAccount == null)
                     return NotFound(new { message = "Receiver account not found.", mesaj = "Alıcı hesap bulunamadı." });
 
+                // 🔍 TEŞHİS LOGU 1: Girdi Kontrolleri Tamamlandı
+                Console.WriteLine($"[DEBUG] 1. Hesaplar bulundu. Gönderen: {senderAccount.AccountNumber}, Alıcı: {receiverAccount.AccountNumber}");
+
                 // AI fraud check
-                var (isFraud, probability) = _fraudModelService.Predict((float)dto.Amount);
+                var hour = DateTime.Now.Hour;
+                
+                Console.WriteLine("[DEBUG] 2. İşlem sıklığı sorgulanıyor...");
+                var frequency = _transactionService.GetRecentTransactionCount(senderAccount.Id, 60);
+                Console.WriteLine($"[DEBUG] 3. İşlem sıklığı bulundu: {frequency}");
+
+                Console.WriteLine("[DEBUG] 4. ML.NET Yapay Zeka tahmini başlatılıyor...");
+                var (isFraud, probability) = _fraudModelService.Predict((float)dto.Amount, hour, frequency);
+                Console.WriteLine($"[DEBUG] 5. Yapay Zeka tahmini bitti. Sonuç: isFraud={isFraud}, Olasılık={probability}");
+
                 if (isFraud && probability > 0.7)
                 {
+                    Console.WriteLine("[DEBUG] ❌ Yapay Zeka engellemesi tetiklendi.");
                     return BadRequest(new
                     {
                         message = "AI flagged this transaction as high risk.",
@@ -133,7 +148,9 @@ namespace Vireon.PresentationLayer.Controllers
                     Description = dto.Description ?? "Transfer"
                 };
 
+                Console.WriteLine("[DEBUG] 6. Veritabanı transaction işlemi (ProcessTransaction) başlatılıyor...");
                 _transactionService.ProcessTransaction(transaction);
+                Console.WriteLine("[DEBUG] 7. Veritabanı transaction işlemi başarıyla tamamlandı!");
 
                 return Ok(new
                 {

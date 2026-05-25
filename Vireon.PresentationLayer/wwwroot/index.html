@@ -291,6 +291,10 @@
                                         <span class="sidebar-icon">🔐</span>
                                         <span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span>
                                     </li>
+                                    <li data-dash="dash-admin" onclick="switchDashSection('dash-admin')" id="adminMenuItem" style="display:none;">
+                                        <span class="sidebar-icon">🛡️</span>
+                                        <span data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</span>
+                                    </li>
                                 </ul>
                             </nav>
                             <div class="sidebar-footer">
@@ -538,6 +542,88 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- ========== ADMIN PANEL ========== -->
+                            <div class="dash-sub-section" id="dash-admin">
+                                <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel">🛡️ Admin Panel</h2>
+                                
+                                <!-- System Stats -->
+                                <div class="admin-stats-grid" id="adminStatsGrid">
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">👥</span>
+                                        <span class="admin-stat-value" id="adminTotalUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Kullanıcı" data-en="Total Users">Total Users</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💳</span>
+                                        <span class="admin-stat-value" id="adminTotalAccounts">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Hesap" data-en="Total Accounts">Total Accounts</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">📊</span>
+                                        <span class="admin-stat-value" id="adminTotalTx">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💰</span>
+                                        <span class="admin-stat-value" id="adminTotalBalance">₺0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Bakiye" data-en="Total Balance">Total Balance</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">🚨</span>
+                                        <span class="admin-stat-value" id="adminTotalFraud">0</span>
+                                        <span class="admin-stat-label" data-tr="Fraud Kayıtları" data-en="Fraud Logs">Fraud Logs</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">📝</span>
+                                        <span class="admin-stat-value" id="adminTotalLedger">0</span>
+                                        <span class="admin-stat-label" data-tr="Muhasebe Kayıtları" data-en="Ledger Entries">Ledger Entries</span>
+                                    </div>
+                                </div>
+
+                                <!-- All Users Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Tüm Kullanıcılar" data-en="All Users">All Users</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminUsersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th data-tr="Ad Soyad" data-en="Name">Name</th>
+                                                    <th data-tr="E-posta" data-en="Email">Email</th>
+                                                    <th data-tr="Hesap No" data-en="Account No">Account No</th>
+                                                    <th data-tr="Bakiye" data-en="Balance">Balance</th>
+                                                    <th data-tr="İşlem" data-en="Tx Count">Tx Count</th>
+                                                    <th data-tr="Rol" data-en="Role">Role</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminUsersBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- All Transactions Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Tüm İşlem Kayıtları" data-en="All Transaction Records">All Transaction Records</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminTxTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th data-tr="Tür" data-en="Type">Type</th>
+                                                    <th data-tr="Gönderen" data-en="Sender">Sender</th>
+                                                    <th data-tr="Alıcı" data-en="Receiver">Receiver</th>
+                                                    <th data-tr="Tutar" data-en="Amount">Amount</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                    <th data-tr="Durum" data-en="Status">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminTxBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </main>
                     </div>
                 </div>
@@ -582,6 +668,7 @@
                         </div>
                     </div>
                     <div class="intro-hero-visual">
+                        <img src="images/coding-screen.jpg" alt="Vireon System" class="hero-image">
                         <div class="intro-floating-card card-1">
                             <span class="card-icon">🔒</span>
                             <span class="card-text" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
@@ -637,6 +724,7 @@
                 <!-- Core Values -->
                 <div class="intro-values">
                     <div class="value-card">
+                        <img src="images/process-optimized.jpg" alt="ACID" class="value-card-img">
                         <div class="value-number">01</div>
                         <h3 data-tr="ACID Transaction" data-en="ACID Transaction">ACID Transaction</h3>
                         <p data-tr="Tüm finansal işlemler veritabanı transactionı içerisinde yürütülür. Atomicity, Consistency, Isolation ve Durability prensipleri eksiksiz uygulanır."
@@ -646,6 +734,7 @@
                         </p>
                     </div>
                     <div class="value-card">
+                        <img src="images/tech-audit.jpg" alt="Fraud" class="value-card-img">
                         <div class="value-number">02</div>
                         <h3 data-tr="Fraud Analizi" data-en="Fraud Analysis">Fraud Analysis</h3>
                         <p data-tr="Kural tabanlı risk analizi ile şüpheli işlemler otomatik tespit edilir ve FraudLogs tablosuna kaydedilir."
@@ -655,6 +744,7 @@
                         </p>
                     </div>
                     <div class="value-card">
+                        <img src="images/digital-strategy.jpg" alt="Ledger" class="value-card-img">
                         <div class="value-number">03</div>
                         <h3 data-tr="Değişmez Defter" data-en="Immutable Ledger">Immutable Ledger</h3>
                         <p data-tr="Muhasebe defteri kayıtları append-only mantıkla çalışır. Finansal kayıtlar değiştirilemez ve silinemez."
@@ -965,21 +1055,21 @@
 
                 <div class="team-grid">
                     <div class="team-card">
-                        <div class="team-image">🎓</div>
+                        <img src="images/about-our-team.jpg" alt="Team" class="team-photo">
                         <div class="team-info">
                             <h4>Cavit Batu Soylu</h4>
                             <p>Full Stack Developer</p>
                         </div>
                     </div>
                     <div class="team-card">
-                        <div class="team-image">🎓</div>
+                        <img src="images/design-screen.jpg" alt="Team" class="team-photo">
                         <div class="team-info">
                             <h4>Enes Kaya</h4>
                             <p>Backend Developer</p>
                         </div>
                     </div>
                     <div class="team-card">
-                        <div class="team-image">🎓</div>
+                        <img src="images/brand-identity.jpg" alt="Team" class="team-photo">
                         <div class="team-info">
                             <h4>Kerem Arslan</h4>
                             <p>Database Specialist</p>
