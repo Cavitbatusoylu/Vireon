@@ -1,9 +1,11 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
+using Vireon.EntityLayer.Concrete;
 using Vireon.PresentationLayer.Middleware;
 
 internal class Program
@@ -11,6 +13,15 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        // Serilog yapılandırması
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .WriteTo.Console()
+            .WriteTo.File("../logs/vireon-.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        builder.Host.UseSerilog();
 
         // Servisleri konteynere ekle
         builder.Services.AddDbContext<VireonContext>((serviceProvider, options) =>
@@ -31,7 +42,19 @@ internal class Program
         });
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.EnableAnnotations();
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "Vireon Digital Banking API",
+                Version = "v1",
+                Description = "Enterprise-grade digital banking core system with ACID transactions, immutable ledger, and AI-powered fraud detection."
+            });
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
+        });
 
         builder.Services.AddAutoMapper(config =>                                                                                            //Enes
         {
@@ -154,6 +177,70 @@ internal class Program
                 }
 
                 logger.LogInformation("✅ Database hazır!");
+
+                // ============================================================
+                // SEED DATA — Test kullanıcıları (Sadece boş database'de çalışır)
+                // ============================================================
+                if (!context.Users.Any())
+                {
+                    logger.LogInformation("🌱 Seed data ekleniyor...");
+
+                    var seedUsers = new[]
+                    {
+                        new { Name = "Admin", Surname = "Vireon", Email = "admin@vireon.com", Password = "admin123", AccountNo = "TR100001", Balance = 1000000m },
+                        new { Name = "Ahmet", Surname = "Yılmaz", Email = "ahmet@test.com", Password = "test123", AccountNo = "TR100002", Balance = 50000m },
+                        new { Name = "Ayşe", Surname = "Demir", Email = "ayse@test.com", Password = "test123", AccountNo = "TR100003", Balance = 75000m }
+                    };
+
+                    foreach (var s in seedUsers)
+                    {
+                        var user = new User
+                        {
+                            Name = s.Name,
+                            Surname = s.Surname,
+                            Email = s.Email,
+                            Password = BCrypt.Net.BCrypt.HashPassword(s.Password),
+                            AccountNumber = s.AccountNo,
+                            CreatedAt = DateTime.Now
+                        };
+                        context.Users.Add(user);
+                        context.SaveChanges();
+
+                        var account = new Account
+                        {
+                            UserId = user.Id,
+                            AccountNumber = s.AccountNo,
+                            Balance = s.Balance,
+                            Currency = "TRY"
+                        };
+                        context.Accounts.Add(account);
+                        context.SaveChanges();
+
+                        context.DailyLimits.Add(new DailyLimit
+                        {
+                            UserId = user.Id,
+                            MaxDailyLimit = 100000m,
+                            UsedLimit = 0m,
+                            LastResetDate = DateTime.Now.Date
+                        });
+                        context.SaveChanges();
+
+                        context.LedgerEntries.Add(new LedgerEntry
+                        {
+                            AccountId = account.Id,
+                            Amount = s.Balance,
+                            PreviousBalance = 0m,
+                            NewBalance = s.Balance,
+                            Description = "Hesap oluşturma - Seed data",
+                            CreatedAt = DateTime.Now
+                        });
+                        context.SaveChanges();
+
+                        logger.LogInformation("  → {Name} ({Email}) → {Account} ({Balance:N2} TRY)", s.Name, s.Email, s.AccountNo, s.Balance);
+                    }
+
+                    logger.LogInformation("✅ Seed data başarıyla eklendi! (3 kullanıcı)");
+                }
             }
             catch (Exception ex)
             {
@@ -163,12 +250,13 @@ internal class Program
             }
         }
 
-        // Swagger arayüzü (Geliştirme ortamında aktif)
-        if (app.Environment.IsDevelopment())
+        // Swagger arayüzü
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vireon API v1");
+            c.RoutePrefix = "swagger";
+        });
 
         // ============================================================
         // GLOBAL ERROR HANDLING MIDDLEWARE

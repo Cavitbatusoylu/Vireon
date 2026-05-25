@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
+using Vireon.DtoLayer.DTOs;
 using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.PresentationLayer.Controllers
@@ -273,27 +274,4 @@ namespace Vireon.PresentationLayer.Controllers
         }
     }
 
-    // DTO modelleri
-    public class UserCreateModel
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class LoginModel
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class UserUpdateModel
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
 }
