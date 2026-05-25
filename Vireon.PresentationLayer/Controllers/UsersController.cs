@@ -30,7 +30,8 @@ namespace Vireon.PresentationLayer.Controllers
                 u.Surname,
                 u.Email,
                 u.AccountNumber,
-                u.CreatedAt
+                u.CreatedAt,
+                u.Role
             }).ToList();
             return Ok(users);
         }
@@ -203,7 +204,8 @@ namespace Vireon.PresentationLayer.Controllers
                 balance = account?.Balance ?? 0m,
                 currency = account?.Currency ?? "TRY",
                 accountId = account?.Id ?? 0,
-                createdAt = user.CreatedAt
+                createdAt = user.CreatedAt,
+                role = user.Role
             });
         }
 
@@ -257,6 +259,81 @@ namespace Vireon.PresentationLayer.Controllers
                 accountNumber = user.AccountNumber,
                 balance = account?.Balance ?? 0m
             });
+        }
+
+        // ========== ADMIN PANELİ ==========
+        // GET: api/users/admin-stats — Genel sistem istatistikleri (Admin için)
+        [HttpGet("admin-stats")]
+        public IActionResult GetAdminStats()
+        {
+            var totalUsers = _context.Users.Count();
+            var totalAccounts = _context.Accounts.Count();
+            var totalTransactions = _context.Transactions.Count();
+            var totalDeposits = _context.Transactions.Count(t => t.SenderAccountId == t.ReceiverAccountId);
+            var totalTransfers = _context.Transactions.Count(t => t.SenderAccountId != t.ReceiverAccountId);
+            var totalBalance = _context.Accounts.Sum(a => a.Balance);
+            var totalFraudLogs = _context.FraudLogs.Count();
+            var totalLedgerEntries = _context.LedgerEntries.Count();
+
+            return Ok(new
+            {
+                totalUsers,
+                totalAccounts,
+                totalTransactions,
+                totalDeposits,
+                totalTransfers,
+                totalBalance,
+                totalFraudLogs,
+                totalLedgerEntries,
+                serverTime = DateTime.Now
+            });
+        }
+
+        // GET: api/users/admin-users — Tüm kullanıcılar (Admin paneli detaylı)
+        [HttpGet("admin-users")]
+        public IActionResult GetAdminUsers()
+        {
+            var users = _context.Users.Select(u => new
+            {
+                u.Id,
+                u.Name,
+                u.Surname,
+                u.Email,
+                u.AccountNumber,
+                u.CreatedAt,
+                u.Role,
+                Balance = _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Balance).FirstOrDefault(),
+                TransactionCount = _context.Transactions.Count(t =>
+                    _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.SenderAccountId) ||
+                    _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.ReceiverAccountId))
+            }).ToList();
+
+            return Ok(users);
+        }
+
+        // GET: api/users/admin-transactions — Tüm işlem kayıtları (Admin paneli)
+        [HttpGet("admin-transactions")]
+        public IActionResult GetAdminTransactions()
+        {
+            var transactions = _context.Transactions
+                .OrderByDescending(t => t.Date)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Amount,
+                    t.Date,
+                    t.Description,
+                    Status = t.Status.ToString(),
+                    SenderAccount = _context.Accounts.Where(a => a.Id == t.SenderAccountId).Select(a => a.AccountNumber).FirstOrDefault(),
+                    ReceiverAccount = _context.Accounts.Where(a => a.Id == t.ReceiverAccountId).Select(a => a.AccountNumber).FirstOrDefault(),
+                    SenderName = _context.Users.Where(u => _context.Accounts.Where(a => a.Id == t.SenderAccountId).Select(a => a.UserId).Contains(u.Id)).Select(u => u.Name + " " + u.Surname).FirstOrDefault(),
+                    ReceiverName = _context.Users.Where(u => _context.Accounts.Where(a => a.Id == t.ReceiverAccountId).Select(a => a.UserId).Contains(u.Id)).Select(u => u.Name + " " + u.Surname).FirstOrDefault(),
+                    Type = t.SenderAccountId == t.ReceiverAccountId ? "Deposit" : "Transfer"
+                })
+                .Take(100)
+                .ToList();
+
+            return Ok(transactions);
         }
 
         // Benzersiz hesap numarası üretici (VR-XXXX formatında)

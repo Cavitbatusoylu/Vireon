@@ -10,6 +10,9 @@ namespace Vireon.EntityLayer.Concrete
         public decimal Balance { get; set; } // Hesap bakiyesi
         public string Currency { get; set; } = null!; // Hesap para birimi
 
+        // Eşzamanlılık (Concurrency) kontrolü için
+        public byte[]? RowVersion { get; set; }
+
         // Navigation Properties (İlişkili Tablolar)
         public User? User { get; set; } // Hesabın sahibi
         public List<Transaction>? SentTransactions { get; set; } // Gönderilen para transferleri
