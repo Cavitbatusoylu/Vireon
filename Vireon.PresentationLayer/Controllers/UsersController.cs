@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
+using Vireon.DtoLayer.DTOs;
 using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.PresentationLayer.Controllers
@@ -47,9 +48,9 @@ namespace Vireon.PresentationLayer.Controllers
                 user.Name,
                 user.Surname,
                 user.Email,
-                user.Password,
                 user.AccountNumber,
-                user.CreatedAt
+                user.CreatedAt,
+                user.Role
             });
         }
 
@@ -105,7 +106,7 @@ namespace Vireon.PresentationLayer.Controllers
                 _context.Users.Add(user);
                 _context.SaveChanges(); // User ID alınır
 
-                // 3. Hesap oluştur (10.000₺ başlangıç bakiyesi)
+                // 3. Hesap oluştur (0₺ başlangıç bakiyesi)
                 var account = new Account
                 {
                     UserId = user.Id,
@@ -270,7 +271,11 @@ namespace Vireon.PresentationLayer.Controllers
             var totalTransactions = _context.Transactions.Count();
             var totalDeposits = _context.Transactions.Count(t => t.SenderAccountId == t.ReceiverAccountId);
             var totalTransfers = _context.Transactions.Count(t => t.SenderAccountId != t.ReceiverAccountId);
-            var totalBalance = _context.Accounts.Sum(a => a.Balance);
+            // SQLite decimal SUM çevirisindeki sınırlama nedeniyle toplamı istemci tarafında alıyoruz.
+            var totalBalance = _context.Accounts
+                .Select(a => a.Balance)
+                .AsEnumerable()
+                .Sum();
             var totalFraudLogs = _context.FraudLogs.Count();
             var totalLedgerEntries = _context.LedgerEntries.Count();
 
@@ -350,27 +355,4 @@ namespace Vireon.PresentationLayer.Controllers
         }
     }
 
-    // DTO modelleri
-    public class UserCreateModel
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class LoginModel
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class UserUpdateModel
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
 }

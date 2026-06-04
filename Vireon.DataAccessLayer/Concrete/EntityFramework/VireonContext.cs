@@ -23,7 +23,7 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
             {
                 // SQLite Bağlantı Dizesi
                 var connectionString = _configuration?.GetConnectionString("VireonDB") 
-                    ?? "Data Source=../vireon_local.db";
+                    ?? "Data Source=../Database/vireon_local.db";
                 
                 // SQLite bağlantısını yapılandır
                 optionsBuilder.UseSqlite(connectionString);

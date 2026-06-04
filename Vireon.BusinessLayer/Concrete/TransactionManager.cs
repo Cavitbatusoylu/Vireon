@@ -11,6 +11,14 @@ namespace Vireon.BusinessLayer.Concrete
         private readonly VireonContext _context;
         private readonly ILogger<TransactionManager> _logger;
 
+        private static readonly Dictionary<string, decimal> ExchangeRates = new()
+        {
+            ["TRY"] = 1m,
+            ["USD"] = 30.50m,
+            ["EUR"] = 33.20m,
+            ["GBP"] = 38.70m
+        };
+
         public TransactionManager(VireonContext context, ILogger<TransactionManager> logger)
         {
             _context = context;
@@ -19,54 +27,11 @@ namespace Vireon.BusinessLayer.Concrete
 
         public void ProcessTransaction(Transaction transaction)
         {
-            // İşlem durumunu "pending" olarak başlat
             transaction.Status = TransactionStatus.Pending;
 
-            // 0. Fraud (Dolandırıcılık) kontrolü - İşlemi bloklamak ve logu kaydetmek için transaction dışına alıyoruz.
-            bool isFraudDetected = false;
-            string fraudMessage = "";
-
-            if (transaction.Amount > 10000)
-            {
-                isFraudDetected = true;
-                fraudMessage = $"Yüksek miktarlı transfer şüphesi: {transaction.Amount:N2} TRY";
-                _context.FraudLogs.Add(new FraudLog
-                {
-                    AccountId = transaction.SenderAccountId,
-                    RiskType = "HIGH_AMOUNT",
-                    Description = fraudMessage,
-                    LogDate = DateTime.Now
-                });
-            }
-
-            var oneMinuteAgo = DateTime.Now.AddMinutes(-1);
-            var recentTransactionsCount = _context.Transactions
-                .Count(t => t.SenderAccountId == transaction.SenderAccountId && t.CreatedAt >= oneMinuteAgo);
-            
-            if (recentTransactionsCount >= 3) // Bu işlemle birlikte 4. işlem olacaksa şüpheli say
-            {
-                isFraudDetected = true;
-                fraudMessage = $"Olağandışı aktivite: Son 1 dakikada {recentTransactionsCount + 1} işlem denemesi.";
-                _context.FraudLogs.Add(new FraudLog
-                {
-                    AccountId = transaction.SenderAccountId,
-                    RiskType = "FREQUENT_TRANSACTIONS",
-                    Description = fraudMessage,
-                    LogDate = DateTime.Now
-                });
-            }
-
-            if (isFraudDetected)
-            {
-                _context.SaveChanges(); // Fraud loglarını hemen veritabanına yaz
-                transaction.Status = TransactionStatus.Failed;
-                throw new InvalidOperationException($"Şüpheli işlem tespit edildi ve sistem tarafından engellendi: {fraudMessage}");
-            }
-
-            using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            using var dbTransaction = _context.Database.BeginTransaction();
             try
             {
-                // 1. Hesapları yükle
                 var senderAccount = _context.Accounts.FirstOrDefault(a => a.Id == transaction.SenderAccountId);
                 var receiverAccount = _context.Accounts.FirstOrDefault(a => a.Id == transaction.ReceiverAccountId);
 
@@ -76,7 +41,6 @@ namespace Vireon.BusinessLayer.Concrete
                     throw new InvalidOperationException("Gönderici veya alıcı hesap bulunamadı.");
                 }
 
-                // 2. İş kuralları
                 if (transaction.SenderAccountId == transaction.ReceiverAccountId)
                 {
                     transaction.Status = TransactionStatus.Failed;
@@ -89,78 +53,136 @@ namespace Vireon.BusinessLayer.Concrete
                     throw new InvalidOperationException("Transfer miktarı 0'dan büyük olmalıdır.");
                 }
 
-                if (senderAccount.Balance < transaction.Amount)
+                decimal amountInSenderCurrency = transaction.Amount;
+                decimal amountInReceiverCurrency;
+
+                if (senderAccount.Currency != receiverAccount.Currency)
                 {
-                    transaction.Status = TransactionStatus.Failed;
-                    throw new InvalidOperationException("Yetersiz bakiye.");
+                    amountInReceiverCurrency = ConvertCurrency(transaction.Amount, senderAccount.Currency, receiverAccount.Currency);
+                }
+                else
+                {
+                    amountInReceiverCurrency = transaction.Amount;
                 }
 
-                // 3. Günlük limit kontrolü
+                if (senderAccount.Balance < amountInSenderCurrency)
+                {
+                    transaction.Status = TransactionStatus.Failed;
+                    throw new InvalidOperationException($"Yetersiz bakiye. Mevcut: {senderAccount.Balance:N2} {senderAccount.Currency}, Gerekli: {amountInSenderCurrency:N2} {senderAccount.Currency}");
+                }
+
                 var dailyLimit = _context.DailyLimits.FirstOrDefault(d => d.UserId == senderAccount.UserId);
                 if (dailyLimit != null)
                 {
-                    // Gün değiştiyse limiti sıfırla
                     if (dailyLimit.LastResetDate.Date < DateTime.Now.Date)
                     {
                         dailyLimit.UsedLimit = 0;
                         dailyLimit.LastResetDate = DateTime.Now.Date;
                     }
 
-                    if (dailyLimit.UsedLimit + transaction.Amount > dailyLimit.MaxDailyLimit)
+                    if (dailyLimit.UsedLimit + amountInSenderCurrency > dailyLimit.MaxDailyLimit)
                     {
                         transaction.Status = TransactionStatus.Failed;
-                        throw new InvalidOperationException($"Günlük limit aşıldı. Kalan: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} TRY");
+
+                        _context.FraudLogs.Add(new FraudLog
+                        {
+                            AccountId = senderAccount.Id,
+                            RiskType = "LIMIT_EXCEEDED",
+                            Description = $"Günlük limit aşımı denemesi: {amountInSenderCurrency:N2} {senderAccount.Currency} (Kalan limit: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} {senderAccount.Currency})",
+                            LogDate = DateTime.Now
+                        });
+                        _context.SaveChanges();
+
+                        throw new InvalidOperationException($"Günlük limit aşıldı. Kalan: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} {senderAccount.Currency}");
                     }
 
-                    dailyLimit.UsedLimit += transaction.Amount;
+                    dailyLimit.UsedLimit += amountInSenderCurrency;
                 }
 
-                // 4. Bakiye güncelleme
                 var oldSenderBalance = senderAccount.Balance;
                 var oldReceiverBalance = receiverAccount.Balance;
 
-                senderAccount.Balance -= transaction.Amount;
-                receiverAccount.Balance += transaction.Amount;
+                senderAccount.Balance -= amountInSenderCurrency;
+                receiverAccount.Balance += amountInReceiverCurrency;
 
-                // 5. Transaction kaydı
                 transaction.Date = DateTime.Now;
                 transaction.CreatedAt = DateTime.Now;
                 transaction.Status = TransactionStatus.Completed;
                 if (string.IsNullOrWhiteSpace(transaction.Description))
                 {
-                    transaction.Description = $"Transfer: {senderAccount.AccountNumber} → {receiverAccount.AccountNumber}";
+                    string currencyInfo = senderAccount.Currency != receiverAccount.Currency
+                        ? $" ({amountInSenderCurrency:N2} {senderAccount.Currency} → {amountInReceiverCurrency:N2} {receiverAccount.Currency})"
+                        : $" {senderAccount.Currency}";
+                    transaction.Description = $"Transfer: {senderAccount.AccountNumber} → {receiverAccount.AccountNumber}{currencyInfo}";
                 }
                 _context.Transactions.Add(transaction);
 
-                // 6. Ledger kayıtları (Immutable)
                 _context.LedgerEntries.Add(new LedgerEntry
                 {
                     AccountId = senderAccount.Id,
-                    Amount = -transaction.Amount,
+                    Amount = -amountInSenderCurrency,
                     PreviousBalance = oldSenderBalance,
                     NewBalance = senderAccount.Balance,
-                    Description = $"Transfer gönderildi - Alıcı: {receiverAccount.AccountNumber}",
+                    Description = $"Transfer gönderildi - Alıcı: {receiverAccount.AccountNumber} ({senderAccount.Currency})",
                     CreatedAt = DateTime.Now
                 });
 
                 _context.LedgerEntries.Add(new LedgerEntry
                 {
                     AccountId = receiverAccount.Id,
-                    Amount = transaction.Amount,
+                    Amount = amountInReceiverCurrency,
                     PreviousBalance = oldReceiverBalance,
                     NewBalance = receiverAccount.Balance,
-                    Description = $"Transfer alındı - Gönderici: {senderAccount.AccountNumber}",
+                    Description = $"Transfer alındı - Gönderici: {senderAccount.AccountNumber} ({receiverAccount.Currency})",
                     CreatedAt = DateTime.Now
                 });
 
-                // 7. Fraud kontrolü artık transaction öncesinde yapılıyor.
+                // Fraud (şüpheli işlem) kayıtları — engellemeden loglanır, admin panelinden görüntülenir.
+                if (amountInSenderCurrency > 10000)
+                {
+                    _context.FraudLogs.Add(new FraudLog
+                    {
+                        AccountId = senderAccount.Id,
+                        RiskType = "HIGH_AMOUNT",
+                        Description = $"Yüksek miktarlı transfer: {amountInSenderCurrency:N2} {senderAccount.Currency}",
+                        LogDate = DateTime.Now
+                    });
+                }
+                var currentHour = DateTime.Now.Hour;
+                if ((currentHour >= 0 && currentHour <= 5) && transaction.Amount > 5000)
+                {
+                    _context.FraudLogs.Add(new FraudLog
+                    {
+                        AccountId = senderAccount.Id,
+                        RiskType = "SUSPICIOUS_NIGHT_TRANSFER",
+                        Description = $"Gece yarısı yüksek tutarlı transfer denemesi: {transaction.Amount:N2} TRY (Saat: {currentHour:D2}:00)",
+                        LogDate = DateTime.Now
+                    });
+                }
 
-                // 8. Commit
+                var oneMinuteAgo = DateTime.Now.AddMinutes(-1);
+                var recentTransactionsCount = _context.Transactions
+                    .Count(t => t.SenderAccountId == senderAccount.Id && t.CreatedAt >= oneMinuteAgo);
+                if (recentTransactionsCount >= 3) // Bu işlemle birlikte 4. işlem olacaksa şüpheli say
+                {
+                    _context.FraudLogs.Add(new FraudLog
+                    {
+                        AccountId = senderAccount.Id,
+                        RiskType = "FREQUENT_TRANSACTIONS",
+                        Description = $"Olağandışı aktivite: Son 1 dakikada {recentTransactionsCount + 1} işlem denemesi.",
+                        LogDate = DateTime.Now
+                    });
+                }
+
                 _context.SaveChanges();
                 dbTransaction.Commit();
 
-                _logger.LogInformation("✅ Transfer başarılı: {Amount} TRY, {Sender} -> {Receiver} (Status: {Status})",
-                    transaction.Amount, senderAccount.AccountNumber, receiverAccount.AccountNumber, transaction.Status);
+                string logCurrency = senderAccount.Currency != receiverAccount.Currency
+                    ? $"{amountInSenderCurrency:N2} {senderAccount.Currency} → {amountInReceiverCurrency:N2} {receiverAccount.Currency}"
+                    : $"{amountInSenderCurrency:N2} {senderAccount.Currency}";
+
+                _logger.LogInformation("✅ Transfer başarılı: {Amount}, {Sender} -> {Receiver} (Status: {Status})",
+                    logCurrency, senderAccount.AccountNumber, receiverAccount.AccountNumber, transaction.Status);
             }
             // BURAYI EKLİYORUZ: Eşzamanlılık (Concurrency) Çakışması Yakalama
             catch (DbUpdateConcurrencyException ex) 
@@ -182,11 +204,25 @@ namespace Vireon.BusinessLayer.Concrete
             return _context.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
         }
 
+        public decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
+        {
+            if (fromCurrency == toCurrency) return amount;
+
+            if (!ExchangeRates.ContainsKey(fromCurrency))
+                throw new InvalidOperationException($"Desteklenmeyen para birimi: {fromCurrency}");
+
+            if (!ExchangeRates.ContainsKey(toCurrency))
+                throw new InvalidOperationException($"Desteklenmeyen para birimi: {toCurrency}");
+
+            decimal amountInTry = amount * ExchangeRates[fromCurrency];
+            return amountInTry / ExchangeRates[toCurrency];
+        }
+
         public void Deposit(string accountNumber, decimal amount, string? description)
         {
             if (amount <= 0) throw new InvalidOperationException("Deposit amount must be greater than 0.");
 
-            using var dbTransaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            using var dbTransaction = _context.Database.BeginTransaction();
             try
             {
                 var account = _context.Accounts.FirstOrDefault(a => a.AccountNumber == accountNumber);
@@ -217,8 +253,8 @@ namespace Vireon.BusinessLayer.Concrete
 
                 _context.SaveChanges();
                 dbTransaction.Commit();
-                
-                _logger.LogInformation("💰 Deposit successful: {Amount} TRY to {AccountNumber}", amount, accountNumber);
+
+                _logger.LogInformation("💰 Deposit successful: {Amount} {Currency} to {AccountNumber}", amount, account.Currency, accountNumber);
             }
             catch (Exception ex)
             {
@@ -226,6 +262,12 @@ namespace Vireon.BusinessLayer.Concrete
                 _logger.LogError(ex, "❌ Deposit failed for {AccountNumber}", accountNumber);
                 throw;
             }
+        }
+        public int GetRecentTransactionCount(int accountId, int minutes)
+        {
+            var timeLimit = DateTime.Now.AddMinutes(-minutes);
+            return _context.Transactions
+                .Count(t => t.SenderAccountId == accountId && t.CreatedAt >= timeLimit);
         }
     }
 }
