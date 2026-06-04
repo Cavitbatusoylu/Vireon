@@ -1,7 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Vireon.PresentationLayer.DTOs;
+using Vireon.DtoLayer.DTOs;
 using Vireon.EntityLayer.Concrete;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
@@ -41,16 +41,18 @@ namespace Vireon.PresentationLayer.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            // 2. YAPAY ZEKA ANALİZİ (ML.NET) - WOW FAKTÖRÜ
+            // 2. YAPAY ZEKA ANALİZİ - risk skoru kontrolü
             // İşlemi iş katmanına göndermeden önce AI "Şüpheli mi?" diye kontrol ediyor
-            var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount);
+            var hour = DateTime.Now.Hour;
+            var frequency = _transactionService.GetRecentTransactionCount(requestDto.SenderAccountId, 60);
+            var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount, hour, frequency);
 
             if (isFraud && probability > 0.7) // %70 üzeri risk varsa işlemi engelle
             {
                 return BadRequest(new
                 {
-                    message = "AI (ML.NET) flagged this transaction as high risk and blocked it automatically.",
-                    mesaj = "Yapay Zeka (ML.NET) bu işlemi yüksek riskli buldu ve otomatik olarak engelledi!",
+                    message = "AI risk engine flagged this transaction as high risk and blocked it automatically.",
+                    mesaj = "Yapay zeka risk motoru bu işlemi yüksek riskli buldu ve otomatik olarak engelledi!",
                     riskScore = probability,
                     status = "blocked"
                 });
@@ -111,7 +113,10 @@ namespace Vireon.PresentationLayer.Controllers
                     return NotFound(new { message = "Receiver account not found.", mesaj = "Alıcı hesap bulunamadı." });
 
                 // AI fraud check
-                var (isFraud, probability) = _fraudModelService.Predict((float)dto.Amount);
+                var hour = DateTime.Now.Hour;
+                var frequency = _transactionService.GetRecentTransactionCount(senderAccount.Id, 60);
+                var (isFraud, probability) = _fraudModelService.Predict((float)dto.Amount, hour, frequency);
+
                 if (isFraud && probability > 0.7)
                 {
                     return BadRequest(new

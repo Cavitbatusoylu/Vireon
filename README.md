@@ -8,7 +8,7 @@
 ### Enterprise-Grade Digital Banking Core System
 
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
-[![SQL Server](https://img.shields.io/badge/SQL%20Server-2019+-CC2927?style=for-the-badge&logo=microsoft-sql-server)](https://www.microsoft.com/sql-server)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
 [![Entity Framework](https://img.shields.io/badge/EF%20Core-8.0-512BD4?style=for-the-badge)](https://docs.microsoft.com/ef/core)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](https://caps-hewlett-sara-kinase.trycloudflare.com)
@@ -31,10 +31,10 @@
 
 - ✅ **ACID Transaction**: Tüm finansal işlemler atomik, tutarlı, izole ve kalıcı
 - ✅ **Immutable Ledger**: Değişmez muhasebe defteri - kayıtlar silinemez
-- ✅ **Fraud Detection**: Gerçek zamanlı kural tabanlı risk analizi (ML.NET)
+- ✅ **Fraud Detection**: Gerçek zamanlı kural tabanlı risk analizi (deterministik risk motoru)
 - ✅ **Daily Limits**: Günlük işlem limiti kontrolü ve otomatik sıfırlama
 - ✅ **Modern UI/UX**: Responsive, PWA destekli web arayüzü
-- ✅ **AI Integration**: Neon AI Coach (Kumru AI - Hugging Face)
+- ✅ **AI Integration**: Neon AI Coach (Groq API - Llama 3.1)
 - ✅ **Real-time Charts**: Canlı bakiye ve işlem grafikleri (Chart.js)
 - ✅ **QR Payment**: QR kod ile ödeme sistemi
 - ✅ **Multi-language**: Türkçe/İngilizce dil desteği
@@ -65,10 +65,10 @@ Vireon, enterprise-grade performans ve güvenilirlik için modern teknolojiler k
 | **ASP.NET Core** | 8.0 | Web API Framework |
 | **C#** | 12 | Primary Language |
 | **Entity Framework Core** | 8.0 | ORM & Database Access |
-| **SQL Server** | 2019+ | Primary Database |
+| **SQLite** | 3 | Embedded Primary Database |
 | **FluentValidation** | Latest | Input Validation |
 | **AutoMapper** | Latest | Object Mapping |
-| **ML.NET** | Latest | Fraud Detection AI |
+| **Rule-based Engine** | - | Deterministic Fraud Detection |
 
 ### 🎨 Frontend Stack
 
@@ -93,8 +93,8 @@ Vireon, enterprise-grade performans ve güvenilirlik için modern teknolojiler k
 
 * ✅ **ACID Transactions:** Database-level transaction management with automatic rollback
 * ✅ **Immutable Ledger:** Append-only financial records for complete audit trail
-* ✅ **Fraud Detection:** ML.NET-powered risk analysis with real-time blocking
-* ✅ **AI Integration:** Kumru AI (Hugging Face) for banking assistance
+* ✅ **Fraud Detection:** Rule-based deterministic risk analysis with real-time blocking
+* ✅ **AI Integration:** Groq API (Llama 3.1) for banking assistance
 * ✅ **Real-time Updates:** Live balance and transaction tracking
 * ✅ **PWA Support:** Installable web application
 * ✅ **Multi-language:** Turkish/English support
@@ -183,9 +183,11 @@ Vireon/
 
 ### Gereksinimler
 - .NET 8.0 SDK
-- SQL Server 2019+ (LocalDB veya Express yeterli)
 - Visual Studio 2022 veya VS Code
 - Git
+- (Opsiyonel) Masaüstü uygulaması için Node.js + Electron
+
+> SQLite gömülü (embedded) bir veritabanı olduğu için ayrı bir veritabanı sunucusu kurmaya gerek yoktur.
 
 ### 1. Projeyi Klonlayın
 ```bash
@@ -193,28 +195,18 @@ git clone https://github.com/Cavitbatusoylu/Vireon.git
 cd Vireon
 ```
 
-### 2. SQL Server Bağlantısını Yapılandırın
-`Vireon.PresentationLayer/appsettings.json` dosyasını düzenleyin:
+### 2. Veritabanı Bağlantısı (Yapılandırma Gerekmez)
+Bağlantı `Vireon.PresentationLayer/appsettings.json` içinde hazır olarak gelir ve SQLite dosyasını işaret eder:
 
 ```json
 {
   "ConnectionStrings": {
-    "VireonDB": "Server=localhost;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;"
+    "VireonDB": "Data Source=../Database/vireon_local.db"
   }
 }
 ```
 
-**Alternatif Connection String'ler:**
-```
-// SQL Server Express
-Server=localhost\\SQLEXPRESS;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;
-
-// LocalDB
-Server=(localdb)\\mssqllocaldb;Database=VireonDB;Integrated Security=true;TrustServerCertificate=true;
-
-// SQL Authentication
-Server=localhost;Database=VireonDB;User Id=sa;Password=YourPassword;TrustServerCertificate=true;
-```
+Veritabanı dosyası repoda bulunur; isterseniz silip ilk çalıştırmada sıfırdan oluşturabilirsiniz.
 
 ### 3. Projeyi Çalıştırın
 ```bash
@@ -222,10 +214,10 @@ cd Vireon.PresentationLayer
 dotnet run
 ```
 
-**ÖNEMLİ:** Database otomatik oluşturulur! İlk çalıştırmada:
-- `VireonDB` database'i oluşturulur
+**ÖNEMLİ:** Database otomatik hazırlanır! İlk çalıştırmada:
+- SQLite dosyası yoksa oluşturulur, migration'lar uygulanır
 - Tüm tablolar oluşturulur
-- Kayıt sistemi aktif (seed data yok)
+- Seed data eklenir (Ana Admin `cavit@vireon.com` ve `enes@vireon.com`)
 
 Tarayıcınızda `https://localhost:5202` adresini açın.
 
@@ -291,8 +283,8 @@ Detaylı database dokümantasyonu için: [DATABASE_DOCUMENTATION.md](DATABASE_DO
 - Immutable audit trail
 
 ### 🤖 AI Integration
-- Neon AI Coach (Kumru AI)
-- Hugging Face entegrasyonu
+- Neon AI Coach (Groq API)
+- Llama 3.1 8B entegrasyonu
 - Doğal dil işleme
 - Bankacılık asistanı
 
@@ -850,9 +842,6 @@ cloudflared tunnel --url http://localhost:5202
 # Proje derleme
 dotnet build
 
-# Testleri çalıştır
-dotnet test
-
 # Migration oluştur
 dotnet ef migrations add MigrationName
 
@@ -869,7 +858,7 @@ dotnet run --project Vireon.PresentationLayer
 
 - [ASP.NET Core Docs](https://docs.microsoft.com/aspnet/core)
 - [Entity Framework Core](https://docs.microsoft.com/ef/core)
-- [MySQL Documentation](https://dev.mysql.com/doc/)
+- [SQLite Documentation](https://www.sqlite.org/docs.html)
 - [Chart.js Documentation](https://www.chartjs.org/docs/)
 - [PWA Guide](https://web.dev/progressive-web-apps/)
 
