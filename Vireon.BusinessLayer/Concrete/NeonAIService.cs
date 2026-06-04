@@ -43,14 +43,14 @@ namespace Vireon.BusinessLayer.Concrete
             }},
             { "güvenlik", new[] {
                 "Vireon şifrelerinizi BCrypt ile hash'leyerek korur. Fraud Detection sistemi şüpheli işlemleri otomatik tespit eder.",
-                "Güvenlik önlemlerimiz: BCrypt şifreleme, ACID transaction'lar, Fraud analizi ve ML.NET tabanlı risk puanlama sistemi."
+                "Güvenlik önlemlerimiz: BCrypt şifreleme, ACID transaction'lar, Fraud analizi ve kural tabanlı risk puanlama sistemi."
             }},
             { "yardım", new[] {
                 "Size yardımcı olabileceğim konular:\n• 💰 Bakiye sorgulama\n• 💸 Para transferi\n• ⚡ Limit bilgileri\n• 📋 Hesap detayları\n• 🔐 Güvenlik\n• 📊 İşlem geçmişi",
                 "Neon AI olarak bankacılık işlemlerinizde rehberlik edebilirim. Bir konu seçin veya sorunuzu doğrudan yazın!"
             }},
             { "fraud", new[] {
-                "Vireon, kural tabanlı ve ML.NET destekli yapay zeka ile şüpheli işlemleri otomatik olarak tespit eder. Yüksek tutarlı veya sık tekrarlayan işlemler FraudLogs tablosuna kaydedilir.",
+                "Vireon, kural tabanlı yapay zeka risk motoru ile şüpheli işlemleri otomatik olarak tespit eder. Yüksek tutarlı veya sık tekrarlayan işlemler FraudLogs tablosuna kaydedilir.",
                 "Fraud Detection sistemimiz her transferi analiz eder. %70 üzeri risk puanı alan işlemler otomatik olarak engellenir."
             }}
         };

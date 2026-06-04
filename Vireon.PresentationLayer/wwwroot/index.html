@@ -12,7 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260415-3">
+    <link rel="stylesheet" href="vireon.css?v=20260604-1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -227,6 +227,10 @@
                 <div class="menu-badge">CT</div>
                 <div class="menu-title" data-tr="İletişim" data-en="Contact">Contact</div>
             </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-desktop')">
+                <div class="menu-badge">DT</div>
+                <div class="menu-title" data-tr="Masaüstü" data-en="Desktop">Desktop</div>
+            </div>
         </div>
 
         <!-- Content Sections -->
@@ -331,7 +335,7 @@
                                     <div class="glass-card recent-tx-modern">
                                         <h4 data-tr="Son İşlemler" data-en="Recent Transactions">Recent Transactions</h4>
                                         <div id="overviewTransactions" class="tx-list-modern">
-                                            <p>Yükleniyor...</p>
+                                            <p data-tr="Yükleniyor..." data-en="Loading...">Loading...</p>
                                         </div>
                                     </div>
                                 </div>
@@ -346,7 +350,7 @@
                                 <div class="glass-card db-preview-card">
                                     <div class="card-header-modern">
                                         <h4 data-tr="Banka Verileri (Live)" data-en="Bank Data (Live)">Bank Data (Live)</h4>
-                                        <button class="refresh-btn-mini" onclick="fetchDatabaseStats()"><i class="fas fa-sync"></i></button>
+                                        <button class="refresh-btn-mini" onclick="fetchDatabaseStats()" aria-label="Refresh database stats">↻</button>
                                     </div>
                                     <div class="vireon-table-scroll">
                                         <table id="dbUsersTable" class="vireon-table-modern">
@@ -371,7 +375,7 @@
                                     </div>
                                     <div class="ai-chat-footer">
                                         <input type="text" id="aiInput" placeholder="Neon'a sor..." onkeypress="if(event.key==='Enter') sendAiMessage()">
-                                        <button class="ai-send-btn" onclick="sendAiMessage()"><i class="fas fa-paper-plane"></i></button>
+                                        <button class="ai-send-btn" onclick="sendAiMessage()" aria-label="Send message">➤</button>
                                     </div>
                                 </div>
                             </div>
@@ -803,7 +807,6 @@
                     <div class="tab-buttons">
                         <button class="tab-btn active" onclick="switchTab(this, 'backend')" data-tr="Backend" data-en="Backend">Backend</button>
                         <button class="tab-btn" onclick="switchTab(this, 'database')" data-tr="Veritabanı" data-en="Database">Database</button>
-                        <button class="tab-btn" onclick="switchTab(this, 'architecture')" data-tr="Mimari" data-en="Architecture">Architecture</button>
                         <button class="tab-btn" onclick="switchTab(this, 'security')" data-tr="Güvenlik" data-en="Security">Security</button>
                         <button class="tab-btn" onclick="switchTab(this, 'desktop')" data-tr="Masaüstü" data-en="Desktop">Desktop</button>
                     </div>
@@ -835,6 +838,42 @@
                                         </p>
                                     </div>
                                 </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">⚡</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Günlük Limit Motoru" data-en="Daily Limit Engine">Daily Limit Engine</h4>
+                                        <p data-tr="Kullanıcı bazlı günlük transfer limiti izlenir, gün sonunda otomatik sıfırlanır ve limit aşımı girişimleri loglanır."
+                                            data-en="User-based daily transfer limits are tracked, auto-reset daily, and over-limit attempts are logged.">
+                                            User-based daily transfer limits are tracked, auto-reset daily, and over-limit attempts are logged.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📒</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Muhasebe Defteri Servisi" data-en="Ledger Service">Ledger Service</h4>
+                                        <p data-tr="Her transfer/deposit işleminde önceki ve yeni bakiyeyi kaydeden immutable ledger kayıtları oluşturulur."
+                                            data-en="Immutable ledger entries are generated for every transfer/deposit with previous and new balance values.">
+                                            Immutable ledger entries are generated for every transfer/deposit with previous and new balance values.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🤖</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Neon AI Entegrasyonu" data-en="Neon AI Integration">Neon AI Integration</h4>
+                                        <p data-tr="Neon AI sohbet endpoint'i ile kullanıcıya finansal akışlar hakkında rehberlik ve durum geri bildirimi sağlanır."
+                                            data-en="The Neon AI chat endpoint provides guidance and status feedback to users about financial workflows.">
+                                            The Neon AI chat endpoint provides guidance and status feedback to users about financial workflows.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -852,73 +891,40 @@
                                         </p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-pane" id="architecture">
-                            <div class="arch-diagram glass-card" style="margin-bottom: 30px;">
-                                <h3 data-tr="Katmanlı Mimari" data-en="Layered Architecture">Layered Architecture</h3>
-                                <div class="arch-layers">
-                                    <div class="arch-layer">
-                                        <div class="layer-icon">🌐</div>
-                                        <div class="layer-info">
-                                            <h4>Presentation Layer</h4>
-                                            <p data-tr="ASP.NET Core Web API + Modern Web UI" data-en="ASP.NET Core Web API + Modern Web UI">ASP.NET Core Web API + Modern Web UI</p>
-                                        </div>
-                                    </div>
-                                    <div class="arch-arrow">↓</div>
-                                    <div class="arch-layer">
-                                        <div class="layer-icon">⚙️</div>
-                                        <div class="layer-info">
-                                            <h4>Business Layer</h4>
-                                            <p data-tr="Transaction Manager, Fraud Detection, AI Services" data-en="Transaction Manager, Fraud Detection, AI Services">Transaction Manager, Fraud Detection, AI Services</p>
-                                        </div>
-                                    </div>
-                                    <div class="arch-arrow">↓</div>
-                                    <div class="arch-layer">
-                                        <div class="layer-icon">💾</div>
-                                        <div class="layer-info">
-                                            <h4>Data Access Layer</h4>
-                                            <p data-tr="Entity Framework Core + Repository Pattern" data-en="Entity Framework Core + Repository Pattern">Entity Framework Core + Repository Pattern</p>
-                                        </div>
-                                    </div>
-                                    <div class="arch-arrow">↓</div>
-                                    <div class="arch-layer">
-                                        <div class="layer-icon">🗄️</div>
-                                        <div class="layer-info">
-                                            <h4>Database Layer</h4>
-                                            <p data-tr="MySQL - ACID Compliant Transactions" data-en="MySQL - ACID Compliant Transactions">MySQL - ACID Compliant Transactions</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="services-list">
                                 <div class="service-row">
                                     <div class="service-row-icon">
-                                        <div style="font-size: 48px;">🔒</div>
+                                        <div style="font-size: 48px;">🔗</div>
                                     </div>
                                     <div class="service-row-content">
-                                        <h4 data-tr="ACID Garantisi" data-en="ACID Guarantee">ACID Guarantee</h4>
-                                        <p data-tr="Tüm finansal işlemler atomik, tutarlı, izole ve kalıcıdır" data-en="All financial transactions are atomic, consistent, isolated, and durable">All financial transactions are atomic, consistent, isolated, and durable</p>
+                                        <h4 data-tr="İlişkiler ve Kısıtlar" data-en="Relations & Constraints">Relations & Constraints</h4>
+                                        <p data-tr="Users-Accounts-DailyLimits-Transactions arasında foreign key, unique ve check constraint yapıları ile veri bütünlüğü korunur."
+                                            data-en="Data integrity is enforced with foreign keys, unique constraints, and check constraints across core tables.">
+                                            Data integrity is enforced with foreign keys, unique constraints, and check constraints across core tables.
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="service-row">
                                     <div class="service-row-icon">
-                                        <div style="font-size: 48px;">📊</div>
+                                        <div style="font-size: 48px;">🧬</div>
                                     </div>
                                     <div class="service-row-content">
-                                        <h4 data-tr="Immutable Ledger" data-en="Immutable Ledger">Immutable Ledger</h4>
-                                        <p data-tr="Değişmez muhasebe defteri - kayıtlar silinemez veya değiştirilemez" data-en="Immutable accounting ledger - records cannot be deleted or modified">Immutable accounting ledger - records cannot be deleted or modified</p>
+                                        <h4 data-tr="Migration Yönetimi" data-en="Migration Management">Migration Management</h4>
+                                        <p data-tr="Entity Framework migration yapısı ile şema evrimi kontrollü şekilde ilerletilir ve sürüm geçmişi korunur."
+                                            data-en="Schema evolution is managed via Entity Framework migrations while preserving version history.">
+                                            Schema evolution is managed via Entity Framework migrations while preserving version history.
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="service-row">
                                     <div class="service-row-icon">
-                                        <div style="font-size: 48px;">🛡️</div>
+                                        <div style="font-size: 48px;">📈</div>
                                     </div>
                                     <div class="service-row-content">
-                                        <h4 data-tr="Fraud Detection" data-en="Fraud Detection">Fraud Detection</h4>
-                                        <p data-tr="Gerçek zamanlı kural tabanlı fraud analizi ve risk skorlama" data-en="Real-time rule-based fraud analysis and risk scoring">Real-time rule-based fraud analysis and risk scoring</p>
+                                        <h4 data-tr="Raporlama Sorguları" data-en="Reporting Queries">Reporting Queries</h4>
+                                        <p data-tr="Dashboard, admin panel ve hesap bilgi ekranları için optimize edilmiş okuma sorguları kullanılır."
+                                            data-en="Optimized read queries power dashboard, admin panel, and account information screens.">
+                                            Optimized read queries power dashboard, admin panel, and account information screens.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -938,6 +944,42 @@
                                         </p>
                                     </div>
                                 </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔐</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Şifre Güvenliği" data-en="Password Security">Password Security</h4>
+                                        <p data-tr="Kullanıcı şifreleri BCrypt ile hashlenerek saklanır; düz metin parola veritabanında tutulmaz."
+                                            data-en="User passwords are stored with BCrypt hashing; plaintext passwords are never persisted.">
+                                            User passwords are stored with BCrypt hashing; plaintext passwords are never persisted.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🚨</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Fraud ve Anomali Kayıtları" data-en="Fraud & Anomaly Logging">Fraud & Anomaly Logging</h4>
+                                        <p data-tr="Yüksek tutar, gece transferi ve yüksek frekans gibi risk desenleri FraudLogs tablosuna kayıt edilir."
+                                            data-en="Risk patterns like high amount, night transfer, and high frequency are logged to FraudLogs.">
+                                            Risk patterns like high amount, night transfer, and high frequency are logged to FraudLogs.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🧱</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hata Dayanıklılığı" data-en="Error Resilience">Error Resilience</h4>
+                                        <p data-tr="Global middleware ile API hataları standartlaştırılır; frontend tarafında güvenli fallback ve toast geri bildirimi uygulanır."
+                                            data-en="API errors are standardized via global middleware, while frontend applies safe fallbacks and toast feedback.">
+                                            API errors are standardized via global middleware, while frontend applies safe fallbacks and toast feedback.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -952,6 +994,30 @@
                                         <p data-tr="Kesintisiz masaüstü deneyimi ve yerel bildirimler."
                                             data-en="Seamless desktop experience with native windowing and icons.">
                                             Seamless desktop experience with native windowing and icons.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📦</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Paketleme ve Dağıtım" data-en="Packaging & Distribution">Packaging & Distribution</h4>
+                                        <p data-tr="Electron tabanlı build akışı ile Windows kurulum çıktıları alınır ve kurum içi dağıtım senaryoları desteklenir."
+                                            data-en="Electron-based build flow produces Windows installers and supports internal distribution scenarios.">
+                                            Electron-based build flow produces Windows installers and supports internal distribution scenarios.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔄</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Web ile Senkron Çalışma" data-en="Web-Desktop Sync">Web-Desktop Sync</h4>
+                                        <p data-tr="Masaüstü sürüm, aynı API altyapısını kullanarak web istemcisiyle eş zamanlı veri akışı ve tutarlı deneyim sunar."
+                                            data-en="The desktop app uses the same API backbone as web, ensuring synchronized data flow and consistent UX.">
+                                            The desktop app uses the same API backbone as web, ensuring synchronized data flow and consistent UX.
                                         </p>
                                     </div>
                                 </div>
@@ -1364,7 +1430,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260415-3" defer></script>
+    <script src="vireon.js?v=20260604-1" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {

@@ -57,15 +57,25 @@ function createToastContainer() {
     setTimeout(clearLoader, 3500);
 })();
 
-// PWA Service Worker devre dışı bırakıldı (Yerel geliştirme önbellek kilitlerini önlemek için)
-window.addEventListener('load', () => {
-   if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-         for (let registration of registrations) {
-            registration.unregister();
-            console.log('SW Unregistered successfully — cache cleared.');
-         }
-      });
+// Service Worker: localhost/electron'da devre dışı, prod ortamda aktif.
+window.addEventListener('load', async () => {
+   if (!('serviceWorker' in navigator)) return;
+
+   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+   const isFileProtocol = window.location.protocol === 'file:';
+
+   if (isLocalhost || isFileProtocol) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+         await registration.unregister();
+      }
+      return;
+   }
+
+   try {
+      await navigator.serviceWorker.register('/sw.js');
+   } catch (error) {
+      console.warn('Service worker register failed:', error);
    }
 });
 
@@ -73,10 +83,25 @@ window.addEventListener('load', () => {
 let isTransitioning = false;
 let currentUser = null;
 let deferredPrompt; 
+let hasAnimatedStats = false;
 
 // Safely get elements
 const getEl = (id) => document.getElementById(id);
 const getEls = (selector) => document.querySelectorAll(selector);
+const getLocale = () => (window.currentLang === 'tr' ? 'tr-TR' : 'en-US');
+const formatNumber = (value, minimumFractionDigits = 2, maximumFractionDigits = 2) =>
+   new Intl.NumberFormat(getLocale(), { minimumFractionDigits, maximumFractionDigits }).format(Number(value) || 0);
+const formatDate = (value, options) => new Date(value).toLocaleDateString(getLocale(), options);
+
+async function fetchJsonOrThrow(url, options) {
+   const response = await fetch(url, options);
+   const payload = await response.json().catch(() => ({}));
+   if (!response.ok) {
+      const message = payload?.mesaj || payload?.message || `HTTP ${response.status}`;
+      throw new Error(message);
+   }
+   return payload;
+}
 
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
@@ -99,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
        initNavigation();
        initInteractions();
+       // Landing sayfasında metrikler ilk açılışta da dolsun.
+       setTimeout(animateStats, 300);
        console.log("NEON AI: Systems Initialized Successfully");
    } catch (e) {
        console.error("NEON AI: Init Error", e);
@@ -107,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initNavigation() {
    document.querySelectorAll('.menu-item').forEach(item => {
+      // Kartlarda inline onclick zaten var; çift tetiklenmeyi önle.
+      if (item.hasAttribute('onclick')) return;
+
       item.addEventListener('click', function() {
          const onclick = this.getAttribute('onclick');
          if (onclick) {
@@ -130,33 +160,30 @@ function smoothScrollTo(id) {
 }
 
 function scrollToSection(id) {
-    console.log('scrollToSection called with:', id);
-    
-    document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
-        sec.classList.remove('active');
-        sec.style.display = 'none';
-        sec.style.visibility = 'hidden';
-    });
+    const target = getEl(id);
+    if (!target) return;
 
+    // Landing akışında kartlar sabit kalır, kullanıcı aşağı doğru section'lara iner.
     const menuGrid = getEl('menuGrid');
     const mainHeader = getEl('mainHeader');
     const mainFooter = getEl('mainFooter');
+    if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
+    if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
+    if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
 
-    if (menuGrid) { menuGrid.style.display = 'none'; menuGrid.style.visibility = 'hidden'; }
-    if (mainHeader) { mainHeader.style.display = 'none'; mainHeader.style.visibility = 'hidden'; }
-    if (mainFooter) { mainFooter.style.display = 'none'; mainFooter.style.visibility = 'hidden'; }
+    document.querySelectorAll('.landing-content-section').forEach(sec => {
+        sec.style.display = 'block';
+        sec.style.visibility = 'visible';
+        sec.style.opacity = '1';
+    });
 
-    const el = document.getElementById(id);
-    if (el) {
-        el.classList.add('active');
-        el.style.display = 'block';
-        el.style.opacity = '1';
-        el.style.visibility = 'visible';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (id === 'section-introduction') setTimeout(animateStats, 500);
-    } else {
-        backToMenu();
-    }
+    document.body.classList.remove('dashboard-active');
+
+    // Kart tıklamasında hedef bölüme güvenilir şekilde git.
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.history.replaceState(null, '', `#${id}`);
+
+    if (id === 'section-introduction') setTimeout(animateStats, 500);
 }
 
 function initInteractions() {
@@ -259,6 +286,9 @@ function showSection(sectionId) {
       section.style.display = 'block';
       section.style.opacity = '1';
       section.style.visibility = 'visible';
+   } else {
+      backToMenu();
+      return;
    }
 
    if (sectionId === 'dashboard') {
@@ -333,9 +363,17 @@ function scrollToDashboardTop() {
 
 // Animate Stats
 function animateStats() {
-   getEls('.metric-value[data-target]').forEach((el, index) => {
+   if (hasAnimatedStats) return;
+
+   const statElements = getEls('.metric-value[data-target]');
+   if (!statElements.length) return;
+
+   hasAnimatedStats = true;
+   statElements.forEach((el, index) => {
       setTimeout(() => {
-         const target = parseInt(el.dataset.target);
+         const target = parseInt(el.dataset.target, 10);
+         if (Number.isNaN(target)) return;
+
          let current = 0;
          const increment = target / 40;
          const timer = setInterval(() => {
@@ -603,6 +641,12 @@ function updateNavbarForLoggedOutUser() {
     if (loginBtn) loginBtn.style.display = 'inline-flex';
     if (logoutBtn) logoutBtn.style.display = 'none';
     if (dashboardBtn) dashboardBtn.style.display = 'none';
+
+    const adminMenu = getEl('adminMenuItem');
+    if (adminMenu) adminMenu.style.display = 'none';
+
+    const dbUsersCard = document.querySelector('#dash-db-explorer .db-preview-card');
+    if (dbUsersCard) dbUsersCard.style.display = 'none';
 }
 
 function handleLogout() {
@@ -643,8 +687,7 @@ async function fetchDashboardData() {
     if (!currentUser) return;
     const lang = window.currentLang || 'en';
     try {
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
+        const accounts = await fetchJsonOrThrow('/api/accounts');
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         if (userAccount) {
@@ -653,13 +696,12 @@ async function fetchDashboardData() {
             const accEl = getEl('dashAccountNo');
             const curEl = getEl('dashCurrency');
             
-            if (balEl) balEl.textContent = userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+            if (balEl) balEl.textContent = formatNumber(userAccount.balance, 2, 2);
             if (accEl) accEl.textContent = userAccount.accountNumber;
             if (curEl) curEl.textContent = userAccount.currency;
 
             // Fetch transactions
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
+            const transactions = await fetchJsonOrThrow('/api/transactions');
             const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
             
             // Update overview transaction list
@@ -676,14 +718,13 @@ async function fetchDashboardData() {
 
             // Update daily limits
             try {
-                const limitsRes = await fetch('/api/dailylimits');
-                const limits = await limitsRes.json();
+                const limits = await fetchJsonOrThrow('/api/dailylimits');
                 const userLimit = limits.find(l => l.userId === currentUser.id);
                 if (userLimit) {
                     const maxEl = getEl('maxLimit');
                     const usedEl = getEl('usedLimit');
-                    if (maxEl) maxEl.textContent = userLimit.maxDailyLimit.toLocaleString('tr-TR');
-                    if (usedEl) usedEl.textContent = userLimit.usedLimit.toLocaleString('tr-TR');
+                    if (maxEl) maxEl.textContent = formatNumber(userLimit.maxDailyLimit, 0, 2);
+                    if (usedEl) usedEl.textContent = formatNumber(userLimit.usedLimit, 0, 2);
                 }
             } catch (e) { 
                 console.error('Limits fetch error:', e); 
@@ -724,7 +765,7 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
     if (balanceChart) balanceChart.destroy();
     if (expensePieChart) expensePieChart.destroy();
 
-    const labels = txs.slice(-6).map(t => new Date(t.date).toLocaleDateString('tr-TR', {day:'numeric', month:'short'}));
+    const labels = txs.slice(-6).map(t => formatDate(t.date, { day: 'numeric', month: 'short' }));
     const dataPoints = txs.slice(-6).map(t => t.amount);
 
     balanceChart = new Chart(lineCtx, {
@@ -775,9 +816,9 @@ async function fetchDatabaseStats() {
         const isAdmin = currentUser && currentUser.role === 'Admin';
         
         const [users, accounts, transactions] = await Promise.all([
-            fetch('/api/users').then(r => r.json()),
-            fetch('/api/accounts').then(r => r.json()),
-            fetch('/api/transactions').then(r => r.json())
+            fetchJsonOrThrow('/api/users'),
+            fetchJsonOrThrow('/api/accounts'),
+            fetchJsonOrThrow('/api/transactions')
         ]);
 
         const container = getEl('dbStatsContainer');
@@ -805,7 +846,7 @@ async function fetchDatabaseStats() {
                             <td>${u.id}</td>
                             <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                             <td>${u.accountNumber || '-'}</td>
-                            <td class="bal-text">₺${acc ? acc.balance.toLocaleString() : '0'}</td>
+                            <td class="bal-text">₺${formatNumber(acc ? acc.balance : 0, 2, 2)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -1043,15 +1084,28 @@ async function handlePasswordChange() {
       return;
    }
    try {
-      const cur = await fetch(`/api/users/${currentUser.id}`).then(r => r.json());
-      if (cur.password !== curPwd) {
+      // Backend hash kullandığı için mevcut şifreyi login endpoint'i ile doğruluyoruz.
+      const verifyRes = await fetch('/api/users/login', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ email: currentUser.email, password: curPwd })
+      });
+
+      if (!verifyRes.ok) {
          showToast(lang === 'tr' ? 'Mevcut şifre yanlış.' : 'Current password is incorrect.', 'error');
          return;
       }
+
       const res = await fetch(`/api/users/${currentUser.id}`, {
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ id: currentUser.id, name: cur.name, surname: cur.surname, email: cur.email, password: newPwd })
+         body: JSON.stringify({
+            id: currentUser.id,
+            name: currentUser.name,
+            surname: currentUser.surname || ' ',
+            email: currentUser.email,
+            password: newPwd
+         })
       });
       if (res.ok) {
          curPwdField.value = '';
@@ -1065,47 +1119,11 @@ async function handlePasswordChange() {
       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
    }
 }
-// ========== DASHBOARD ACCOUNT INFO ==========
-async function loadAccountInfo() {
-    if (!currentUser) return;
-    
-    // Yükleme sırasında spinner veya - gösterelim
-    const setValue = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
-    
-    try {
-        setValue('infoAccountNumber', currentUser.accountNumber || '-');
-        setValue('infoFullName', (currentUser.name + ' ' + (currentUser.surname || '')).trim());
-        setValue('infoEmail', currentUser.email || '-');
-        
-        if (currentUser.createdAt) {
-            const d = new Date(currentUser.createdAt);
-            setValue('infoCreatedAt', d.toLocaleDateString('tr-TR'));
-        } else {
-            setValue('infoCreatedAt', '-');
-        }
-
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
-        const userAccount = accounts.find(a => a.userId === currentUser.id);
-        
-        if (userAccount) {
-            setValue('infoBalance', '₺' + userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
-            setValue('infoCurrency', userAccount.currency || 'TRY');
-            
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
-            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
-            setValue('infoTxCount', userTxs.length.toString());
-        }
-    } catch (err) {
-        console.error('Account Info Error:', err);
-    }
-}
-
 // ========== TRANSFERS ==========
 async function handleSendTransfer() {
-    if (!currentUser || !currentUser.accountNumber) {
-        showToast('Please login first', 'warning');
+   if (!currentUser || !currentUser.accountNumber) {
+        const lang = window.currentLang || 'en';
+        showToast(lang === 'tr' ? 'Lutfen once giris yapin.' : 'Please login first.', 'warning');
         return;
     }
     
@@ -1201,11 +1219,11 @@ function updateTransactionList(txs, accountId, listElement) {
                     <div class="tx-meta">
                         <span class="tx-desc">${label}</span>
                         ${desc}
-                        <span class="tx-date">${new Date(tx.date).toLocaleDateString('tr-TR', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                        <span class="tx-date">${new Date(tx.date).toLocaleString(getLocale(), {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
                     </div>
                     ${statusBadge}
                 </div>
-                <div class="tx-amount ${amountClass}">${symbol}₺${tx.amount.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</div>
+                <div class="tx-amount ${amountClass}">${symbol}${formatNumber(tx.amount, 2, 2)} TRY</div>
             </div>`;
     }).join('');
 }
@@ -1347,22 +1365,20 @@ async function loadAccountInfo() {
         if (accNumEl) accNumEl.textContent = currentUser.accountNumber || '-';
         if (nameEl) nameEl.textContent = `${currentUser.name} ${currentUser.surname || ''}`.trim();
         if (emailEl) emailEl.textContent = currentUser.email || '-';
-        if (createdEl) createdEl.textContent = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('tr-TR') : '-';
+        if (createdEl) createdEl.textContent = currentUser.createdAt ? formatDate(currentUser.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
         // Balance
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
+        const accounts = await fetchJsonOrThrow('/api/accounts');
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         const balEl = getEl('infoBalance');
         const curEl = getEl('infoCurrency');
-        if (balEl) balEl.textContent = userAccount ? `₺${userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺0.00';
+        if (balEl) balEl.textContent = userAccount ? `${formatNumber(userAccount.balance, 2, 2)} TRY` : `0.00 TRY`;
         if (curEl) curEl.textContent = userAccount?.currency || 'TRY';
 
         // Transaction history
         if (userAccount) {
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
+            const transactions = await fetchJsonOrThrow('/api/transactions');
             const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
             
             const historyEl = getEl('infoTransactionHistory');
@@ -1373,6 +1389,7 @@ async function loadAccountInfo() {
         }
     } catch (err) {
         console.error('Account info error:', err);
+        showToast(lang === 'tr' ? 'Hesap bilgileri yuklenemedi.' : 'Could not load account details.', 'error');
     }
 }
 
@@ -1382,20 +1399,18 @@ async function loadAdminPanel() {
 
     try {
         // 1. Admin Stats
-        const statsRes = await fetch('/api/users/admin-stats');
-        const stats = await statsRes.json();
+        const stats = await fetchJsonOrThrow('/api/users/admin-stats');
 
         const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
         setVal('adminTotalUsers', stats.totalUsers);
         setVal('adminTotalAccounts', stats.totalAccounts);
         setVal('adminTotalTx', stats.totalTransactions);
-        setVal('adminTotalBalance', '₺' + stats.totalBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+        setVal('adminTotalBalance', `${formatNumber(stats.totalBalance, 2, 2)} TRY`);
         setVal('adminTotalFraud', stats.totalFraudLogs);
         setVal('adminTotalLedger', stats.totalLedgerEntries);
 
         // 2. All Users
-        const usersRes = await fetch('/api/users/admin-users');
-        const users = await usersRes.json();
+        const users = await fetchJsonOrThrow('/api/users/admin-users');
         const usersBody = getEl('adminUsersBody');
         if (usersBody) {
             usersBody.innerHTML = users.map(u => `
@@ -1404,7 +1419,7 @@ async function loadAdminPanel() {
                     <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                     <td>${escapeHtml(u.email)}</td>
                     <td>${u.accountNumber || '-'}</td>
-                    <td class="bal-text">₺${(u.balance || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td class="bal-text">${formatNumber((u.balance || 0), 2, 2)} TRY</td>
                     <td>${u.transactionCount || 0}</td>
                     <td><span class="role-badge role-${(u.role || 'User').toLowerCase()}">${u.role || 'User'}</span></td>
                 </tr>
@@ -1412,8 +1427,7 @@ async function loadAdminPanel() {
         }
 
         // 3. All Transactions
-        const txRes = await fetch('/api/users/admin-transactions');
-        const txs = await txRes.json();
+        const txs = await fetchJsonOrThrow('/api/users/admin-transactions');
         const txBody = getEl('adminTxBody');
         if (txBody) {
             txBody.innerHTML = txs.map(tx => `
@@ -1422,9 +1436,9 @@ async function loadAdminPanel() {
                     <td><span class="type-badge type-${tx.type.toLowerCase()}">${tx.type}</span></td>
                     <td>${escapeHtml(tx.senderName || tx.senderAccount || '-')}</td>
                     <td>${escapeHtml(tx.receiverName || tx.receiverAccount || '-')}</td>
-                    <td class="bal-text">₺${tx.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td class="bal-text">${formatNumber(tx.amount, 2, 2)} TRY</td>
                     <td>${escapeHtml(tx.description || '-')}</td>
-                    <td>${new Date(tx.date).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                    <td>${new Date(tx.date).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
                     <td><span class="tx-status tx-status-${tx.status}">${tx.status}</span></td>
                 </tr>
             `).join('');
@@ -1432,5 +1446,7 @@ async function loadAdminPanel() {
 
     } catch (err) {
         console.error('Admin panel error:', err);
+        const lang = window.currentLang || 'en';
+        showToast(lang === 'tr' ? 'Admin panel verileri yuklenemedi.' : 'Could not load admin panel data.', 'error');
     }
 }
