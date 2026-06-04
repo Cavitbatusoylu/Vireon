@@ -1,9 +1,11 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
+using Vireon.EntityLayer.Concrete;
 using Vireon.PresentationLayer.Middleware;
 
 internal class Program
@@ -12,12 +14,32 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Serilog yapılandırması
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .WriteTo.Console()
+            .WriteTo.File("../logs/vireon-.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        builder.Host.UseSerilog();
+
         // Servisleri konteynere ekle
         builder.Services.AddDbContext<VireonContext>((serviceProvider, options) =>
         {
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            var connectionString = configuration.GetConnectionString("VireonDB");
-            options.UseSqlite(connectionString);
+            var rawConnection = configuration.GetConnectionString("VireonDB") ?? "Data Source=../Database/vireon_local.db";
+
+            // SQLite dosya yolunu çalışma dizininden (cwd) ve başlatma yönteminden bağımsız
+            // hale getiriyoruz. Böylece uygulama ister "dotnet run", ister derlenmiş .exe,
+            // ister farklı bir cihazdan çalıştırılsın her zaman repodaki ortak
+            // Database/vireon_local.db dosyası kullanılır (herkes aynı veriyi görür).
+            var csb = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(rawConnection);
+            if (!string.IsNullOrWhiteSpace(csb.DataSource) && !Path.IsPathRooted(csb.DataSource))
+            {
+                csb.DataSource = ResolveSharedDbPath(builder.Environment.ContentRootPath, csb.DataSource);
+            }
+
+            options.UseSqlite(csb.ConnectionString);
         });
 
         builder.Services.AddCors(options => // CORS politikası (Frontend erişimi için)
@@ -31,7 +53,19 @@ internal class Program
         });
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.EnableAnnotations();
+            c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "Vireon Digital Banking API",
+                Version = "v1",
+                Description = "Enterprise-grade digital banking core system with ACID transactions, immutable ledger, and AI-powered fraud detection."
+            });
+            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
+        });
 
         builder.Services.AddAutoMapper(config =>                                                                                            //Enes
         {
@@ -166,21 +200,94 @@ internal class Program
                 }
 
                 logger.LogInformation("✅ Database hazır!");
+
+                // ============================================================
+                // SEED DATA — Cavit (Ana Admin) ve Enes
+                var hasCavit = context.Users.Any(u => u.Email == "cavit@vireon.com");
+                if (!hasCavit)
+                {
+                    logger.LogInformation("🧹 Eski test verileri ve ilişkili tüm kayıtlar temizleniyor...");
+                    context.Database.ExecuteSqlRaw("DELETE FROM LedgerEntries;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM FraudLogs;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM Transactions;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM DailyLimits;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM Accounts;");
+                    context.Database.ExecuteSqlRaw("DELETE FROM Users;");
+
+                    logger.LogInformation("🌱 Asıl Admin (Cavit) ve Enes ekleniyor...");
+
+                    var seedUsers = new[]
+                    {
+                        new { Name = "Cavit Batu", Surname = "Soylu", Email = "cavit@vireon.com", Password = "admin123", AccountNo = "VR-99999", Balance = 1000000m, Role = "Admin" },
+                        new { Name = "Enes", Surname = "Kaya", Email = "enes@vireon.com", Password = "enes123", AccountNo = "VR-88888", Balance = 50000m, Role = "User" }
+                    };
+
+                    foreach (var s in seedUsers)
+                    {
+                        var user = new User
+                        {
+                            Name = s.Name,
+                            Surname = s.Surname,
+                            Email = s.Email,
+                            Password = BCrypt.Net.BCrypt.HashPassword(s.Password),
+                            AccountNumber = s.AccountNo,
+                            CreatedAt = DateTime.Now,
+                            Role = s.Role
+                        };
+                        context.Users.Add(user);
+                        context.SaveChanges();
+
+                        var account = new Account
+                        {
+                            UserId = user.Id,
+                            AccountNumber = s.AccountNo,
+                            Balance = s.Balance,
+                            Currency = "TRY"
+                        };
+                        context.Accounts.Add(account);
+                        context.SaveChanges();
+
+                        context.DailyLimits.Add(new DailyLimit
+                        {
+                            UserId = user.Id,
+                            MaxDailyLimit = 100000m,
+                            UsedLimit = 0m,
+                            LastResetDate = DateTime.Now.Date
+                        });
+                        context.SaveChanges();
+
+                        context.LedgerEntries.Add(new LedgerEntry
+                        {
+                            AccountId = account.Id,
+                            Amount = s.Balance,
+                            PreviousBalance = 0m,
+                            NewBalance = s.Balance,
+                            Description = "Hesap oluşturma - Seed data",
+                            CreatedAt = DateTime.Now
+                        });
+                        context.SaveChanges();
+
+                        logger.LogInformation("  → {Name} ({Email}) → {Account} ({Balance:N2} TRY)", s.Name, s.Email, s.AccountNo, s.Balance);
+                    }
+
+                    logger.LogInformation("✅ Sistem sadece Ana Admin (Cavit) ve Enes ile hazırlandı!");
+                }
             }
             catch (Exception ex)
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "❌ Database oluşturulurken hata: {Message}", ex.Message);
-                logger.LogWarning("⚠️ Lütfen SQL Server'ın çalıştığından ve connection string'in doğru olduğundan emin olun.");
+                logger.LogWarning("⚠️ Lütfen SQLite connection string'inin (VireonDB) doğru olduğundan ve dosya yolunun yazılabilir olduğundan emin olun.");
             }
         }
 
-        // Swagger arayüzü (Geliştirme ortamında aktif)
-        if (app.Environment.IsDevelopment())
+        // Swagger arayüzü
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vireon API v1");
+            c.RoutePrefix = "swagger";
+        });
 
         // ============================================================
         // GLOBAL ERROR HANDLING MIDDLEWARE
@@ -254,5 +361,34 @@ internal class Program
         });
 
         app.Run();
+    }
+
+    /// <summary>
+    /// SQLite veritabanı dosyasının paylaşılan/sabit yolunu çözer.
+    /// ContentRoot'tan başlayıp yukarı doğru ilerleyerek "Database" klasörünü bulur;
+    /// böylece "dotnet run", derlenmiş .exe veya farklı çalışma dizinleri fark etmeksizin
+    /// her zaman repodaki aynı vireon_local.db dosyası kullanılır.
+    /// </summary>
+    private static string ResolveSharedDbPath(string contentRootPath, string relativeDataSource)
+    {
+        var fileName = Path.GetFileName(relativeDataSource);
+        if (string.IsNullOrWhiteSpace(fileName)) fileName = "vireon_local.db";
+
+        // ContentRoot'tan yukarı doğru "Database" klasörünü ara.
+        var dir = new DirectoryInfo(contentRootPath);
+        for (int depth = 0; dir != null && depth < 8; depth++, dir = dir.Parent)
+        {
+            var candidate = Path.Combine(dir.FullName, "Database");
+            if (Directory.Exists(candidate))
+            {
+                return Path.Combine(candidate, fileName);
+            }
+        }
+
+        // Bulunamazsa: ContentRoot'a göre çöz ve klasörü oluştur.
+        var fallback = Path.GetFullPath(Path.Combine(contentRootPath, relativeDataSource));
+        var fallbackDir = Path.GetDirectoryName(fallback);
+        if (!string.IsNullOrEmpty(fallbackDir)) Directory.CreateDirectory(fallbackDir);
+        return fallback;
     }
 }

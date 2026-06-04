@@ -57,26 +57,25 @@ function createToastContainer() {
     setTimeout(clearLoader, 3500);
 })();
 
-// Loading Screen & PWA Registration
-window.addEventListener('load', () => {
-   if ('serviceWorker' in navigator) {
-      // Service worker'ı güncellemeye zorla
-      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
-         .then(reg => {
-            console.log('SW Registered', reg);
-            // Güncelleme varsa hemen uygula
-            reg.addEventListener('updatefound', () => {
-               const newWorker = reg.installing;
-               if (newWorker) {
-                  newWorker.addEventListener('statechange', () => {
-                     if (newWorker.state === 'activated') {
-                        console.log('New SW activated — cache refreshed');
-                     }
-                  });
-               }
-            });
-         })
-         .catch(err => console.log('SW Reg Error', err));
+// Service Worker: localhost/electron'da devre dışı, prod ortamda aktif.
+window.addEventListener('load', async () => {
+   if (!('serviceWorker' in navigator)) return;
+
+   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+   const isFileProtocol = window.location.protocol === 'file:';
+
+   if (isLocalhost || isFileProtocol) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+         await registration.unregister();
+      }
+      return;
+   }
+
+   try {
+      await navigator.serviceWorker.register('/sw.js');
+   } catch (error) {
+      console.warn('Service worker register failed:', error);
    }
 });
 
@@ -84,33 +83,239 @@ window.addEventListener('load', () => {
 let isTransitioning = false;
 let currentUser = null;
 let deferredPrompt; 
+let hasAnimatedStats = false;
+let chatHistory = [];
+
+// ========== RATE LIMITING ==========
+const loginAttempts = { count: 0, firstAttempt: 0, lockedUntil: 0 };
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const RATE_LIMIT_LOCKOUT = 60000; // 1 minute lockout
+
+function checkRateLimit() {
+    const now = Date.now();
+    if (now < loginAttempts.lockedUntil) {
+        const remaining = Math.ceil((loginAttempts.lockedUntil - now) / 1000);
+        return { allowed: false, remaining };
+    }
+    if (now - loginAttempts.firstAttempt > RATE_LIMIT_WINDOW) {
+        loginAttempts.count = 0;
+        loginAttempts.firstAttempt = now;
+    }
+    if (loginAttempts.count >= RATE_LIMIT_MAX) {
+        loginAttempts.lockedUntil = now + RATE_LIMIT_LOCKOUT;
+        loginAttempts.count = 0;
+        return { allowed: false, remaining: Math.ceil(RATE_LIMIT_LOCKOUT / 1000) };
+    }
+    return { allowed: true };
+}
+
+function recordLoginAttempt() {
+    if (loginAttempts.count === 0) loginAttempts.firstAttempt = Date.now();
+    loginAttempts.count++;
+}
+
+// ========== SESSION TIMEOUT ==========
+let sessionTimer = null;
+const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+function resetSessionTimer() {
+    if (sessionTimer) clearTimeout(sessionTimer);
+    if (!currentUser) return;
+    sessionTimer = setTimeout(() => {
+        const lang = window.currentLang || 'en';
+        showToast(lang === 'tr' ? 'Oturum zaman aşımına uğradı.' : 'Session timed out due to inactivity.', 'warning');
+        handleLogout();
+    }, SESSION_TIMEOUT);
+}
+
+// Track user activity for session timeout
+['click', 'keydown', 'mousemove', 'scroll', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, () => {
+        if (currentUser) resetSessionTimer();
+    }, { passive: true });
+});
+
+// ========== INLINE VALIDATION ==========
+function showFieldError(inputEl, message) {
+    if (!inputEl) return;
+    clearFieldError(inputEl);
+    inputEl.classList.add('input-error');
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error-msg';
+    errorDiv.textContent = message;
+    inputEl.parentElement.appendChild(errorDiv);
+}
+
+function clearFieldError(inputEl) {
+    if (!inputEl) return;
+    inputEl.classList.remove('input-error');
+    const existing = inputEl.parentElement.querySelector('.field-error-msg');
+    if (existing) existing.remove();
+}
+
+function clearAllFieldErrors(form) {
+    if (!form) return;
+    form.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    form.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+}
+
+function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function getPasswordStrength(password) {
+    let score = 0;
+    if (password.length >= 6) score++;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    if (score <= 1) return { level: 'weak', label: 'Weak', percent: 20 };
+    if (score <= 2) return { level: 'fair', label: 'Fair', percent: 40 };
+    if (score <= 3) return { level: 'good', label: 'Good', percent: 65 };
+    if (score <= 4) return { level: 'strong', label: 'Strong', percent: 85 };
+    return { level: 'excellent', label: 'Excellent', percent: 100 };
+}
+
+function initFormValidation() {
+    const loginEmail = getEl('loginEmail');
+    const loginPassword = getEl('loginPassword');
+    const regName = getEl('registerName');
+    const regEmail = getEl('registerEmail');
+    const regPassword = getEl('registerPassword');
+    const regConfirm = getEl('registerConfirmPassword');
+
+    if (loginEmail) {
+        loginEmail.addEventListener('blur', () => {
+            const val = loginEmail.value.trim();
+            if (val && !validateEmail(val)) {
+                showFieldError(loginEmail, window.currentLang === 'tr' ? 'Geçersiz e-posta' : 'Invalid email');
+            } else { clearFieldError(loginEmail); }
+        });
+        loginEmail.addEventListener('input', () => clearFieldError(loginEmail));
+    }
+    if (loginPassword) {
+        loginPassword.addEventListener('input', () => clearFieldError(loginPassword));
+    }
+    if (regEmail) {
+        regEmail.addEventListener('blur', () => {
+            const val = regEmail.value.trim();
+            if (val && !validateEmail(val)) {
+                showFieldError(regEmail, window.currentLang === 'tr' ? 'Geçersiz e-posta' : 'Invalid email');
+            } else { clearFieldError(regEmail); }
+        });
+        regEmail.addEventListener('input', () => clearFieldError(regEmail));
+    }
+    if (regPassword) {
+        regPassword.addEventListener('input', () => {
+            clearFieldError(regPassword);
+            updatePasswordStrengthMeter(regPassword);
+        });
+    }
+    if (regConfirm) {
+        regConfirm.addEventListener('blur', () => {
+            if (regPassword && regConfirm.value && regConfirm.value !== regPassword.value) {
+                showFieldError(regConfirm, window.currentLang === 'tr' ? 'Şifreler eşleşmiyor' : 'Passwords do not match');
+            } else { clearFieldError(regConfirm); }
+        });
+        regConfirm.addEventListener('input', () => clearFieldError(regConfirm));
+    }
+    [regName, regEmail, regPassword, regConfirm].forEach(el => {
+        if (el) el.addEventListener('input', () => clearFieldError(el));
+    });
+}
+
+function updatePasswordStrengthMeter(inputEl) {
+    const parent = inputEl.closest('.form-group');
+    if (!parent) return;
+    let meter = parent.querySelector('.password-strength-meter');
+    const val = inputEl.value;
+    if (!val) { if (meter) meter.remove(); return; }
+    if (!meter) {
+        meter = document.createElement('div');
+        meter.className = 'password-strength-meter';
+        meter.innerHTML = '<div class="strength-bar"><div class="strength-fill"></div></div><span class="strength-label"></span>';
+        parent.appendChild(meter);
+    }
+    const strength = getPasswordStrength(val);
+    const fill = meter.querySelector('.strength-fill');
+    const label = meter.querySelector('.strength-label');
+    if (fill) { fill.style.width = strength.percent + '%'; fill.className = 'strength-fill strength-' + strength.level; }
+    if (label) { label.textContent = strength.label; label.className = 'strength-label strength-' + strength.level; }
+}
 
 // Safely get elements
 const getEl = (id) => document.getElementById(id);
 const getEls = (selector) => document.querySelectorAll(selector);
+const getLocale = () => (window.currentLang === 'tr' ? 'tr-TR' : 'en-US');
+const formatNumber = (value, minimumFractionDigits = 2, maximumFractionDigits = 2) =>
+   new Intl.NumberFormat(getLocale(), { minimumFractionDigits, maximumFractionDigits }).format(Number(value) || 0);
+const formatDate = (value, options) => new Date(value).toLocaleDateString(getLocale(), options);
+
+async function fetchJsonOrThrow(url, options) {
+   const response = await fetch(url, options);
+   const payload = await response.json().catch(() => ({}));
+   if (!response.ok) {
+      const message = payload?.mesaj || payload?.message || `HTTP ${response.status}`;
+      throw new Error(message);
+   }
+   return payload;
+}
+
+// ========== SESSION ==========
+// "Beni Hatırla" işaretliyse localStorage (kalıcı), değilse sessionStorage (sekme kapanınca silinir).
+const SESSION_KEY = 'vireonUser';
+function saveSession(user, remember) {
+   const data = JSON.stringify(user);
+   if (remember) {
+      localStorage.setItem(SESSION_KEY, data);
+      sessionStorage.removeItem(SESSION_KEY);
+   } else {
+      sessionStorage.setItem(SESSION_KEY, data);
+      localStorage.removeItem(SESSION_KEY);
+   }
+}
+function loadSession() {
+   return sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+}
+function clearSession() {
+   localStorage.removeItem(SESSION_KEY);
+   sessionStorage.removeItem(SESSION_KEY);
+}
+// currentUser güncellendiğinde mevcut oturumu (hangi store kullanılıyorsa) yeniden yazar.
+function persistCurrentUser() {
+   if (!currentUser) return;
+   const data = JSON.stringify(currentUser);
+   if (localStorage.getItem(SESSION_KEY) !== null) localStorage.setItem(SESSION_KEY, data);
+   else if (sessionStorage.getItem(SESSION_KEY) !== null) sessionStorage.setItem(SESSION_KEY, data);
+}
 
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
    try {
-       // Restore user from localStorage
-       const savedUser = localStorage.getItem('vireonUser');
+       // Restore user from session (localStorage = remembered, sessionStorage = this tab only)
+       const savedUser = loadSession();
        if (savedUser) {
            try {
                currentUser = JSON.parse(savedUser);
-               console.log('User restored from localStorage:', currentUser.name);
                updateNavbarForLoggedInUser();
-               
+               resetSessionTimer();
+
                // Restore to dashboard immediately if session exists
                showSection('dashboard');
                fetchDashboardData();
            } catch (e) {
-               localStorage.removeItem('vireonUser');
+               clearSession();
            }
        }
 
        initNavigation();
        initInteractions();
-       console.log("NEON AI: Systems Initialized Successfully");
+       initPasswordToggles();
+       initFormValidation();
+       // Landing sayfasında metrikler ilk açılışta da dolsun.
+       setTimeout(animateStats, 300);
    } catch (e) {
        console.error("NEON AI: Init Error", e);
    }
@@ -118,6 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initNavigation() {
    document.querySelectorAll('.menu-item').forEach(item => {
+      // Kartlarda inline onclick zaten var; çift tetiklenmeyi önle.
+      if (item.hasAttribute('onclick')) return;
+
       item.addEventListener('click', function() {
          const onclick = this.getAttribute('onclick');
          if (onclick) {
@@ -130,44 +338,31 @@ function initNavigation() {
    });
 }
 
-function smoothScrollTo(id) {
-    const element = document.getElementById(id);
-    if (element) {
-        const navbarHeight = 80;
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - navbarHeight;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
-}
-
 function scrollToSection(id) {
-    console.log('scrollToSection called with:', id);
-    
-    document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
-        sec.classList.remove('active');
-        sec.style.display = 'none';
-        sec.style.visibility = 'hidden';
-    });
+    const target = getEl(id);
+    if (!target) return;
 
+    // Landing akışında kartlar sabit kalır, kullanıcı aşağı doğru section'lara iner.
     const menuGrid = getEl('menuGrid');
     const mainHeader = getEl('mainHeader');
     const mainFooter = getEl('mainFooter');
+    if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
+    if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
+    if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
 
-    if (menuGrid) { menuGrid.style.display = 'none'; menuGrid.style.visibility = 'hidden'; }
-    if (mainHeader) { mainHeader.style.display = 'none'; mainHeader.style.visibility = 'hidden'; }
-    if (mainFooter) { mainFooter.style.display = 'none'; mainFooter.style.visibility = 'hidden'; }
+    document.querySelectorAll('.landing-content-section').forEach(sec => {
+        sec.style.display = 'block';
+        sec.style.visibility = 'visible';
+        sec.style.opacity = '1';
+    });
 
-    const el = document.getElementById(id);
-    if (el) {
-        el.classList.add('active');
-        el.style.display = 'block';
-        el.style.opacity = '1';
-        el.style.visibility = 'visible';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (id === 'section-introduction') setTimeout(animateStats, 500);
-    } else {
-        backToMenu();
-    }
+    document.body.classList.remove('dashboard-active');
+
+    // Kart tıklamasında hedef bölüme güvenilir şekilde git.
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.history.replaceState(null, '', `#${id}`);
+
+    if (id === 'section-introduction') setTimeout(animateStats, 500);
 }
 
 function initInteractions() {
@@ -246,8 +441,6 @@ function initInteractions() {
 }
 
 function showSection(sectionId) {
-   console.log('showSection called with:', sectionId);
-   
    document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
       sec.classList.remove('active');
       sec.style.display = 'none';
@@ -270,6 +463,9 @@ function showSection(sectionId) {
       section.style.display = 'block';
       section.style.opacity = '1';
       section.style.visibility = 'visible';
+   } else {
+      backToMenu();
+      return;
    }
 
    if (sectionId === 'dashboard') {
@@ -336,17 +532,19 @@ function backToMenu() {
    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function scrollToDashboardTop() {
-   window.scrollTo(0, 0);
-   const dash = getEl('dashboard');
-   if (dash) dash.scrollIntoView({ block: 'start', behavior: 'auto' });
-}
-
 // Animate Stats
 function animateStats() {
-   getEls('.metric-value[data-target]').forEach((el, index) => {
+   if (hasAnimatedStats) return;
+
+   const statElements = getEls('.metric-value[data-target]');
+   if (!statElements.length) return;
+
+   hasAnimatedStats = true;
+   statElements.forEach((el, index) => {
       setTimeout(() => {
-         const target = parseInt(el.dataset.target);
+         const target = parseInt(el.dataset.target, 10);
+         if (Number.isNaN(target)) return;
+
          let current = 0;
          const increment = target / 40;
          const timer = setInterval(() => {
@@ -462,21 +660,45 @@ function handleForgotPassword(e) {
 // ========== AUTHENTICATION ==========
 async function handleLogin(event) {
     event.preventDefault();
-    
-    const email = getEl('loginEmail')?.value?.trim();
-    const password = getEl('loginPassword')?.value;
+    const form = event.target;
+    clearAllFieldErrors(form);
+
+    const emailEl = getEl('loginEmail');
+    const passwordEl = getEl('loginPassword');
+    const email = emailEl?.value?.trim();
+    const password = passwordEl?.value;
     const lang = window.currentLang || 'en';
-    
-    if (!email || !password) {
-        showToast(lang === 'tr' ? 'Lütfen tüm alanları doldurun.' : 'Please fill all fields.', 'warning');
+
+    // Rate limiting: çok fazla başarısız denemede geçici kilit
+    const rateCheck = checkRateLimit();
+    if (!rateCheck.allowed) {
+        showToast(lang === 'tr'
+            ? `Çok fazla deneme. ${rateCheck.remaining} saniye bekleyin.`
+            : `Too many attempts. Please wait ${rateCheck.remaining} seconds.`, 'error');
         return;
     }
+
+    // Inline validation
+    let hasError = false;
+    if (!email) {
+        showFieldError(emailEl, lang === 'tr' ? 'E-posta gerekli' : 'Email is required');
+        hasError = true;
+    } else if (!validateEmail(email)) {
+        showFieldError(emailEl, lang === 'tr' ? 'Geçerli bir e-posta girin' : 'Enter a valid email');
+        hasError = true;
+    }
+    if (!password) {
+        showFieldError(passwordEl, lang === 'tr' ? 'Şifre gerekli' : 'Password is required');
+        hasError = true;
+    }
+    if (hasError) return;
     
     const btn = event.target.querySelector('button[type="submit"]');
     const originalText = btn ? btn.innerHTML : '';
     if (btn) { btn.innerHTML = '<span class="loader-tiny"></span>'; btn.disabled = true; }
     
     try {
+        recordLoginAttempt();
         const response = await fetch('/api/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -486,8 +708,11 @@ async function handleLogin(event) {
         if (response.ok) {
             const user = await response.json();
             currentUser = user;
-            localStorage.setItem('vireonUser', JSON.stringify(user));
-            
+            loginAttempts.count = 0; // başarılı girişte rate limit sayacını sıfırla
+            const remember = !!getEl('rememberMe')?.checked;
+            saveSession(user, remember);
+            resetSessionTimer();
+
             showToast(lang === 'tr' ? `Hoş geldin ${user.name}!` : `Welcome ${user.name}!`, 'success');
             closeLoginModal();
             updateNavbarForLoggedInUser();
@@ -586,11 +811,17 @@ function updateNavbarForLoggedInUser() {
     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
     if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
 
+    const isAdmin = currentUser && currentUser.role === 'Admin';
+
     // Admin menü öğesini göster/gizle
     const adminMenu = getEl('adminMenuItem');
     if (adminMenu) {
-        adminMenu.style.display = (currentUser && currentUser.role === 'Admin') ? 'flex' : 'none';
+        adminMenu.style.display = isAdmin ? 'flex' : 'none';
     }
+
+    // DB Explorer yalnızca admin kullanıcılarda görünür.
+    const dbExplorerMenu = document.querySelector('.sidebar-menu li[data-dash="dash-db-explorer"]');
+    if (dbExplorerMenu) dbExplorerMenu.style.display = isAdmin ? 'flex' : 'none';
 
     // Admin kırmızı tema
     if (currentUser && currentUser.role === 'Admin') {
@@ -614,13 +845,27 @@ function updateNavbarForLoggedOutUser() {
     if (loginBtn) loginBtn.style.display = 'inline-flex';
     if (logoutBtn) logoutBtn.style.display = 'none';
     if (dashboardBtn) dashboardBtn.style.display = 'none';
+
+    const adminMenu = getEl('adminMenuItem');
+    if (adminMenu) adminMenu.style.display = 'none';
+
+    const dbUsersCard = document.querySelector('#dash-db-explorer .db-preview-card');
+    if (dbUsersCard) dbUsersCard.style.display = 'none';
 }
 
 function handleLogout() {
     const lang = window.currentLang || 'en';
     currentUser = null;
-    localStorage.removeItem('vireonUser');
+    clearSession();
+    chatHistory = [];
+    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
     document.body.classList.remove('admin-mode');
+
+    // Giriş formundaki bilgileri de temizle (önceki oturum sızmasın).
+    ['loginEmail', 'loginPassword'].forEach(id => { const el = getEl(id); if (el) el.value = ''; });
+    const remember = getEl('rememberMe');
+    if (remember) remember.checked = false;
+
     showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
     updateNavbarForLoggedOutUser();
     backToMenu();
@@ -631,6 +876,79 @@ function escapeHtml(s) {
     d.textContent = s;
     return d.innerHTML;
 }
+
+// ========== PASSWORD SHOW/HIDE ==========
+// Tüm password inputlarının sonuna bir "göz" butonu ekler; basıldığında şifreyi gösterir.
+function initPasswordToggles() {
+    document.querySelectorAll('input[type="password"]').forEach(input => {
+        if (input.dataset.toggleReady === '1') return;
+        input.dataset.toggleReady = '1';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'pwd-wrap';
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pwd-toggle';
+        btn.setAttribute('aria-label', 'Show password');
+        btn.textContent = '👁';
+        btn.addEventListener('click', () => {
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁';
+            btn.classList.toggle('active', show);
+        });
+        wrap.appendChild(btn);
+    });
+}
+
+// ========== RECEIVER NAME LOOKUP ==========
+let _receiverLookupTimer = null;
+function lookupReceiverName() {
+    const input = getEl('transferTarget');
+    const hint = getEl('transferReceiverName');
+    if (!input || !hint) return;
+
+    const acc = input.value.trim().toUpperCase();
+    const lang = window.currentLang || 'en';
+    clearTimeout(_receiverLookupTimer);
+
+    if (!acc || acc.length < 4) { hint.textContent = ''; hint.className = 'receiver-name-hint'; return; }
+
+    _receiverLookupTimer = setTimeout(async () => {
+        try {
+            const res = await fetch(`/api/users/search?accountNumber=${encodeURIComponent(acc)}`);
+            if (!res.ok) {
+                hint.textContent = lang === 'tr' ? '⚠ Hesap bulunamadı' : '⚠ Account not found';
+                hint.className = 'receiver-name-hint error';
+                return;
+            }
+            const u = await res.json();
+            const fullName = `${u.name || ''} ${u.surname || ''}`.trim();
+            hint.textContent = fullName ? `✓ ${fullName}` : '';
+            hint.className = 'receiver-name-hint ok';
+        } catch {
+            hint.textContent = '';
+            hint.className = 'receiver-name-hint';
+        }
+    }, 350);
+}
+
+// ========== LANGUAGE CHANGE HOOK ==========
+// switchLang (index.html) statik [data-tr] öğelerini günceller; JS ile üretilen
+// içerik (işlem listeleri, admin tabloları) burada yeniden render edilir.
+window.onLanguageChange = function () {
+    try {
+        if (currentUser) {
+            fetchDashboardData();
+            if (currentUser.role === 'Admin') loadAdminPanel();
+            const accInfo = getEl('dash-account-info');
+            if (accInfo && accInfo.classList.contains('active')) loadAccountInfo();
+        }
+    } catch (e) { console.error('Language refresh error:', e); }
+};
 
 // ========== DASHBOARD NAVIGATION ==========
 function switchDashSection(targetId) {
@@ -654,8 +972,10 @@ async function fetchDashboardData() {
     if (!currentUser) return;
     const lang = window.currentLang || 'en';
     try {
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
+        const accounts = await fetchJsonOrThrow('/api/accounts');
+        // Karşı taraf isimlerini gösterebilmek için kullanıcı rehberini oluştur.
+        const directoryUsers = await fetchJsonOrThrow('/api/users').catch(() => []);
+        buildAccountDirectory(accounts, directoryUsers);
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         if (userAccount) {
@@ -664,13 +984,12 @@ async function fetchDashboardData() {
             const accEl = getEl('dashAccountNo');
             const curEl = getEl('dashCurrency');
             
-            if (balEl) balEl.textContent = userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+            if (balEl) balEl.textContent = formatNumber(userAccount.balance, 2, 2);
             if (accEl) accEl.textContent = userAccount.accountNumber;
             if (curEl) curEl.textContent = userAccount.currency;
 
             // Fetch transactions
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
+            const transactions = await fetchJsonOrThrow('/api/transactions');
             const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
             
             // Update overview transaction list
@@ -687,16 +1006,26 @@ async function fetchDashboardData() {
 
             // Update daily limits
             try {
-                const limitsRes = await fetch('/api/dailylimits');
-                const limits = await limitsRes.json();
+                const limits = await fetchJsonOrThrow('/api/dailylimits');
                 const userLimit = limits.find(l => l.userId === currentUser.id);
                 if (userLimit) {
                     const maxEl = getEl('maxLimit');
                     const usedEl = getEl('usedLimit');
-                    if (maxEl) maxEl.textContent = userLimit.maxDailyLimit.toLocaleString('tr-TR');
-                    if (usedEl) usedEl.textContent = userLimit.usedLimit.toLocaleString('tr-TR');
+                    if (maxEl) maxEl.textContent = formatNumber(userLimit.maxDailyLimit, 0, 2);
+                    if (usedEl) usedEl.textContent = formatNumber(userLimit.usedLimit, 0, 2);
                 }
-            } catch (e) { console.error('Limits fetch error:', e); }
+            } catch (e) { 
+                console.error('Limits fetch error:', e); 
+            }
+        } else {
+            // Self-healing mechanism: clear corrupt or stale session if user ID is missing in the database
+            console.warn('Session user account not found in database. Clearing stale session.');
+            currentUser = null;
+            clearSession();
+            showToast(lang === 'tr' ? 'Oturum süreniz doldu veya veritabanı sıfırlandı. Lütfen tekrar giriş yapın.' : 'Your session expired or database was reset. Please login again.', 'warning');
+            updateNavbarForLoggedOutUser();
+            backToMenu();
+            return;
         }
 
         // Profile fields
@@ -724,7 +1053,7 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
     if (balanceChart) balanceChart.destroy();
     if (expensePieChart) expensePieChart.destroy();
 
-    const labels = txs.slice(-6).map(t => new Date(t.date).toLocaleDateString('tr-TR', {day:'numeric', month:'short'}));
+    const labels = txs.slice(-6).map(t => formatDate(t.date, { day: 'numeric', month: 'short' }));
     const dataPoints = txs.slice(-6).map(t => t.amount);
 
     balanceChart = new Chart(lineCtx, {
@@ -775,9 +1104,9 @@ async function fetchDatabaseStats() {
         const isAdmin = currentUser && currentUser.role === 'Admin';
         
         const [users, accounts, transactions] = await Promise.all([
-            fetch('/api/users').then(r => r.json()),
-            fetch('/api/accounts').then(r => r.json()),
-            fetch('/api/transactions').then(r => r.json())
+            fetchJsonOrThrow('/api/users'),
+            fetchJsonOrThrow('/api/accounts'),
+            fetchJsonOrThrow('/api/transactions')
         ]);
 
         const container = getEl('dbStatsContainer');
@@ -798,14 +1127,14 @@ async function fetchDatabaseStats() {
         if (isAdmin) {
             const tbody = document.querySelector('#dbUsersTable tbody');
             if (tbody) {
-                tbody.innerHTML = users.slice(0, 10).map(u => {
+                tbody.innerHTML = users.slice(0, 10).map((u, idx) => {
                     const acc = accounts.find(a => a.userId === u.id);
                     return `
                         <tr>
-                            <td>${u.id}</td>
+                            <td>${idx + 1}</td>
                             <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                             <td>${u.accountNumber || '-'}</td>
-                            <td class="bal-text">₺${acc ? acc.balance.toLocaleString() : '0'}</td>
+                            <td class="bal-text">₺${formatNumber(acc ? acc.balance : 0, 2, 2)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -845,14 +1174,20 @@ async function sendAiMessage() {
         const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText })
+            body: JSON.stringify({ message: userText, history: chatHistory, lang: window.currentLang || 'en' })
         });
         const data = await response.json();
-        
+        const botResponse = data.response || 'Hata oluştu.';
+
+        // Sohbet geçmişini güncelle (son 10 mesaj çifti)
+        chatHistory.push({ role: 'user', content: userText });
+        chatHistory.push({ role: 'assistant', content: botResponse });
+        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+
         display.innerHTML += `
             <div class="bot-bubble">
                 <div class="bubble-icon">🤖</div>
-                <div class="bubble-text">${escapeHtml(data.response || 'Hata oluştu.')}</div>
+                <div class="bubble-text">${escapeHtml(botResponse)}</div>
             </div>
         `;
     } catch (err) {
@@ -879,7 +1214,7 @@ async function sendAIMessage() {
       const response = await fetch('/api/ai/chat', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ message: message })
+         body: JSON.stringify({ message: message, history: chatHistory, lang: window.currentLang || 'en' })
       });
       let text = '';
       const ct = response.headers.get('content-type') || '';
@@ -892,6 +1227,11 @@ async function sendAIMessage() {
       } else {
          text = await response.text();
          if (!response.ok) text = `Server error (${response.status})`;
+      }
+      if (text) {
+         chatHistory.push({ role: 'user', content: message });
+         chatHistory.push({ role: 'assistant', content: text });
+         if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
       }
       const loadingEl = getEl(loadingId);
       if (loadingEl) {
@@ -933,7 +1273,6 @@ function refreshQrCode() {
    }
 }
 
-// ========== DEPOSIT ==========
 // ========== DEPOSIT ==========
 async function handleDepositRequest() {
    if (!currentUser) return;
@@ -1007,7 +1346,7 @@ async function handleProfileSave() {
       });
       if (res.ok) {
          currentUser = { ...currentUser, name, surname: surname || ' ', email };
-         localStorage.setItem('vireonUser', JSON.stringify(currentUser));
+         persistCurrentUser();
          showToast(lang === 'tr' ? 'Bilgiler güncellendi.' : 'Profile updated.', 'success');
       } else {
          const err = await res.json().catch(() => ({}));
@@ -1043,15 +1382,28 @@ async function handlePasswordChange() {
       return;
    }
    try {
-      const cur = await fetch(`/api/users/${currentUser.id}`).then(r => r.json());
-      if (cur.password !== curPwd) {
+      // Backend hash kullandığı için mevcut şifreyi login endpoint'i ile doğruluyoruz.
+      const verifyRes = await fetch('/api/users/login', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ email: currentUser.email, password: curPwd })
+      });
+
+      if (!verifyRes.ok) {
          showToast(lang === 'tr' ? 'Mevcut şifre yanlış.' : 'Current password is incorrect.', 'error');
          return;
       }
+
       const res = await fetch(`/api/users/${currentUser.id}`, {
          method: 'PUT',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ id: currentUser.id, name: cur.name, surname: cur.surname, email: cur.email, password: newPwd })
+         body: JSON.stringify({
+            id: currentUser.id,
+            name: currentUser.name,
+            surname: currentUser.surname || ' ',
+            email: currentUser.email,
+            password: newPwd
+         })
       });
       if (res.ok) {
          curPwdField.value = '';
@@ -1065,47 +1417,11 @@ async function handlePasswordChange() {
       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
    }
 }
-// ========== DASHBOARD ACCOUNT INFO ==========
-async function loadAccountInfo() {
-    if (!currentUser) return;
-    
-    // Yükleme sırasında spinner veya - gösterelim
-    const setValue = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
-    
-    try {
-        setValue('infoAccountNumber', currentUser.accountNumber || '-');
-        setValue('infoFullName', (currentUser.name + ' ' + (currentUser.surname || '')).trim());
-        setValue('infoEmail', currentUser.email || '-');
-        
-        if (currentUser.createdAt) {
-            const d = new Date(currentUser.createdAt);
-            setValue('infoCreatedAt', d.toLocaleDateString('tr-TR'));
-        } else {
-            setValue('infoCreatedAt', '-');
-        }
-
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
-        const userAccount = accounts.find(a => a.userId === currentUser.id);
-        
-        if (userAccount) {
-            setValue('infoBalance', '₺' + userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
-            setValue('infoCurrency', userAccount.currency || 'TRY');
-            
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
-            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
-            setValue('infoTxCount', userTxs.length.toString());
-        }
-    } catch (err) {
-        console.error('Account Info Error:', err);
-    }
-}
-
 // ========== TRANSFERS ==========
 async function handleSendTransfer() {
-    if (!currentUser || !currentUser.accountNumber) {
-        showToast('Please login first', 'warning');
+   if (!currentUser || !currentUser.accountNumber) {
+        const lang = window.currentLang || 'en';
+        showToast(lang === 'tr' ? 'Lutfen once giris yapin.' : 'Please login first.', 'warning');
         return;
     }
     
@@ -1174,6 +1490,16 @@ async function handleSendTransfer() {
     }
 }
 
+// Hesap rehberi: accountId -> { number, owner }. İşlem listelerinde karşı tarafı göstermek için.
+let accountDirectory = {};
+function buildAccountDirectory(accounts, users) {
+   const ownerByUserId = {};
+   (users || []).forEach(u => { ownerByUserId[u.id] = `${u.name || ''} ${u.surname || ''}`.trim(); });
+   const dir = {};
+   (accounts || []).forEach(a => { dir[a.id] = { number: a.accountNumber, owner: ownerByUserId[a.userId] || '' }; });
+   accountDirectory = dir;
+}
+
 function updateTransactionList(txs, accountId, listElement) {
    if (!listElement) return;
    const lang = window.currentLang || 'en';
@@ -1181,9 +1507,12 @@ function updateTransactionList(txs, accountId, listElement) {
       listElement.innerHTML = `<p class="tx-empty">${lang === 'tr' ? 'Henüz işlem bulunamadı.' : 'No transactions found.'}</p>`;
       return;
    }
-   const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing';
-   const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming';
+   const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing transfer';
+   const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming transfer';
    const depositLabel = lang === 'tr' ? 'Para Yatırma' : 'Deposit';
+   const toLabel = lang === 'tr' ? 'Alıcı' : 'To';
+   const fromLabel = lang === 'tr' ? 'Gönderen' : 'From';
+
    listElement.innerHTML = txs.slice().reverse().map(tx => {
       const isDeposit = tx.senderAccountId === tx.receiverAccountId;
       const isOut = !isDeposit && tx.senderAccountId === accountId;
@@ -1193,19 +1522,36 @@ function updateTransactionList(txs, accountId, listElement) {
       const icon = isDeposit ? '💰' : (isOut ? '📤' : '📥');
       const statusText = typeof tx.status === 'number' ? ['Pending','Completed','Failed','Cancelled'][tx.status] || '' : (tx.status || '');
       const statusBadge = statusText ? `<span class="tx-status tx-status-${statusText}">${statusText}</span>` : '';
-      const desc = tx.description ? `<span class="tx-detail">${escapeHtml(tx.description)}</span>` : '';
+
+      // Karşı taraf (hangi hesaba/kimden) bilgisini göster.
+      let partyHtml = '';
+      if (!isDeposit) {
+         const partyId = isOut ? tx.receiverAccountId : tx.senderAccountId;
+         const party = accountDirectory[partyId];
+         const partyLabel = isOut ? toLabel : fromLabel;
+         if (party) {
+            const who = party.owner ? `${party.owner} · ${party.number}` : party.number;
+            partyHtml = `<span class="tx-detail">${partyLabel}: ${escapeHtml(who)}</span>`;
+         }
+      }
+
+      // Kullanıcının girdiği özel açıklamayı göster (otomatik "Transfer: ..." metnini tekrarlama).
+      const customDesc = (tx.description && !/^transfer\s*:/i.test(tx.description)) ? tx.description : '';
+      const desc = customDesc ? `<span class="tx-detail">${escapeHtml(customDesc)}</span>` : '';
+
       return `
             <div class="tx-item">
                 <div class="tx-info">
                     <span class="tx-icon">${icon}</span>
                     <div class="tx-meta">
                         <span class="tx-desc">${label}</span>
+                        ${partyHtml}
                         ${desc}
-                        <span class="tx-date">${new Date(tx.date).toLocaleDateString('tr-TR', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                        <span class="tx-date">${new Date(tx.date).toLocaleString(getLocale(), {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
                     </div>
                     ${statusBadge}
                 </div>
-                <div class="tx-amount ${amountClass}">${symbol}₺${tx.amount.toLocaleString('tr-TR', {minimumFractionDigits: 2})}</div>
+                <div class="tx-amount ${amountClass}">${symbol}${formatNumber(tx.amount, 2, 2)} TRY</div>
             </div>`;
     }).join('');
 }
@@ -1347,22 +1693,22 @@ async function loadAccountInfo() {
         if (accNumEl) accNumEl.textContent = currentUser.accountNumber || '-';
         if (nameEl) nameEl.textContent = `${currentUser.name} ${currentUser.surname || ''}`.trim();
         if (emailEl) emailEl.textContent = currentUser.email || '-';
-        if (createdEl) createdEl.textContent = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString('tr-TR') : '-';
+        if (createdEl) createdEl.textContent = currentUser.createdAt ? formatDate(currentUser.createdAt, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
 
         // Balance
-        const response = await fetch('/api/accounts');
-        const accounts = await response.json();
+        const accounts = await fetchJsonOrThrow('/api/accounts');
+        const directoryUsers = await fetchJsonOrThrow('/api/users').catch(() => []);
+        buildAccountDirectory(accounts, directoryUsers);
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         const balEl = getEl('infoBalance');
         const curEl = getEl('infoCurrency');
-        if (balEl) balEl.textContent = userAccount ? `₺${userAccount.balance.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : '₺0.00';
+        if (balEl) balEl.textContent = userAccount ? `${formatNumber(userAccount.balance, 2, 2)} TRY` : `0.00 TRY`;
         if (curEl) curEl.textContent = userAccount?.currency || 'TRY';
 
         // Transaction history
         if (userAccount) {
-            const txResponse = await fetch('/api/transactions');
-            const transactions = await txResponse.json();
+            const transactions = await fetchJsonOrThrow('/api/transactions');
             const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
             
             const historyEl = getEl('infoTransactionHistory');
@@ -1373,6 +1719,7 @@ async function loadAccountInfo() {
         }
     } catch (err) {
         console.error('Account info error:', err);
+        showToast(lang === 'tr' ? 'Hesap bilgileri yuklenemedi.' : 'Could not load account details.', 'error');
     }
 }
 
@@ -1382,20 +1729,18 @@ async function loadAdminPanel() {
 
     try {
         // 1. Admin Stats
-        const statsRes = await fetch('/api/users/admin-stats');
-        const stats = await statsRes.json();
+        const stats = await fetchJsonOrThrow('/api/users/admin-stats');
 
         const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
         setVal('adminTotalUsers', stats.totalUsers);
         setVal('adminTotalAccounts', stats.totalAccounts);
         setVal('adminTotalTx', stats.totalTransactions);
-        setVal('adminTotalBalance', '₺' + stats.totalBalance.toLocaleString('tr-TR', { minimumFractionDigits: 2 }));
+        setVal('adminTotalBalance', `${formatNumber(stats.totalBalance, 2, 2)} TRY`);
         setVal('adminTotalFraud', stats.totalFraudLogs);
         setVal('adminTotalLedger', stats.totalLedgerEntries);
 
         // 2. All Users
-        const usersRes = await fetch('/api/users/admin-users');
-        const users = await usersRes.json();
+        const users = await fetchJsonOrThrow('/api/users/admin-users');
         const usersBody = getEl('adminUsersBody');
         if (usersBody) {
             usersBody.innerHTML = users.map(u => `
@@ -1404,7 +1749,7 @@ async function loadAdminPanel() {
                     <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                     <td>${escapeHtml(u.email)}</td>
                     <td>${u.accountNumber || '-'}</td>
-                    <td class="bal-text">₺${(u.balance || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td class="bal-text">${formatNumber((u.balance || 0), 2, 2)} TRY</td>
                     <td>${u.transactionCount || 0}</td>
                     <td><span class="role-badge role-${(u.role || 'User').toLowerCase()}">${u.role || 'User'}</span></td>
                 </tr>
@@ -1412,8 +1757,7 @@ async function loadAdminPanel() {
         }
 
         // 3. All Transactions
-        const txRes = await fetch('/api/users/admin-transactions');
-        const txs = await txRes.json();
+        const txs = await fetchJsonOrThrow('/api/users/admin-transactions');
         const txBody = getEl('adminTxBody');
         if (txBody) {
             txBody.innerHTML = txs.map(tx => `
@@ -1422,15 +1766,43 @@ async function loadAdminPanel() {
                     <td><span class="type-badge type-${tx.type.toLowerCase()}">${tx.type}</span></td>
                     <td>${escapeHtml(tx.senderName || tx.senderAccount || '-')}</td>
                     <td>${escapeHtml(tx.receiverName || tx.receiverAccount || '-')}</td>
-                    <td class="bal-text">₺${tx.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                    <td class="bal-text">${formatNumber(tx.amount, 2, 2)} TRY</td>
                     <td>${escapeHtml(tx.description || '-')}</td>
-                    <td>${new Date(tx.date).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                    <td>${new Date(tx.date).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
                     <td><span class="tx-status tx-status-${tx.status}">${tx.status}</span></td>
                 </tr>
             `).join('');
         }
 
+        // 4. Suspicious Transactions / Fraud Logs
+        const fraudBody = getEl('adminFraudBody');
+        if (fraudBody) {
+            const lang = window.currentLang || 'en';
+            const [fraudLogs, accountsForFraud] = await Promise.all([
+                fetchJsonOrThrow('/api/fraudlogs').catch(() => []),
+                fetchJsonOrThrow('/api/accounts').catch(() => [])
+            ]);
+            const accNumById = {};
+            accountsForFraud.forEach(a => { accNumById[a.id] = a.accountNumber; });
+
+            if (!fraudLogs.length) {
+                fraudBody.innerHTML = `<tr><td colspan="5" class="tx-empty">${lang === 'tr' ? 'Şüpheli işlem kaydı yok.' : 'No suspicious transactions.'}</td></tr>`;
+            } else {
+                fraudBody.innerHTML = fraudLogs.slice().reverse().map(f => `
+                    <tr>
+                        <td>${f.id}</td>
+                        <td>${escapeHtml(accNumById[f.accountId] || ('#' + f.accountId))}</td>
+                        <td><span class="type-badge type-fraud">${escapeHtml(f.riskType || '-')}</span></td>
+                        <td>${escapeHtml(f.description || '-')}</td>
+                        <td>${new Date(f.logDate).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
     } catch (err) {
         console.error('Admin panel error:', err);
+        const lang = window.currentLang || 'en';
+        showToast(lang === 'tr' ? 'Admin panel verileri yuklenemedi.' : 'Could not load admin panel data.', 'error');
     }
 }

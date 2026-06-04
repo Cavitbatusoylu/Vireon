@@ -43,3 +43,7 @@ build_errors.txt
 
 # HTTP test files
 *.http
+
+# SQLite temporary files
+*.db-shm
+*.db-wal

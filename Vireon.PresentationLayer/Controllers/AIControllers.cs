@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Vireon.BusinessLayer.Concrete;
+using Vireon.DtoLayer.DTOs;
 
 namespace Vireon.PresentationLayer.Controllers
 {
@@ -20,13 +21,8 @@ namespace Vireon.PresentationLayer.Controllers
             if (string.IsNullOrWhiteSpace(request?.Message))
                 return BadRequest(new { message = "Mesaj boş olamaz." });
 
-            var result = await _neonAIService.GetResponseAsync(request.Message);
+            var result = await _neonAIService.GetResponseAsync(request.Message, request.History, request.Lang);
             return Ok(new { response = result });
         }
-    }
-
-    public class ChatRequest
-    {
-        public string? Message { get; set; }
     }
 }

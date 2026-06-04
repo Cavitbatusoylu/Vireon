@@ -1,33 +1,7 @@
-using Microsoft.ML;
-using Microsoft.ML.Data;
-using System;
-using System.Collections.Generic;
-
 namespace Vireon.BusinessLayer.Concrete
 {
-    // ML.NET'in anlayacağı veri modelleri
-    public class TransactionData
-    {
-        [LoadColumn(0)]
-        public float Amount { get; set; }
-        [LoadColumn(1)]
-        public float Hour { get; set; }        // İşlem saati (0-23)
-        [LoadColumn(2)]
-        public float Frequency { get; set; }   // Son 1 saatteki işlem sayısı
-        [LoadColumn(3)]
-        public bool IsFraud { get; set; } 
-    }
-
-    public class FraudPrediction
-    {
-        [ColumnName("PredictedLabel")] 
-        public bool Prediction { get; set; }
-        public float Probability { get; set; }
-        public float Score { get; set; }
-    }
-
     /// <summary>
-    /// ML.NET tabanlı Fraud Tespit Servisi.
+    /// Kural tabanlı Fraud Tespit Servisi.
     /// 3 özellik kullanarak risk skoru hesaplar:
     ///   1. Amount (İşlem tutarı)
     ///   2. Hour (İşlem saati — gece işlemleri daha riskli)
@@ -35,47 +9,10 @@ namespace Vireon.BusinessLayer.Concrete
     /// </summary>
     public class FraudModelService
     {
-        private readonly MLContext _mlContext;
-        private ITransformer _model;
+        private const float FraudThreshold = 0.70f;
 
         public FraudModelService()
         {
-            _mlContext = new MLContext(seed: 1);
-            TrainModel(); 
-        }
-
-        private void TrainModel()
-        {
-            // Genişletilmiş Sentetik Eğitim Verisi
-            var data = new List<TransactionData>
-            {
-                // Normal işlemler (gün içi, düşük miktar, düşük sıklık)
-                new TransactionData { Amount = 50,    Hour = 10, Frequency = 1, IsFraud = false },
-                new TransactionData { Amount = 100,   Hour = 14, Frequency = 1, IsFraud = false },
-                new TransactionData { Amount = 200,   Hour = 11, Frequency = 2, IsFraud = false },
-                new TransactionData { Amount = 500,   Hour = 9,  Frequency = 1, IsFraud = false },
-                new TransactionData { Amount = 300,   Hour = 16, Frequency = 1, IsFraud = false },
-                new TransactionData { Amount = 1000,  Hour = 13, Frequency = 2, IsFraud = false },
-                new TransactionData { Amount = 750,   Hour = 15, Frequency = 1, IsFraud = false },
-                new TransactionData { Amount = 150,   Hour = 10, Frequency = 1, IsFraud = false },
-
-                // Şüpheli işlemler (yüksek miktar, gece saatleri, yüksek sıklık)
-                new TransactionData { Amount = 10000, Hour = 3,  Frequency = 5, IsFraud = true },
-                new TransactionData { Amount = 15000, Hour = 2,  Frequency = 8, IsFraud = true },
-                new TransactionData { Amount = 25000, Hour = 4,  Frequency = 6, IsFraud = true },
-                new TransactionData { Amount = 8000,  Hour = 1,  Frequency = 10, IsFraud = true },
-                new TransactionData { Amount = 20000, Hour = 23, Frequency = 7, IsFraud = true },
-                new TransactionData { Amount = 12000, Hour = 3,  Frequency = 4, IsFraud = true },
-                new TransactionData { Amount = 30000, Hour = 2,  Frequency = 9, IsFraud = true },
-                new TransactionData { Amount = 50000, Hour = 4,  Frequency = 3, IsFraud = true },
-            };
-
-            var trainData = _mlContext.Data.LoadFromEnumerable(data);
-
-            // Pipeline: 3 özelliği birleştir ve SdcaLogisticRegression ile modeli eğit
-            var pipeline = _mlContext.Transforms.Concatenate("Features", "Amount", "Hour", "Frequency")
-                            .Append(_mlContext.BinaryClassification.Trainers.SdcaLogisticRegression(labelColumnName: "IsFraud"));
-            _model = pipeline.Fit(trainData);
         }
 
         /// <summary>
@@ -91,10 +28,23 @@ namespace Vireon.BusinessLayer.Concrete
         /// </summary>
         public (bool IsFraud, float Probability) Predict(float amount, float hour, float frequency)
         {
-            var predictionEngine = _mlContext.Model.CreatePredictionEngine<TransactionData, FraudPrediction>(_model);
-            var input = new TransactionData { Amount = amount, Hour = hour, Frequency = frequency };
-            var prediction = predictionEngine.Predict(input);
-            return (prediction.Prediction, prediction.Probability);
+            var safeAmount = amount < 0 ? 0 : amount;
+            var safeHour = Math.Clamp(hour, 0f, 23f);
+            var safeFrequency = frequency < 0 ? 0 : frequency;
+
+            var probability = CalculateRiskScore(safeAmount, safeHour, safeFrequency);
+            return (probability >= FraudThreshold, probability);
+        }
+
+        private static float CalculateRiskScore(float amount, float hour, float frequency)
+        {
+            // Toplam skor 0-1 aralığında normalize edilir.
+            var amountRisk = Math.Clamp(amount / 25000f, 0f, 1f);
+            var nightRisk = (hour <= 5f || hour >= 23f) ? 1f : 0f;
+            var frequencyRisk = Math.Clamp(frequency / 8f, 0f, 1f);
+
+            var score = (amountRisk * 0.6f) + (nightRisk * 0.2f) + (frequencyRisk * 0.2f);
+            return Math.Clamp(score, 0f, 1f);
         }
     }
 }
