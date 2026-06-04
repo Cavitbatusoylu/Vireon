@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
        if (savedUser) {
            try {
                currentUser = JSON.parse(savedUser);
-               console.log('User restored from localStorage:', currentUser.name);
                updateNavbarForLoggedInUser();
                
                // Restore to dashboard immediately if session exists
@@ -126,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
        initInteractions();
        // Landing sayfasında metrikler ilk açılışta da dolsun.
        setTimeout(animateStats, 300);
-       console.log("NEON AI: Systems Initialized Successfully");
    } catch (e) {
        console.error("NEON AI: Init Error", e);
    }
@@ -147,16 +145,6 @@ function initNavigation() {
          }
       });
    });
-}
-
-function smoothScrollTo(id) {
-    const element = document.getElementById(id);
-    if (element) {
-        const navbarHeight = 80;
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - navbarHeight;
-        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
 }
 
 function scrollToSection(id) {
@@ -262,8 +250,6 @@ function initInteractions() {
 }
 
 function showSection(sectionId) {
-   console.log('showSection called with:', sectionId);
-   
    document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
       sec.classList.remove('active');
       sec.style.display = 'none';
@@ -353,12 +339,6 @@ function backToMenu() {
    if (backBtn) backBtn.style.display = 'none';
    
    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function scrollToDashboardTop() {
-   window.scrollTo(0, 0);
-   const dash = getEl('dashboard');
-   if (dash) dash.scrollIntoView({ block: 'start', behavior: 'auto' });
 }
 
 // Animate Stats
@@ -974,7 +954,6 @@ function refreshQrCode() {
    }
 }
 
-// ========== DEPOSIT ==========
 // ========== DEPOSIT ==========
 async function handleDepositRequest() {
    if (!currentUser) return;
