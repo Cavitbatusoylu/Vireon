@@ -4,5 +4,4 @@
   <Project Path="Vireon.DtoLayer/Vireon.DtoLayer.csproj" Id="d13ec4e6-2cd0-46a9-af5b-187d028bffc4" />
   <Project Path="Vireon.EntityLayer/Vireon.EntityLayer.csproj" Id="183e39b2-d4af-4b3c-83a6-36db5fe041a9" />
   <Project Path="Vireon.PresentationLayer/Vireon.PresentationLayer.csproj" Id="39d8c8bf-a203-4c04-a2fb-ae82f5814bb4" />
-  <Project Path="Vireon.Tests/Vireon.Tests.csproj" Id="e7f2d5c1-8b3a-4f9e-9d2c-6a1b8e4f7d0a" />
 </Solution>

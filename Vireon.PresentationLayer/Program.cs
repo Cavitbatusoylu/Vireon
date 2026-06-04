@@ -266,7 +266,7 @@ internal class Program
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 logger.LogError(ex, "❌ Database oluşturulurken hata: {Message}", ex.Message);
-                logger.LogWarning("⚠️ Lütfen SQL Server'ın çalıştığından ve connection string'in doğru olduğundan emin olun.");
+                logger.LogWarning("⚠️ Lütfen SQLite connection string'inin (VireonDB) doğru olduğundan ve dosya yolunun yazılabilir olduğundan emin olun.");
             }
         }
 
