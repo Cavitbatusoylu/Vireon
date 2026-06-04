@@ -27,7 +27,7 @@ namespace Vireon.PresentationLayer.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddDailyLimit(DailyLimit dailyLimit) // Yeni günlük limit ekler
+        public IActionResult AddDailyLimit([FromBody] DailyLimit dailyLimit) // Yeni günlük limit ekler
         {
             _context.DailyLimits.Add(dailyLimit);
             _context.SaveChanges();
@@ -35,7 +35,7 @@ namespace Vireon.PresentationLayer.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateDailyLimit(int id, DailyLimit dailyLimit) // Limit günceller
+        public IActionResult UpdateDailyLimit(int id, [FromBody] DailyLimit dailyLimit) // Limit günceller
         {
             var existing = _context.DailyLimits.Find(id);
             if (existing == null) return NotFound("Limit bulunamadı.");

@@ -1,5 +1,5 @@
 using FluentValidation;
-using Vireon.PresentationLayer.DTOs;
+using Vireon.DtoLayer.DTOs;
 
 namespace Vireon.PresentationLayer.Validators
 {
