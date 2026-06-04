@@ -4847,3 +4847,110 @@ body.admin-mode #adminMenuItem {
     background: rgba(220, 38, 38, 0.08);
     border-left: 3px solid var(--admin-red);
 }
+
+/* ========== PASSWORD SHOW/HIDE TOGGLE ========== */
+.pwd-wrap {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.pwd-wrap > input {
+    width: 100%;
+    padding-right: 46px !important;
+}
+
+.pwd-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 6px;
+    border-radius: 8px;
+    opacity: 0.65;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    z-index: 2;
+}
+
+.pwd-toggle:hover,
+.pwd-toggle.active {
+    opacity: 1;
+    background: rgba(0, 180, 216, 0.12);
+}
+
+/* ========== RECEIVER NAME LOOKUP HINT ========== */
+.receiver-name-hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 16px;
+}
+
+.receiver-name-hint.ok {
+    color: #00ff88;
+}
+
+.receiver-name-hint.error {
+    color: #ff6b6b;
+}
+
+/* ========== FRAUD BADGE ========== */
+.type-badge.type-fraud {
+    background: rgba(220, 38, 38, 0.16);
+    color: #ff6b6b;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+/* ========== LIGHT THEME READABILITY (transactions + menu) ========== */
+[data-theme="light"] .tx-item {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .tx-desc {
+    color: #1a202c;
+}
+
+[data-theme="light"] .tx-detail {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .tx-meta .tx-date,
+[data-theme="light"] .tx-list .tx-date {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .tx-empty {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] .tx-amount.tx-in {
+    color: #0a8f4f;
+}
+
+[data-theme="light"] .tx-amount.tx-out {
+    color: #d92d20;
+}
+
+[data-theme="light"] .sidebar-menu li {
+    color: rgba(0, 0, 0, 0.78);
+}
+
+[data-theme="light"] .sidebar-menu li .sidebar-icon {
+    opacity: 0.9;
+}
+
+[data-theme="light"] .receiver-name-hint.ok {
+    color: #0a8f4f;
+}
+
+[data-theme="light"] .vireon-table-modern td {
+    color: #1a202c;
+}

@@ -27,8 +27,19 @@ internal class Program
         builder.Services.AddDbContext<VireonContext>((serviceProvider, options) =>
         {
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            var connectionString = configuration.GetConnectionString("VireonDB");
-            options.UseSqlite(connectionString);
+            var rawConnection = configuration.GetConnectionString("VireonDB") ?? "Data Source=../Database/vireon_local.db";
+
+            // SQLite dosya yolunu çalışma dizininden (cwd) ve başlatma yönteminden bağımsız
+            // hale getiriyoruz. Böylece uygulama ister "dotnet run", ister derlenmiş .exe,
+            // ister farklı bir cihazdan çalıştırılsın her zaman repodaki ortak
+            // Database/vireon_local.db dosyası kullanılır (herkes aynı veriyi görür).
+            var csb = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(rawConnection);
+            if (!string.IsNullOrWhiteSpace(csb.DataSource) && !Path.IsPathRooted(csb.DataSource))
+            {
+                csb.DataSource = ResolveSharedDbPath(builder.Environment.ContentRootPath, csb.DataSource);
+            }
+
+            options.UseSqlite(csb.ConnectionString);
         });
 
         builder.Services.AddCors(options => // CORS politikası (Frontend erişimi için)
@@ -350,5 +361,34 @@ internal class Program
         });
 
         app.Run();
+    }
+
+    /// <summary>
+    /// SQLite veritabanı dosyasının paylaşılan/sabit yolunu çözer.
+    /// ContentRoot'tan başlayıp yukarı doğru ilerleyerek "Database" klasörünü bulur;
+    /// böylece "dotnet run", derlenmiş .exe veya farklı çalışma dizinleri fark etmeksizin
+    /// her zaman repodaki aynı vireon_local.db dosyası kullanılır.
+    /// </summary>
+    private static string ResolveSharedDbPath(string contentRootPath, string relativeDataSource)
+    {
+        var fileName = Path.GetFileName(relativeDataSource);
+        if (string.IsNullOrWhiteSpace(fileName)) fileName = "vireon_local.db";
+
+        // ContentRoot'tan yukarı doğru "Database" klasörünü ara.
+        var dir = new DirectoryInfo(contentRootPath);
+        for (int depth = 0; dir != null && depth < 8; depth++, dir = dir.Parent)
+        {
+            var candidate = Path.Combine(dir.FullName, "Database");
+            if (Directory.Exists(candidate))
+            {
+                return Path.Combine(candidate, fileName);
+            }
+        }
+
+        // Bulunamazsa: ContentRoot'a göre çöz ve klasörü oluştur.
+        var fallback = Path.GetFullPath(Path.Combine(contentRootPath, relativeDataSource));
+        var fallbackDir = Path.GetDirectoryName(fallback);
+        if (!string.IsNullOrEmpty(fallbackDir)) Directory.CreateDirectory(fallbackDir);
+        return fallback;
     }
 }

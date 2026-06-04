@@ -103,11 +103,39 @@ async function fetchJsonOrThrow(url, options) {
    return payload;
 }
 
+// ========== SESSION ==========
+// "Beni Hatırla" işaretliyse localStorage (kalıcı), değilse sessionStorage (sekme kapanınca silinir).
+const SESSION_KEY = 'vireonUser';
+function saveSession(user, remember) {
+   const data = JSON.stringify(user);
+   if (remember) {
+      localStorage.setItem(SESSION_KEY, data);
+      sessionStorage.removeItem(SESSION_KEY);
+   } else {
+      sessionStorage.setItem(SESSION_KEY, data);
+      localStorage.removeItem(SESSION_KEY);
+   }
+}
+function loadSession() {
+   return sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+}
+function clearSession() {
+   localStorage.removeItem(SESSION_KEY);
+   sessionStorage.removeItem(SESSION_KEY);
+}
+// currentUser güncellendiğinde mevcut oturumu (hangi store kullanılıyorsa) yeniden yazar.
+function persistCurrentUser() {
+   if (!currentUser) return;
+   const data = JSON.stringify(currentUser);
+   if (localStorage.getItem(SESSION_KEY) !== null) localStorage.setItem(SESSION_KEY, data);
+   else if (sessionStorage.getItem(SESSION_KEY) !== null) sessionStorage.setItem(SESSION_KEY, data);
+}
+
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
    try {
-       // Restore user from localStorage
-       const savedUser = localStorage.getItem('vireonUser');
+       // Restore user from session (localStorage = remembered, sessionStorage = this tab only)
+       const savedUser = loadSession();
        if (savedUser) {
            try {
                currentUser = JSON.parse(savedUser);
@@ -117,12 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
                showSection('dashboard');
                fetchDashboardData();
            } catch (e) {
-               localStorage.removeItem('vireonUser');
+               clearSession();
            }
        }
 
        initNavigation();
        initInteractions();
+       initPasswordToggles();
        // Landing sayfasında metrikler ilk açılışta da dolsun.
        setTimeout(animateStats, 300);
    } catch (e) {
@@ -493,7 +522,8 @@ async function handleLogin(event) {
         if (response.ok) {
             const user = await response.json();
             currentUser = user;
-            localStorage.setItem('vireonUser', JSON.stringify(user));
+            const remember = !!getEl('rememberMe')?.checked;
+            saveSession(user, remember);
             
             showToast(lang === 'tr' ? `Hoş geldin ${user.name}!` : `Welcome ${user.name}!`, 'success');
             closeLoginModal();
@@ -593,11 +623,17 @@ function updateNavbarForLoggedInUser() {
     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
     if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
 
+    const isAdmin = currentUser && currentUser.role === 'Admin';
+
     // Admin menü öğesini göster/gizle
     const adminMenu = getEl('adminMenuItem');
     if (adminMenu) {
-        adminMenu.style.display = (currentUser && currentUser.role === 'Admin') ? 'flex' : 'none';
+        adminMenu.style.display = isAdmin ? 'flex' : 'none';
     }
+
+    // DB Explorer yalnızca admin kullanıcılarda görünür.
+    const dbExplorerMenu = document.querySelector('.sidebar-menu li[data-dash="dash-db-explorer"]');
+    if (dbExplorerMenu) dbExplorerMenu.style.display = isAdmin ? 'flex' : 'none';
 
     // Admin kırmızı tema
     if (currentUser && currentUser.role === 'Admin') {
@@ -632,8 +668,14 @@ function updateNavbarForLoggedOutUser() {
 function handleLogout() {
     const lang = window.currentLang || 'en';
     currentUser = null;
-    localStorage.removeItem('vireonUser');
+    clearSession();
     document.body.classList.remove('admin-mode');
+
+    // Giriş formundaki bilgileri de temizle (önceki oturum sızmasın).
+    ['loginEmail', 'loginPassword'].forEach(id => { const el = getEl(id); if (el) el.value = ''; });
+    const remember = getEl('rememberMe');
+    if (remember) remember.checked = false;
+
     showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
     updateNavbarForLoggedOutUser();
     backToMenu();
@@ -644,6 +686,79 @@ function escapeHtml(s) {
     d.textContent = s;
     return d.innerHTML;
 }
+
+// ========== PASSWORD SHOW/HIDE ==========
+// Tüm password inputlarının sonuna bir "göz" butonu ekler; basıldığında şifreyi gösterir.
+function initPasswordToggles() {
+    document.querySelectorAll('input[type="password"]').forEach(input => {
+        if (input.dataset.toggleReady === '1') return;
+        input.dataset.toggleReady = '1';
+
+        const wrap = document.createElement('div');
+        wrap.className = 'pwd-wrap';
+        input.parentNode.insertBefore(wrap, input);
+        wrap.appendChild(input);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pwd-toggle';
+        btn.setAttribute('aria-label', 'Show password');
+        btn.textContent = '👁';
+        btn.addEventListener('click', () => {
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁';
+            btn.classList.toggle('active', show);
+        });
+        wrap.appendChild(btn);
+    });
+}
+
+// ========== RECEIVER NAME LOOKUP ==========
+let _receiverLookupTimer = null;
+function lookupReceiverName() {
+    const input = getEl('transferTarget');
+    const hint = getEl('transferReceiverName');
+    if (!input || !hint) return;
+
+    const acc = input.value.trim().toUpperCase();
+    const lang = window.currentLang || 'en';
+    clearTimeout(_receiverLookupTimer);
+
+    if (!acc || acc.length < 4) { hint.textContent = ''; hint.className = 'receiver-name-hint'; return; }
+
+    _receiverLookupTimer = setTimeout(async () => {
+        try {
+            const res = await fetch(`/api/users/search?accountNumber=${encodeURIComponent(acc)}`);
+            if (!res.ok) {
+                hint.textContent = lang === 'tr' ? '⚠ Hesap bulunamadı' : '⚠ Account not found';
+                hint.className = 'receiver-name-hint error';
+                return;
+            }
+            const u = await res.json();
+            const fullName = `${u.name || ''} ${u.surname || ''}`.trim();
+            hint.textContent = fullName ? `✓ ${fullName}` : '';
+            hint.className = 'receiver-name-hint ok';
+        } catch {
+            hint.textContent = '';
+            hint.className = 'receiver-name-hint';
+        }
+    }, 350);
+}
+
+// ========== LANGUAGE CHANGE HOOK ==========
+// switchLang (index.html) statik [data-tr] öğelerini günceller; JS ile üretilen
+// içerik (işlem listeleri, admin tabloları) burada yeniden render edilir.
+window.onLanguageChange = function () {
+    try {
+        if (currentUser) {
+            fetchDashboardData();
+            if (currentUser.role === 'Admin') loadAdminPanel();
+            const accInfo = getEl('dash-account-info');
+            if (accInfo && accInfo.classList.contains('active')) loadAccountInfo();
+        }
+    } catch (e) { console.error('Language refresh error:', e); }
+};
 
 // ========== DASHBOARD NAVIGATION ==========
 function switchDashSection(targetId) {
@@ -668,6 +783,9 @@ async function fetchDashboardData() {
     const lang = window.currentLang || 'en';
     try {
         const accounts = await fetchJsonOrThrow('/api/accounts');
+        // Karşı taraf isimlerini gösterebilmek için kullanıcı rehberini oluştur.
+        const directoryUsers = await fetchJsonOrThrow('/api/users').catch(() => []);
+        buildAccountDirectory(accounts, directoryUsers);
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         if (userAccount) {
@@ -713,7 +831,7 @@ async function fetchDashboardData() {
             // Self-healing mechanism: clear corrupt or stale session if user ID is missing in the database
             console.warn('Session user account not found in database. Clearing stale session.');
             currentUser = null;
-            localStorage.removeItem('vireonUser');
+            clearSession();
             showToast(lang === 'tr' ? 'Oturum süreniz doldu veya veritabanı sıfırlandı. Lütfen tekrar giriş yapın.' : 'Your session expired or database was reset. Please login again.', 'warning');
             updateNavbarForLoggedOutUser();
             backToMenu();
@@ -819,11 +937,11 @@ async function fetchDatabaseStats() {
         if (isAdmin) {
             const tbody = document.querySelector('#dbUsersTable tbody');
             if (tbody) {
-                tbody.innerHTML = users.slice(0, 10).map(u => {
+                tbody.innerHTML = users.slice(0, 10).map((u, idx) => {
                     const acc = accounts.find(a => a.userId === u.id);
                     return `
                         <tr>
-                            <td>${u.id}</td>
+                            <td>${idx + 1}</td>
                             <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                             <td>${u.accountNumber || '-'}</td>
                             <td class="bal-text">₺${formatNumber(acc ? acc.balance : 0, 2, 2)}</td>
@@ -866,7 +984,7 @@ async function sendAiMessage() {
         const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText })
+            body: JSON.stringify({ message: userText, lang: window.currentLang || 'en' })
         });
         const data = await response.json();
         
@@ -900,7 +1018,7 @@ async function sendAIMessage() {
       const response = await fetch('/api/ai/chat', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ message: message })
+         body: JSON.stringify({ message: message, lang: window.currentLang || 'en' })
       });
       let text = '';
       const ct = response.headers.get('content-type') || '';
@@ -1027,7 +1145,7 @@ async function handleProfileSave() {
       });
       if (res.ok) {
          currentUser = { ...currentUser, name, surname: surname || ' ', email };
-         localStorage.setItem('vireonUser', JSON.stringify(currentUser));
+         persistCurrentUser();
          showToast(lang === 'tr' ? 'Bilgiler güncellendi.' : 'Profile updated.', 'success');
       } else {
          const err = await res.json().catch(() => ({}));
@@ -1171,6 +1289,16 @@ async function handleSendTransfer() {
     }
 }
 
+// Hesap rehberi: accountId -> { number, owner }. İşlem listelerinde karşı tarafı göstermek için.
+let accountDirectory = {};
+function buildAccountDirectory(accounts, users) {
+   const ownerByUserId = {};
+   (users || []).forEach(u => { ownerByUserId[u.id] = `${u.name || ''} ${u.surname || ''}`.trim(); });
+   const dir = {};
+   (accounts || []).forEach(a => { dir[a.id] = { number: a.accountNumber, owner: ownerByUserId[a.userId] || '' }; });
+   accountDirectory = dir;
+}
+
 function updateTransactionList(txs, accountId, listElement) {
    if (!listElement) return;
    const lang = window.currentLang || 'en';
@@ -1178,9 +1306,12 @@ function updateTransactionList(txs, accountId, listElement) {
       listElement.innerHTML = `<p class="tx-empty">${lang === 'tr' ? 'Henüz işlem bulunamadı.' : 'No transactions found.'}</p>`;
       return;
    }
-   const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing';
-   const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming';
+   const outLabel = lang === 'tr' ? 'Giden transfer' : 'Outgoing transfer';
+   const inLabel = lang === 'tr' ? 'Gelen transfer' : 'Incoming transfer';
    const depositLabel = lang === 'tr' ? 'Para Yatırma' : 'Deposit';
+   const toLabel = lang === 'tr' ? 'Alıcı' : 'To';
+   const fromLabel = lang === 'tr' ? 'Gönderen' : 'From';
+
    listElement.innerHTML = txs.slice().reverse().map(tx => {
       const isDeposit = tx.senderAccountId === tx.receiverAccountId;
       const isOut = !isDeposit && tx.senderAccountId === accountId;
@@ -1190,13 +1321,30 @@ function updateTransactionList(txs, accountId, listElement) {
       const icon = isDeposit ? '💰' : (isOut ? '📤' : '📥');
       const statusText = typeof tx.status === 'number' ? ['Pending','Completed','Failed','Cancelled'][tx.status] || '' : (tx.status || '');
       const statusBadge = statusText ? `<span class="tx-status tx-status-${statusText}">${statusText}</span>` : '';
-      const desc = tx.description ? `<span class="tx-detail">${escapeHtml(tx.description)}</span>` : '';
+
+      // Karşı taraf (hangi hesaba/kimden) bilgisini göster.
+      let partyHtml = '';
+      if (!isDeposit) {
+         const partyId = isOut ? tx.receiverAccountId : tx.senderAccountId;
+         const party = accountDirectory[partyId];
+         const partyLabel = isOut ? toLabel : fromLabel;
+         if (party) {
+            const who = party.owner ? `${party.owner} · ${party.number}` : party.number;
+            partyHtml = `<span class="tx-detail">${partyLabel}: ${escapeHtml(who)}</span>`;
+         }
+      }
+
+      // Kullanıcının girdiği özel açıklamayı göster (otomatik "Transfer: ..." metnini tekrarlama).
+      const customDesc = (tx.description && !/^transfer\s*:/i.test(tx.description)) ? tx.description : '';
+      const desc = customDesc ? `<span class="tx-detail">${escapeHtml(customDesc)}</span>` : '';
+
       return `
             <div class="tx-item">
                 <div class="tx-info">
                     <span class="tx-icon">${icon}</span>
                     <div class="tx-meta">
                         <span class="tx-desc">${label}</span>
+                        ${partyHtml}
                         ${desc}
                         <span class="tx-date">${new Date(tx.date).toLocaleString(getLocale(), {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
                     </div>
@@ -1348,6 +1496,8 @@ async function loadAccountInfo() {
 
         // Balance
         const accounts = await fetchJsonOrThrow('/api/accounts');
+        const directoryUsers = await fetchJsonOrThrow('/api/users').catch(() => []);
+        buildAccountDirectory(accounts, directoryUsers);
         const userAccount = accounts.find(a => a.userId === currentUser.id);
         
         const balEl = getEl('infoBalance');
@@ -1421,6 +1571,32 @@ async function loadAdminPanel() {
                     <td><span class="tx-status tx-status-${tx.status}">${tx.status}</span></td>
                 </tr>
             `).join('');
+        }
+
+        // 4. Suspicious Transactions / Fraud Logs
+        const fraudBody = getEl('adminFraudBody');
+        if (fraudBody) {
+            const lang = window.currentLang || 'en';
+            const [fraudLogs, accountsForFraud] = await Promise.all([
+                fetchJsonOrThrow('/api/fraudlogs').catch(() => []),
+                fetchJsonOrThrow('/api/accounts').catch(() => [])
+            ]);
+            const accNumById = {};
+            accountsForFraud.forEach(a => { accNumById[a.id] = a.accountNumber; });
+
+            if (!fraudLogs.length) {
+                fraudBody.innerHTML = `<tr><td colspan="5" class="tx-empty">${lang === 'tr' ? 'Şüpheli işlem kaydı yok.' : 'No suspicious transactions.'}</td></tr>`;
+            } else {
+                fraudBody.innerHTML = fraudLogs.slice().reverse().map(f => `
+                    <tr>
+                        <td>${f.id}</td>
+                        <td>${escapeHtml(accNumById[f.accountId] || ('#' + f.accountId))}</td>
+                        <td><span class="type-badge type-fraud">${escapeHtml(f.riskType || '-')}</span></td>
+                        <td>${escapeHtml(f.description || '-')}</td>
+                        <td>${new Date(f.logDate).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
+                    </tr>
+                `).join('');
+            }
         }
 
     } catch (err) {

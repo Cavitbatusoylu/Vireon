@@ -12,7 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260605-1">
+    <link rel="stylesheet" href="vireon.css?v=20260605-2">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -370,11 +370,11 @@
                                     <div class="ai-chat-body" id="aiChatContent">
                                         <div class="bot-bubble">
                                             <div class="bubble-icon">🤖</div>
-                                            <div class="bubble-text">Merhaba! Ben Neon. Senin bankacılık işlemlerini analiz ediyorum. Sana nasıl yardımcı olabilirim?</div>
+                                            <div class="bubble-text" data-tr="Merhaba! Ben Neon. Senin bankacılık işlemlerini analiz ediyorum. Sana nasıl yardımcı olabilirim?" data-en="Hi! I'm Neon. I analyze your banking activity. How can I help you?">Merhaba! Ben Neon. Senin bankacılık işlemlerini analiz ediyorum. Sana nasıl yardımcı olabilirim?</div>
                                         </div>
                                     </div>
                                     <div class="ai-chat-footer">
-                                        <input type="text" id="aiInput" placeholder="Neon'a sor..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+                                        <input type="text" id="aiInput" placeholder="Neon'a sor..." data-tr-placeholder="Neon'a sor..." data-en-placeholder="Ask Neon..." onkeypress="if(event.key==='Enter') sendAiMessage()">
                                         <button class="ai-send-btn" onclick="sendAiMessage()" aria-label="Send message">➤</button>
                                     </div>
                                 </div>
@@ -458,7 +458,8 @@
                                     <div class="transfer-form">
                                         <div class="form-group">
                                             <label data-tr="Alıcı Hesap Numarası" data-en="Receiver Account Number">Receiver Account Number</label>
-                                            <input type="text" id="transferTarget" placeholder="VR-0001" class="neon-input">
+                                            <input type="text" id="transferTarget" placeholder="VR-0001" class="neon-input" oninput="lookupReceiverName()">
+                                            <span class="receiver-name-hint" id="transferReceiverName"></span>
                                         </div>
                                         <div class="form-group">
                                             <label data-tr="Miktar (₺)" data-en="Amount (₺)">Amount (₺)</label>
@@ -624,6 +625,29 @@
                                                 </tr>
                                             </thead>
                                             <tbody id="adminTxBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Suspicious Transactions / Fraud Logs -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="🚨 Şüpheli İşlemler" data-en="🚨 Suspicious Transactions">🚨 Suspicious Transactions</h4>
+                                        <button class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh fraud logs">↻</button>
+                                    </div>
+                                    <p class="dash-hint" data-tr="Yüksek tutarlı, gece (00:00-05:00) veya sık tekrarlayan işlemler otomatik olarak buraya kaydedilir." data-en="High-value, night-time (00:00-05:00) or frequent transactions are automatically logged here.">High-value, night-time or frequent transactions are logged here.</p>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminFraudTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th data-tr="Hesap" data-en="Account">Account</th>
+                                                    <th data-tr="Risk Tipi" data-en="Risk Type">Risk Type</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminFraudBody"></tbody>
                                         </table>
                                     </div>
                                 </div>
@@ -1430,7 +1454,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260605-1" defer></script>
+    <script src="vireon.js?v=20260605-2" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
@@ -1456,6 +1480,9 @@
             });
 
             localStorage.setItem('vireon-lang', lang);
+
+            // JS ile üretilen dinamik içeriği (işlem listeleri, tablolar) yeniden render et.
+            if (typeof window.onLanguageChange === 'function') window.onLanguageChange();
         }
 
         // ========== THEME TOGGLE ==========
