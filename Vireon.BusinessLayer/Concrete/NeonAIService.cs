@@ -55,6 +55,44 @@ namespace Vireon.BusinessLayer.Concrete
             }}
         };
 
+        // İngilizce bankacılık konuşma veritabanı (Offline fallback)
+        private static readonly Dictionary<string, string[]> _offlineResponsesEn = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "hello", new[] {
+                "Hi! I'm Neon, your Vireon banking assistant. How can I help you today? 💳",
+                "Welcome! I can help with account info, transfers, or limits.",
+                "Hello! Welcome to the Vireon digital banking system. What would you like to do?"
+            }},
+            { "balance", new[] {
+                "You can view your balance on the Dashboard > Overview page. Click the 📊 icon in the left menu.",
+                "Your account balance is shown at the top of the main panel. Refresh the page for the latest figure."
+            }},
+            { "transfer", new[] {
+                "To send money, go to 💸 Send Money in the left menu. Enter the receiver account number (VR-XXXXX) and the amount.",
+                "Transfers are ACID-compliant. Mind your daily limit — you can review it under the ⚡ section."
+            }},
+            { "limit", new[] {
+                "Your default daily transfer limit is 50,000₺. You can adjust it under ⚡ Daily Limits.",
+                "You can check your limits in the 'Daily Limits' section of the left menu — used and remaining limits are shown there."
+            }},
+            { "account", new[] {
+                "You can see your account details under 📋 Account Information.",
+                "To open a new account, use the registration form. Each user is assigned a VR-XXXXX account number automatically."
+            }},
+            { "security", new[] {
+                "Vireon protects your passwords with BCrypt hashing. The fraud detection system flags suspicious transactions automatically.",
+                "Our security measures: BCrypt encryption, ACID transactions, fraud analysis and a rule-based risk scoring system."
+            }},
+            { "help", new[] {
+                "I can help you with:\n• 💰 Balance inquiries\n• 💸 Money transfers\n• ⚡ Limit info\n• 📋 Account details\n• 🔐 Security\n• 📊 Transaction history",
+                "As Neon AI, I can guide you through banking operations. Pick a topic or just type your question!"
+            }},
+            { "fraud", new[] {
+                "Vireon uses a rule-based AI risk engine to detect suspicious transactions automatically. High-value or frequent transactions are logged to FraudLogs.",
+                "Our fraud detection analyzes every transfer. Transactions scoring above 70% risk are blocked automatically."
+            }}
+        };
+
         public NeonAIService(HttpClient httpClient, IOptions<NeonAIOptions> options)
         {
             _httpClient = httpClient;
@@ -62,26 +100,27 @@ namespace Vireon.BusinessLayer.Concrete
             _httpClient.Timeout = TimeSpan.FromMinutes(2);
         }
 
-        public async Task<string> GetResponseAsync(string message)
+        public async Task<string> GetResponseAsync(string message, string? lang = null)
         {
+            var isEnglish = string.Equals(lang, "en", StringComparison.OrdinalIgnoreCase);
             var opt = _options.Value;
-            
+
             // API key yoksa veya geçersizse offline yanıt ver
             if (string.IsNullOrWhiteSpace(opt.ApiToken) || opt.ApiToken.Length < 10)
-                return GetOfflineResponse(message);
+                return GetOfflineResponse(message, isEnglish);
 
             try
             {
+                var systemPrompt = isEnglish
+                    ? "You are Neon, the AI assistant of Vireon digital bank. Always reply in English. Help with banking, money transfers, account operations and financial topics. Keep answers short, clear and professional."
+                    : "Sen Vireon dijital bankasının yapay zeka asistanı Neon'sun. Türkçe yanıt ver. Bankacılık, para transferi, hesap işlemleri ve finansal konularda yardımcı ol. Kısa, net ve profesyonel yanıtlar ver.";
+
                 var requestBody = new
                 {
                     model = opt.ModelId.Trim(),
                     messages = new object[]
                     {
-                        new
-                        {
-                            role = "system",
-                            content = "Sen Vireon dijital bankasının yapay zeka asistanı Neon'sun. Türkçe yanıt ver. Bankacılık, para transferi, hesap işlemleri ve finansal konularda yardımcı ol. Kısa, net ve profesyonel yanıtlar ver."
-                        },
+                        new { role = "system", content = systemPrompt },
                         new { role = "user", content = message }
                     },
                     max_tokens = 350,
@@ -99,23 +138,24 @@ namespace Vireon.BusinessLayer.Concrete
                 if (!response.IsSuccessStatusCode)
                 {
                     // API hatası varsa offline fallback
-                    return GetOfflineResponse(message);
+                    return GetOfflineResponse(message, isEnglish);
                 }
 
-                return ParseResponse(body) ?? GetOfflineResponse(message);
+                return ParseResponse(body) ?? GetOfflineResponse(message, isEnglish);
             }
             catch (Exception)
             {
                 // Bağlantı hatası durumunda da offline yanıt ver
-                return GetOfflineResponse(message);
+                return GetOfflineResponse(message, isEnglish);
             }
         }
 
-        private static string GetOfflineResponse(string message)
+        private static string GetOfflineResponse(string message, bool isEnglish)
         {
             var lower = message.ToLowerInvariant();
-            
-            foreach (var kvp in _offlineResponses)
+            var dictionary = isEnglish ? _offlineResponsesEn : _offlineResponses;
+
+            foreach (var kvp in dictionary)
             {
                 if (lower.Contains(kvp.Key))
                 {
@@ -124,7 +164,18 @@ namespace Vireon.BusinessLayer.Concrete
                 }
             }
 
-            // Genel fallback
+            if (isEnglish)
+            {
+                var generalEn = new[]
+                {
+                    $"I see you'd like to know about \"{message}\". As the Vireon banking system, I can help with account management, money transfers, limit settings and security. Would you like to ask something more specific?",
+                    "I'd be happy to help! Use the left menu in your Vireon panel to reach the relevant section. Type 'help' for detailed assistance.",
+                    "I'm currently running in offline mode. I can answer basic banking questions: balance, transfer, limit, account, security and more! 🤖"
+                };
+                return generalEn[Random.Shared.Next(generalEn.Length)];
+            }
+
+            // Genel fallback (TR)
             var generalResponses = new[]
             {
                 $"Anladım, \"{message}\" hakkında bilgi istiyorsunuz. Vireon bankacılık sistemi olarak size hesap yönetimi, para transferi, limit ayarları ve güvenlik konularında yardımcı olabilirim. Daha spesifik bir soru sormak ister misiniz?",
