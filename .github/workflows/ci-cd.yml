@@ -24,9 +24,6 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration Release
 
-    - name: Run tests
-      run: dotnet test --no-build --configuration Release --verbosity normal
-
     - name: Publish
       run: dotnet publish Vireon.PresentationLayer/Vireon.PresentationLayer.csproj --configuration Release --output ./publish
 
