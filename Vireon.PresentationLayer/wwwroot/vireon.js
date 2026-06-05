@@ -764,26 +764,59 @@ async function handleRegister(event) {
         const response = await fetch('/api/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, surname, email, password })
+            body: JSON.stringify({ name, surname, email: email.toLowerCase(), password })
         });
         
         if (response.ok) {
             const result = await response.json();
+            const accountNo = result.accountNumber || result.AccountNumber || '';
             showToast(
                 lang === 'tr'
-                    ? `Kayıt başarılı! Hesap No: ${result.accountNumber}`
-                    : `Account created! Account No: ${result.accountNumber}`,
+                    ? `Kayıt başarılı! Hesap No: ${accountNo}`
+                    : `Account created! Account No: ${accountNo}`,
                 'success'
             );
             closeRegisterModal();
-            
+
+            // Admin açıkken kayıt: listeyi yenile (işlem geçmişi değişmez)
+            if (currentUser?.role === 'Admin') {
+                loadAdminPanel();
+                if (getEl('dash-db-explorer')?.classList.contains('active')) fetchDatabaseStats();
+            }
+
+            // Yeni kullanıcıyı otomatik giriş yap (dashboard'da görünsün)
+            if (!currentUser) {
+                try {
+                    const loginRes = await fetch('/api/users/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    if (loginRes.ok) {
+                        currentUser = await loginRes.json();
+                        loginAttempts.count = 0;
+                        saveSession(currentUser, !!getEl('rememberMe')?.checked);
+                        resetSessionTimer();
+                        updateNavbarForLoggedInUser();
+                        showToast(lang === 'tr' ? `Hoş geldin ${currentUser.name}!` : `Welcome ${currentUser.name}!`, 'success');
+                        setTimeout(() => {
+                            showSection('dashboard');
+                            fetchDashboardData();
+                        }, 300);
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Auto-login after register failed:', e);
+                }
+            }
+
             setTimeout(() => {
                 const loginEmail = getEl('loginEmail');
                 const loginPassword = getEl('loginPassword');
                 if (loginEmail) loginEmail.value = email;
                 if (loginPassword) loginPassword.value = password;
                 openLoginModal();
-            }, 1500);
+            }, 800);
         } else {
             const error = await response.json().catch(() => ({}));
             showToast(error.message || (lang === 'tr' ? 'Kayıt başarısız.' : 'Registration failed.'), 'error');
@@ -1135,8 +1168,10 @@ async function fetchDatabaseStats() {
         if (isAdmin) {
             const tbody = document.querySelector('#dbUsersTable tbody');
             if (tbody) {
-                tbody.innerHTML = users.slice(0, 10).map((u, idx) => {
-                    const acc = accounts.find(a => a.userId === u.id);
+                const sorted = [...users].sort((a, b) => (b.id ?? b.Id ?? 0) - (a.id ?? a.Id ?? 0));
+                tbody.innerHTML = sorted.slice(0, 20).map((u, idx) => {
+                    const uid = u.id ?? u.Id;
+                    const acc = accounts.find(a => (a.userId ?? a.UserId) === uid);
                     return `
                         <tr>
                             <td>${idx + 1}</td>

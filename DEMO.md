@@ -78,6 +78,20 @@ npm start
 
 ---
 
+## Ekip — veritabanı senkronu
+
+Başka PC'de demo / kayıt yaptıysanız sunum öncesi:
+
+```powershell
+git pull origin Cavit-login   # güncel vireon_local.db
+```
+
+Yeni kullanıcı veya işlem ekledikten sonra:
+
+```powershell
+powershell -File scripts/sync-database.ps1
+```
+
 ## Sorun Giderme (sunum anı)
 
 | Sorun | Çözüm |

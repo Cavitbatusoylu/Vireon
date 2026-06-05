@@ -238,6 +238,27 @@ dotnet run
 
 Tarayıcınızda **http://localhost:5202** adresini açın.
 
+### 3b. Paylaşımlı veritabanı (ekip — GitHub)
+
+Tüm ekip **aynı** `Database/vireon_local.db` dosyasını kullanır. Başka bilgisayarda kayıt / işlem yaptıysan **DB'yi GitHub'a push etmeden** diğer PC'lerde görünmez.
+
+**Veri ekledikten sonra (kayıt, transfer, vb.):**
+```powershell
+# API kapalı olsun (Ctrl+C veya taskkill)
+powershell -File scripts/sync-database.ps1
+```
+
+**Diğer bilgisayarda güncel veriyi al:**
+```powershell
+git pull origin Cavit-login
+cd Vireon.PresentationLayer
+dotnet run
+```
+
+Konsolda `📂 Paylaşımlı SQLite: ...\Database\vireon_local.db` satırını kontrol et — yol repodaki `Database` klasörü olmalı.
+
+> İki kişi aynı anda farklı DB değişikliği push ederse binary çakışma olabilir; önce `git pull`, gerekirse son push'u kullanın.
+
 ### 4. İlk Kullanıcıyı Kaydet
 API: `POST /api/users/register`
 ```json

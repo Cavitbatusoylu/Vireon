@@ -103,6 +103,9 @@ internal class Program
                 // Database yoksa oluştur, migration'ları uygula
                 context.Database.Migrate();
 
+                var dbPath = context.Database.GetDbConnection().DataSource;
+                logger.LogInformation("📂 Paylaşımlı SQLite: {DbPath}", dbPath);
+
                 // ============================================================
                 // MEVCUT KULLANICILARA HESAP NUMARASI ATA
                 // Migration sonrası AccountNumber'ı boş olan kullanıcıları düzelt
