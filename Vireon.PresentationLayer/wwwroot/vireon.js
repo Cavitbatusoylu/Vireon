@@ -992,7 +992,7 @@ async function fetchDashboardData() {
             const accEl = getEl('dashAccountNo');
             const curEl = getEl('dashCurrency');
             
-            if (balEl) balEl.textContent = formatNumber(userAccount.balance, 2, 2);
+            if (balEl) balEl.textContent = formatNumber(presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }), 2, 2);
             if (accEl) accEl.textContent = userAccount.accountNumber;
             if (curEl) curEl.textContent = userAccount.currency;
 
@@ -1008,7 +1008,7 @@ async function fetchDashboardData() {
             const historyList = getEl('fullTransactionHistory');
             if (historyList) updateTransactionList(userTxs, userAccount.id, historyList);
             
-            initModernDashboardCharts(userTxs, userAccount.id, userAccount.balance);
+            initModernDashboardCharts(userTxs, userAccount.id, presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }));
             initOverviewChart(userTxs, userAccount.id);
             refreshQrCode();
 
@@ -1142,7 +1142,7 @@ async function fetchDatabaseStats() {
                             <td>${idx + 1}</td>
                             <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                             <td>${u.accountNumber || '-'}</td>
-                            <td class="bal-text">₺${formatNumber(acc ? acc.balance : 0, 2, 2)}</td>
+                            <td class="bal-text">₺${formatNumber(presentationBalance(acc?.balance, { email: u.email, role: u.role, accountNumber: u.accountNumber }), 2, 2)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -1713,7 +1713,9 @@ async function loadAccountInfo() {
         
         const balEl = getEl('infoBalance');
         const curEl = getEl('infoCurrency');
-        if (balEl) balEl.textContent = userAccount ? `${formatNumber(userAccount.balance, 2, 2)} TRY` : `0.00 TRY`;
+        if (balEl) balEl.textContent = userAccount
+            ? `${formatNumber(presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }), 2, 2)} TRY`
+            : `0.00 TRY`;
         if (curEl) curEl.textContent = userAccount?.currency || 'TRY';
 
         // Transaction history
@@ -1785,6 +1787,17 @@ function formatAdminReceiverCell(tx, lang) {
     return formatAdminParty(tx.receiverName, tx.receiverAccount);
 }
 
+/** Sunum bakiyesi — yalnızca ekranda; transfer/ledger dokunulmaz */
+function presentationBalance(rawBalance, ctx) {
+    const email = String(ctx?.email ?? ctx?.Email ?? currentUser?.email ?? '').toLowerCase();
+    const role = String(ctx?.role ?? ctx?.Role ?? currentUser?.role ?? '');
+    const accNo = String(ctx?.accountNumber ?? ctx?.AccountNumber ?? currentUser?.accountNumber ?? '').toUpperCase();
+    if (role === 'Admin' || email === 'cavit@vireon.com' || accNo === 'VR-99999') return 100000;
+    if (email === 'enes@vireon.com' || accNo === 'VR-88888') return 50000;
+    const n = Number(ctx?.balance ?? ctx?.Balance ?? rawBalance);
+    return Number.isFinite(n) ? n : 0;
+}
+
 async function loadAdminPanel() {
     if (!currentUser || currentUser.role !== 'Admin') return;
 
@@ -1816,7 +1829,6 @@ async function loadAdminPanel() {
         setVal('adminTotalTx', stats.totalTransactions ?? 0);
         setVal('adminTotalDeposits', stats.totalDeposits ?? 0);
         setVal('adminTotalTransfers', stats.totalTransfers ?? 0);
-        setVal('adminTotalBalance', `₺${formatNumber(stats.totalBalance ?? 0, 2, 2)}`);
         setVal('adminTotalFraud', stats.totalFraudLogs ?? 0);
         setVal('adminTotalLedger', stats.totalLedgerEntries ?? 0);
 
@@ -1832,24 +1844,31 @@ async function loadAdminPanel() {
         if (usersBody) {
             if (!users.length) {
                 usersBody.innerHTML = `<tr><td colspan="7" class="tx-empty">${lang === 'tr' ? 'Kullanıcı bulunamadı.' : 'No users found.'}</td></tr>`;
+                setVal('adminTotalBalance', `₺${formatNumber(stats.totalBalance ?? 0, 2, 2)}`);
             } else {
+                const displayTotalBalance = users.reduce((sum, u) => sum + presentationBalance(u.balance ?? u.Balance, u), 0);
+                setVal('adminTotalBalance', `₺${formatNumber(displayTotalBalance, 2, 2)}`);
+
                 usersBody.innerHTML = users.map((u, idx) => {
-                    const roleKey = (u.role || 'User').toLowerCase();
-                    const roleLabel = u.role === 'Admin'
+                    const roleKey = (u.role || u.Role || 'User').toLowerCase();
+                    const roleLabel = (u.role || u.Role) === 'Admin'
                         ? (lang === 'tr' ? 'Admin' : 'Admin')
                         : (lang === 'tr' ? 'Kullanıcı' : 'User');
+                    const displayBal = presentationBalance(u.balance ?? u.Balance, u);
                     return `
                 <tr title="DB ID: ${u.id}">
                     <td class="col-seq">${idx + 1}</td>
                     <td class="col-party">${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                     <td>${escapeHtml(u.email)}</td>
                     <td>${escapeHtml(u.accountNumber || '-')}</td>
-                    <td class="bal-text">₺${formatNumber(u.balance || 0, 2, 2)}</td>
+                    <td class="bal-text">₺${formatNumber(displayBal, 2, 2)}</td>
                     <td>${u.transactionCount ?? 0}</td>
                     <td><span class="role-badge role-${roleKey}">${roleLabel}</span></td>
                 </tr>`;
                 }).join('');
             }
+        } else {
+            setVal('adminTotalBalance', `₺${formatNumber(stats.totalBalance ?? 0, 2, 2)}`);
         }
 
         if (txBody) {

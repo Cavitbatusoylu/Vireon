@@ -271,11 +271,16 @@ namespace Vireon.PresentationLayer.Controllers
             var totalTransactions = _context.Transactions.Count();
             var totalDeposits = _context.Transactions.Count(t => t.SenderAccountId == t.ReceiverAccountId);
             var totalTransfers = _context.Transactions.Count(t => t.SenderAccountId != t.ReceiverAccountId);
-            // SQLite decimal SUM çevirisindeki sınırlama nedeniyle toplamı istemci tarafında alıyoruz.
-            var totalBalance = _context.Accounts
-                .Select(a => a.Balance)
+            // Admin panel sunum bakiyeleri (DB/ledger değişmez)
+            var totalBalance = _context.Users
+                .Select(u => new
+                {
+                    u.Email,
+                    u.Role,
+                    Balance = _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Balance).FirstOrDefault()
+                })
                 .AsEnumerable()
-                .Sum();
+                .Sum(u => AdminPanelDisplayBalance(u.Email, u.Role, u.Balance));
             var totalFraudLogs = _context.FraudLogs.Count();
             var totalLedgerEntries = _context.LedgerEntries.Count();
 
@@ -315,6 +320,19 @@ namespace Vireon.PresentationLayer.Controllers
                         _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.SenderAccountId) ||
                         _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.ReceiverAccountId))
                 })
+                .AsEnumerable()
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name,
+                    u.Surname,
+                    u.Email,
+                    u.AccountNumber,
+                    u.CreatedAt,
+                    u.Role,
+                    Balance = AdminPanelDisplayBalance(u.Email, u.Role, u.Balance),
+                    u.TransactionCount
+                })
                 .ToList();
 
             return Ok(users);
@@ -343,6 +361,18 @@ namespace Vireon.PresentationLayer.Controllers
                 .ToList();
 
             return Ok(transactions);
+        }
+
+        /// <summary>Admin panel / sunum — gerçek bakiye DB'de kalır, işlem geçmişi değişmez.</summary>
+        private static decimal AdminPanelDisplayBalance(string? email, string? role, decimal actualBalance)
+        {
+            var e = (email ?? "").Trim().ToLowerInvariant();
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)
+                || e == "cavit@vireon.com")
+                return 100_000m;
+            if (e == "enes@vireon.com")
+                return 50_000m;
+            return actualBalance;
         }
 
         // Benzersiz hesap numarası üretici (VR-XXXX formatında)
