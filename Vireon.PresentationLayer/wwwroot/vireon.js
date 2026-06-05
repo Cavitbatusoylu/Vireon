@@ -1829,6 +1829,7 @@ function presentationBalance(rawBalance, ctx) {
     const accNo = String(ctx?.accountNumber ?? ctx?.AccountNumber ?? currentUser?.accountNumber ?? '').toUpperCase();
     if (role === 'Admin' || email === 'cavit@vireon.com' || accNo === 'VR-99999') return 100000;
     if (email === 'enes@vireon.com' || accNo === 'VR-88888') return 50000;
+    if (email === 'kerem@vireon.com' || accNo === 'VR-77777') return 50000;
     const n = Number(ctx?.balance ?? ctx?.Balance ?? rawBalance);
     return Number.isFinite(n) ? n : 0;
 }
