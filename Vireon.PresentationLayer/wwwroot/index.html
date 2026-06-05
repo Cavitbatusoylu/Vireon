@@ -12,7 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260605-3">
+    <link rel="stylesheet" href="vireon.css?v=20260605-6">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -68,31 +68,28 @@
                 <span class="theme-icon-dark">🌙</span>
                 <span class="theme-icon-light">☀️</span>
             </button>
-            <!-- Back to Home Button (visible only in dashboard) -->
-            <button class="login-btn" id="backToHomeBtn" onclick="backToMenu()" style="display: none;" aria-label="Back to home">
-                <span class="login-icon">🏠</span>
-                <span data-tr="Ana Menü" data-en="Home">Home</span>
-            </button>
-            <!-- PWA Install Button -->
-            <button type="button" class="login-btn install-app-btn" id="installBtn" hidden aria-label="Install app">
-                <span class="login-icon">📱</span>
-                <span data-tr="Yükle" data-en="Install">Install</span>
-            </button>
-            <!-- Login Button -->
-            <button class="login-btn" id="loginBtn" aria-label="Open login modal">
-                <span class="login-icon">🔐</span>
-                <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
-            </button>
-            <!-- Logout Button (hidden by default) -->
-            <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;" aria-label="Logout">
-                <span class="login-icon">🚪</span>
-                <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
-            </button>
-            <!-- My Dashboard Button (Quick Access) -->
-            <button class="login-btn dash-quick-btn" id="homeDashboardBtn" onclick="showSection('dashboard')" style="display: none;" aria-label="Go to dashboard">
-                <span class="login-icon">🚀</span>
-                <span data-tr="Dashboardım" data-en="My Dashboard">My Dashboard</span>
-            </button>
+            <div class="navbar-actions" id="navbarActions">
+                <!-- Back to Home (dashboard only) -->
+                <button class="login-btn" id="backToHomeBtn" onclick="backToMenu()" style="display: none;" aria-label="Back to home">
+                    <span class="login-icon">🏠</span>
+                    <span data-tr="Ana Menü" data-en="Home">Home</span>
+                </button>
+                <!-- PWA Install -->
+                <button type="button" class="login-btn install-app-btn" id="installBtn" hidden aria-label="Install app">
+                    <span class="login-icon">📱</span>
+                    <span data-tr="Yükle" data-en="Install">Install</span>
+                </button>
+                <!-- Login -->
+                <button class="login-btn" id="loginBtn" aria-label="Open login modal">
+                    <span class="login-icon">🔐</span>
+                    <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
+                </button>
+                <!-- Logout -->
+                <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;" aria-label="Logout">
+                    <span class="login-icon">🚪</span>
+                    <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -542,7 +539,7 @@
                             <div class="dash-sub-section" id="dash-history">
                                 <h2 class="sub-section-title" data-tr="Tüm İşlemler" data-en="Full Transaction History">Full Transaction History</h2>
                                 <div class="dash-card transactions-card">
-                                    <div class="tx-list" id="fullTransactionHistory">
+                                    <div class="tx-list tx-list-modern" id="fullTransactionHistory">
                                         <p data-tr="Henüz işlem bulunamadı." data-en="No transactions found.">No transactions found.</p>
                                     </div>
                                 </div>
@@ -550,7 +547,11 @@
 
                             <!-- ========== ADMIN PANEL ========== -->
                             <div class="dash-sub-section" id="dash-admin">
-                                <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel">🛡️ Admin Panel</h2>
+                                <div class="card-header-modern admin-panel-header">
+                                    <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel" style="margin:0;">🛡️ Admin Panel</h2>
+                                    <button type="button" class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh admin panel">↻</button>
+                                </div>
+                                <p class="dash-hint admin-last-updated" id="adminLastUpdated" data-tr="Veriler yükleniyor..." data-en="Loading data...">Loading data...</p>
                                 
                                 <!-- System Stats -->
                                 <div class="admin-stats-grid" id="adminStatsGrid">
@@ -568,6 +569,16 @@
                                         <span class="admin-stat-icon">📊</span>
                                         <span class="admin-stat-value" id="adminTotalTx">0</span>
                                         <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💵</span>
+                                        <span class="admin-stat-value" id="adminTotalDeposits">0</span>
+                                        <span class="admin-stat-label" data-tr="Para Yatırma" data-en="Deposits">Deposits</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">↔️</span>
+                                        <span class="admin-stat-value" id="adminTotalTransfers">0</span>
+                                        <span class="admin-stat-label" data-tr="Transferler" data-en="Transfers">Transfers</span>
                                     </div>
                                     <div class="glass-card admin-stat-card">
                                         <span class="admin-stat-icon">💰</span>
@@ -593,7 +604,7 @@
                                         <table class="vireon-table-modern" id="adminUsersTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>#</th>
                                                     <th data-tr="Ad Soyad" data-en="Name">Name</th>
                                                     <th data-tr="E-posta" data-en="Email">Email</th>
                                                     <th data-tr="Hesap No" data-en="Account No">Account No</th>
@@ -614,7 +625,7 @@
                                         <table class="vireon-table-modern" id="adminTxTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>#</th>
                                                     <th data-tr="Tür" data-en="Type">Type</th>
                                                     <th data-tr="Gönderen" data-en="Sender">Sender</th>
                                                     <th data-tr="Alıcı" data-en="Receiver">Receiver</th>
@@ -640,7 +651,7 @@
                                         <table class="vireon-table-modern" id="adminFraudTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>#</th>
                                                     <th data-tr="Hesap" data-en="Account">Account</th>
                                                     <th data-tr="Risk Tipi" data-en="Risk Type">Risk Type</th>
                                                     <th data-tr="Açıklama" data-en="Description">Description</th>
@@ -1454,7 +1465,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260605-3" defer></script>
+    <script src="vireon.js?v=20260605-6" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
