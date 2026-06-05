@@ -297,20 +297,25 @@ namespace Vireon.PresentationLayer.Controllers
         [HttpGet("admin-users")]
         public IActionResult GetAdminUsers()
         {
-            var users = _context.Users.Select(u => new
-            {
-                u.Id,
-                u.Name,
-                u.Surname,
-                u.Email,
-                u.AccountNumber,
-                u.CreatedAt,
-                u.Role,
-                Balance = _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Balance).FirstOrDefault(),
-                TransactionCount = _context.Transactions.Count(t =>
-                    _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.SenderAccountId) ||
-                    _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.ReceiverAccountId))
-            }).ToList();
+            var users = _context.Users
+                .OrderByDescending(u => u.Role == "Admin")
+                .ThenBy(u => u.Name)
+                .ThenBy(u => u.Surname)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name,
+                    u.Surname,
+                    u.Email,
+                    u.AccountNumber,
+                    u.CreatedAt,
+                    u.Role,
+                    Balance = _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Balance).FirstOrDefault(),
+                    TransactionCount = _context.Transactions.Count(t =>
+                        _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.SenderAccountId) ||
+                        _context.Accounts.Where(a => a.UserId == u.Id).Select(a => a.Id).Contains(t.ReceiverAccountId))
+                })
+                .ToList();
 
             return Ok(users);
         }
