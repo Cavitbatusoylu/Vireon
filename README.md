@@ -11,11 +11,11 @@
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
 [![Entity Framework](https://img.shields.io/badge/EF%20Core-8.0-512BD4?style=for-the-badge)](https://docs.microsoft.com/ef/core)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](https://caps-hewlett-sara-kinase.trycloudflare.com)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](http://localhost:5202)
 
 **Production-grade, database-centric digital banking core system demonstrating enterprise-level financial transaction management with ACID compliance, immutable ledger architecture, AI-powered fraud detection, and modern fintech UI/UX.**
 
-[🚀 Live Demo](https://caps-hewlett-sara-kinase.trycloudflare.com) • [📖 Documentation](#-proje-hakkında) • [🎯 Features](#-temel-özellikler) • [🏗️ Architecture](#-proje-yapısı-ve-mimari) • [🔐 Security](#-güvenlik-ve-uyumluluk)
+[🚀 Demo (yerel)](http://localhost:5202) • [📋 Sunum senaryosu](DEMO.md) • [📖 Documentation](#-proje-hakkında) • [🎯 Features](#-temel-özellikler) • [🏗️ Architecture](#-proje-yapısı-ve-mimari) • [🔐 Security](#-güvenlik-ve-uyumluluk)
 
 ---
 
@@ -38,7 +38,7 @@
 - ✅ **Real-time Charts**: Canlı bakiye ve işlem grafikleri (Chart.js)
 - ✅ **QR Payment**: QR kod ile ödeme sistemi
 - ✅ **Multi-language**: Türkçe/İngilizce dil desteği
-- ✅ **Electron Desktop**: Cross-platform masaüstü uygulaması
+- ✅ **Electron Desktop (opsiyonel)**: Masaüstü kabuk — sunumda zorunlu değil; API çalışırken `npm start`
 
 ### 📊 Sistem Metrikleri
 
@@ -84,7 +84,7 @@ Vireon, enterprise-grade performans ve güvenilirlik için modern teknolojiler k
 
 | Teknoloji | Kullanım Amacı |
 |-----------|----------------|
-| **Electron** | Cross-platform Desktop App |
+| **Electron (opsiyonel)** | Masaüstü kabuk — demo için web yeterli |
 | **Node.js** | Desktop Runtime |
 | **Cloudflare Tunnel** | Secure Deployment |
 | **Git & GitHub** | Version Control |
@@ -93,7 +93,7 @@ Vireon, enterprise-grade performans ve güvenilirlik için modern teknolojiler k
 
 * ✅ **ACID Transactions:** Database-level transaction management with automatic rollback
 * ✅ **Immutable Ledger:** Append-only financial records for complete audit trail
-* ✅ **Fraud Detection:** Rule-based deterministic risk analysis with real-time blocking
+* ✅ **Fraud Detection:** Rule-based risk analysis; şüpheli işlemler loglanır (işlem engellenmez, admin panelinde görünür)
 * ✅ **AI Integration:** Groq API (Llama 3.1) for banking assistance
 * ✅ **Real-time Updates:** Live balance and transaction tracking
 * ✅ **PWA Support:** Installable web application
@@ -116,9 +116,9 @@ Vireon/
 │       ├── DailyLimit.cs         # Günlük limit
 │       └── FraudLogs.cs          # Fraud kayıtları
 │
-├── Vireon.DataAccessLayer/       # 🗄️ Data Access Layer (Repository Pattern)
-│   ├── Concrete/
-│   │   └── Context.cs            # DbContext (EF Core)
+├── Vireon.DataAccessLayer/       # 🗄️ Data Access Layer
+│   ├── Concrete/EntityFramework/
+│   │   └── VireonContext.cs      # DbContext (EF Core)
 │   └── Migrations/               # Database migrations
 │
 ├── Vireon.DtoLayer/              # 📋 Data Transfer Objects
@@ -130,7 +130,7 @@ Vireon/
 │   └── Concrete/
 │       ├── TransactionManager.cs  # ACID transaction yönetimi
 │       ├── FraudModelService.cs   # Fraud detection
-│       └── KumruAIService.cs      # AI entegrasyonu
+│       └── NeonAIService.cs       # AI entegrasyonu (Groq)
 │
 ├── Vireon.PresentationLayer/    # 🎨 Presentation Layer (Web UI)
 │   ├── Controllers/              # API Controllers
@@ -144,6 +144,9 @@ Vireon/
 │   ├── Program.cs                # Application entry point
 │   └── appsettings.json          # Configuration
 │
+├── Database/                     # 🗃️ Paylaşımlı SQLite (vireon_local.db)
+├── DATABASE_DOCUMENTATION.md     # Migration & seed (Kerem)
+├── DEMO.md                       # Sunum senaryosu & demo hesapları
 └── Vireon.slnx                   # Solution file
 ```
 
@@ -156,10 +159,10 @@ Vireon/
 - PWA desteği
 
 #### 2. Business Layer (İş Mantığı Katmanı)
-- Transaction Manager (ACID)
-- Fraud Detection Service
-- AI Integration Service
-- Business rules ve validations
+- `TransactionManager` — ACID transfer, ledger, limit
+- `FraudModelService` — kural tabanlı risk (log)
+- `NeonAIService` — bankacılık asistanı
+- Ayrı microservice yok; hesap/fraud/defter mantığı controller + manager içinde
 
 #### 3. Data Access Layer (Veri Erişim Katmanı)
 - Entity Framework Core
@@ -208,6 +211,20 @@ Bağlantı `Vireon.PresentationLayer/appsettings.json` içinde hazır olarak gel
 
 Veritabanı dosyası repoda bulunur; isterseniz silip ilk çalıştırmada sıfırdan oluşturabilirsiniz.
 
+### 2b. Neon AI (Groq) API anahtarı
+
+Anahtar **repoya yazılmaz**. Yerel geliştirme için:
+
+```bash
+cd Vireon.PresentationLayer
+copy appsettings.Development.json.example appsettings.Development.json
+# appsettings.Development.json içine Groq API anahtarınızı yazın (gitignore'da)
+```
+
+Alternatif: ortam değişkeni `NeonAI__ApiToken` (veya `NEONAI__APITOKEN`).
+
+> Daha önce repoda düz metin anahtar varsa [Groq Console](https://console.groq.com/) üzerinden **rotate** edin.
+
 ### 3. Projeyi Çalıştırın
 ```bash
 cd Vireon.PresentationLayer
@@ -219,7 +236,7 @@ dotnet run
 - Tüm tablolar oluşturulur
 - Seed data eklenir (Ana Admin `cavit@vireon.com` ve `enes@vireon.com`)
 
-Tarayıcınızda `https://localhost:5202` adresini açın.
+Tarayıcınızda **http://localhost:5202** adresini açın.
 
 ### 4. İlk Kullanıcıyı Kaydet
 API: `POST /api/users/register`
@@ -300,34 +317,58 @@ Detaylı database dokümantasyonu için: [DATABASE_DOCUMENTATION.md](DATABASE_DO
 ## 👥 Ekip ve Sorumluluklar
 
 ### Cavit Batu Soylu
-**Rol:** Full Stack Developer  
+**Rol:** Full Stack / Frontend  
 **Sorumluluklar:**
-- Frontend (WPF masaüstü uygulaması)
-- Modern web UI (HTML/CSS/JS)
-- TransferService (ACID/Rollback/Concurrency)
-- Database connection konfigürasyonu
-- PWA implementasyonu
-- Cloudflare Tunnel deployment
+- Modern web UI (`wwwroot`: HTML/CSS/JS, PWA)
+- `TransactionManager` ile ACID transfer akışı (iş birliği)
+- Paylaşımlı SQLite yolu (`ResolveSharedDbPath`, `Database/`)
+- Admin paneli, DB Explorer, deploy notları
 
 ### Enes Kaya
 **Rol:** Backend Developer  
 **Sorumluluklar:**
-- AccountService
-- FraudService
-- LedgerService
-- Tüm API Controller'lar
-- Backend servis katmanı
-- Business logic implementation
+- API Controller'lar (Users, Transfers, Transactions, FraudLogs, Ledger, AI, …)
+- `TransactionManager`, `FraudModelService`, `NeonAIService`
+- FluentValidation, AutoMapper, iş kuralları
+- Ayrı Account/Fraud/Ledger **servis projeleri yok** — tek solution, katmanlı mimari
 
 ### Kerem Arslan
 **Rol:** Database Specialist  
 **Sorumluluklar:**
-- Entity modellerin yazılması
-- DbContext tanımı
-- DailyLimit servisi
-- Seed data hazırlama
-- Database migrations
-- Schema design
+- Entity modeller, `VireonContext`
+- EF Core migration'lar (`Vireon.DataAccessLayer/Migrations`)
+- Seed ve şema ([DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md))
+- `DailyLimit` entity ve ilişkiler
+
+<p align="right">(<a href="#readme-top">yukarı dön</a>)</p>
+
+## 📚 Ek Dokümantasyon
+
+| Dosya | İçerik |
+|-------|--------|
+| [DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md) | Migration listesi, seed, tablolar (Kerem) |
+| [DEMO.md](DEMO.md) | Demo URL, hesaplar, ~10 dk sunum akışı |
+
+## 🧪 Otomatik Testler
+
+Projede **ayrı bir test projesi (xUnit/NUnit) yoktur** — final teslim kapsamında bilinçli olarak çıkarılmıştır. Doğrulama: `dotnet build`, manuel UI/API akışı ve [DEMO.md](DEMO.md) kontrol listesi.
+
+## 🖥️ Electron (Opsiyonel)
+
+```bash
+cd Vireon.PresentationLayer && dotnet run   # önce API: http://localhost:5202
+npm install && npm start                    # kök dizinden — masaüstü kabuk
+```
+
+Sunum için tarayıcıda **http://localhost:5202** yeterlidir.
+
+## 🎬 Demo ve Sunum
+
+1. `dotnet run` → **http://localhost:5202**
+2. Admin: `cavit@vireon.com` / `admin123` — kullanıcı: `enes@vireon.com` / `enes123`
+3. Adım adım akış: [DEMO.md](DEMO.md)
+
+**Cloudflare Tunnel (opsiyonel):** `cloudflared tunnel --url http://localhost:5202` — URL her oturumda değişebilir; birincil demo yerel porttur.
 
 <p align="right">(<a href="#readme-top">yukarı dön</a>)</p>
 
@@ -371,12 +412,12 @@ git push origin main
 ## 📈 Proje İstatistikleri
 
 - **Toplam Kod Satırı:** ~15,000+
-- **Backend Servisler:** 8
+- **Business servisleri:** 3 (`TransactionManager`, `FraudModelService`, `NeonAIService`)
 - **API Endpoints:** 25+
 - **Database Tabloları:** 6
 - **Frontend Sayfaları:** 10+
-- **Test Kullanıcıları:** 3
-- **Deployment:** Cloudflare Tunnel
+- **Seed kullanıcıları:** 2 (detay: DEMO.md)
+- **Demo:** http://localhost:5202 (birincil)
 
 ## 🎓 Eğitim Amaçlı Proje
 
@@ -397,7 +438,7 @@ Proje Sahibi: Cavit Batu Soylu
 GitHub: [@Cavitbatusoylu](https://github.com/Cavitbatusoylu)
 
 Proje Linki: [https://github.com/Cavitbatusoylu/Vireon](https://github.com/Cavitbatusoylu/Vireon)  
-Canlı Demo: [https://caps-hewlett-sara-kinase.trycloudflare.com](https://caps-hewlett-sara-kinase.trycloudflare.com)
+Canlı Demo (yerel): [http://localhost:5202](http://localhost:5202) — sunum: [DEMO.md](DEMO.md)
 
 ---
 <div align="center">
@@ -815,38 +856,43 @@ using (var transaction = _context.Database.BeginTransaction())
 
 ## 🚀 Deployment
 
-### Cloudflare Tunnel
-Proje Cloudflare Tunnel ile deploy edilmiştir:
+### Yerel demo (birincil)
+```bash
+cd Vireon.PresentationLayer
+dotnet run
+# → http://localhost:5202
+```
+
+### Cloudflare Tunnel (opsiyonel)
+Geçici dış erişim için (URL her seferinde değişir):
 
 ```bash
 cloudflared tunnel --url http://localhost:5202
 ```
 
-**Canlı URL:** https://caps-hewlett-sara-kinase.trycloudflare.com
-
 ### Production Checklist
 - [x] Database migration tamamlandı
 - [x] Seed data yüklendi
-- [x] API testleri yapıldı
-- [x] Frontend testleri yapıldı
-- [x] Cloudflare tunnel aktif
-- [x] HTTPS aktif
+- [x] Manuel API/UI doğrulaması ([DEMO.md](DEMO.md))
+- [x] Otomatik test projesi yok (bilinçli — final kapsamı)
 - [ ] SSL sertifikası (production için)
 - [ ] Domain bağlantısı (opsiyonel)
 
 ---
 
-## 🧪 Test Komutları
+## 🧪 Derleme ve Veritabanı Komutları
+
+Otomatik test projesi yoktur; aşağıdaki komutlar geliştirme ve sunum hazırlığı içindir.
 
 ```bash
 # Proje derleme
 dotnet build
 
-# Migration oluştur
-dotnet ef migrations add MigrationName
+# Migration oluştur (EF tools gerekir)
+dotnet ef migrations add MigrationName --project Vireon.DataAccessLayer --startup-project Vireon.PresentationLayer
 
 # Database güncelle
-dotnet ef database update
+dotnet ef database update --project Vireon.DataAccessLayer --startup-project Vireon.PresentationLayer
 
 # Projeyi çalıştır
 dotnet run --project Vireon.PresentationLayer
@@ -856,6 +902,8 @@ dotnet run --project Vireon.PresentationLayer
 
 ## 📚 Ek Kaynaklar
 
+- [DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md) — şema, migration, seed
+- [DEMO.md](DEMO.md) — sunum senaryosu
 - [ASP.NET Core Docs](https://docs.microsoft.com/aspnet/core)
 - [Entity Framework Core](https://docs.microsoft.com/ef/core)
 - [SQLite Documentation](https://www.sqlite.org/docs.html)
@@ -866,12 +914,11 @@ dotnet run --project Vireon.PresentationLayer
 
 ## 🎯 Gelecek Planları
 
-- [ ] Unit testler
-- [ ] Integration testler
+- [ ] Unit / integration test projesi (final teslimde bilinçli olarak eklenmedi)
+- [x] Swagger API dokümantasyonu (`/swagger`)
+- [x] Logging (Serilog — console + `logs/`)
 - [ ] Docker containerization
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Swagger API dokümantasyonu
-- [ ] Logging sistemi (Serilog)
 - [ ] Email servisi
 - [ ] SMS bildirimleri
 - [ ] Multi-currency desteği
