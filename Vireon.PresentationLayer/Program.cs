@@ -84,6 +84,7 @@ internal class Program
         builder.Services.AddSingleton<Vireon.BusinessLayer.Concrete.FraudModelService>();
 
         var app = builder.Build();
+        var isDevelopment = app.Environment.IsDevelopment();
 
         // ============================================================
         // OTOMATIK DATABASE MIGRATION VE SEED DATA
@@ -101,6 +102,9 @@ internal class Program
 
                 // Database yoksa oluştur, migration'ları uygula
                 context.Database.Migrate();
+
+                var dbPath = context.Database.GetDbConnection().DataSource;
+                logger.LogInformation("📂 Paylaşımlı SQLite: {DbPath}", dbPath);
 
                 // ============================================================
                 // MEVCUT KULLANICILARA HESAP NUMARASI ATA
@@ -324,7 +328,9 @@ internal class Program
             }
             else if (path.EndsWith(".js") || path.EndsWith(".css"))
             {
-                context.Response.Headers["Cache-Control"] = "public, max-age=3600";
+                context.Response.Headers["Cache-Control"] = isDevelopment
+                    ? "no-cache, no-store, must-revalidate"
+                    : "public, max-age=3600";
             }
             else if (path.EndsWith(".png") || path.EndsWith(".jpg") || path.EndsWith(".ico") || path.EndsWith(".webp"))
             {

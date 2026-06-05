@@ -32,6 +32,7 @@ _ReSharper*/
 
 # Secrets (API keys - never commit)
 Vireon.PresentationLayer/appsettings.Development.json
+!Vireon.PresentationLayer/appsettings.Development.json.example
 
 # Node
 node_modules/

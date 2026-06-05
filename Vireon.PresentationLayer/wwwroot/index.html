@@ -12,20 +12,20 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260605-3">
+    <link rel="stylesheet" href="vireon.css?v=20260605-11">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="icon" type="image/png" href="images/vireon-logo-transparent-new.png">
-    <link rel="shortcut icon" href="images/vireon-logo-transparent-new.png">
-    <link rel="apple-touch-icon" href="images/vireon-logo-transparent-new.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
+    <link rel="shortcut icon" href="images/pwa/icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="images/pwa/icon-192.png">
+    <link rel="manifest" href="manifest.json?v=20260605-11">
     <meta name="theme-color" content="#00b4d8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Vireon">
     <meta name="application-name" content="Vireon Digital Bank">
-    <meta name="msapplication-TileImage" content="images/vireon-logo-transparent-new.png">
+    <meta name="msapplication-TileImage" content="images/pwa/icon-512.png">
     <meta name="msapplication-TileColor" content="#0a0f1a">
     <!-- Chart.js for Dashboard Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -68,31 +68,28 @@
                 <span class="theme-icon-dark">🌙</span>
                 <span class="theme-icon-light">☀️</span>
             </button>
-            <!-- Back to Home Button (visible only in dashboard) -->
-            <button class="login-btn" id="backToHomeBtn" onclick="backToMenu()" style="display: none;" aria-label="Back to home">
-                <span class="login-icon">🏠</span>
-                <span data-tr="Ana Menü" data-en="Home">Home</span>
-            </button>
-            <!-- PWA Install Button -->
-            <button type="button" class="login-btn install-app-btn" id="installBtn" hidden aria-label="Install app">
-                <span class="login-icon">📱</span>
-                <span data-tr="Yükle" data-en="Install">Install</span>
-            </button>
-            <!-- Login Button -->
-            <button class="login-btn" id="loginBtn" aria-label="Open login modal">
-                <span class="login-icon">🔐</span>
-                <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
-            </button>
-            <!-- Logout Button (hidden by default) -->
-            <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;" aria-label="Logout">
-                <span class="login-icon">🚪</span>
-                <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
-            </button>
-            <!-- My Dashboard Button (Quick Access) -->
-            <button class="login-btn dash-quick-btn" id="homeDashboardBtn" onclick="showSection('dashboard')" style="display: none;" aria-label="Go to dashboard">
-                <span class="login-icon">🚀</span>
-                <span data-tr="Dashboardım" data-en="My Dashboard">My Dashboard</span>
-            </button>
+            <div class="navbar-actions" id="navbarActions">
+                <!-- Back to Home (dashboard only) -->
+                <button class="login-btn" id="backToHomeBtn" onclick="backToMenu()" style="display: none;" aria-label="Back to home">
+                    <span class="login-icon">🏠</span>
+                    <span data-tr="Ana Menü" data-en="Home">Home</span>
+                </button>
+                <!-- PWA Install -->
+                <button type="button" class="login-btn install-app-btn" id="installBtn" hidden aria-label="Install app">
+                    <span class="login-icon">📱</span>
+                    <span data-tr="Yükle" data-en="Install">Install</span>
+                </button>
+                <!-- Login -->
+                <button class="login-btn" id="loginBtn" aria-label="Open login modal">
+                    <span class="login-icon">🔐</span>
+                    <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
+                </button>
+                <!-- Logout -->
+                <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;" aria-label="Logout">
+                    <span class="login-icon">🚪</span>
+                    <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -363,7 +360,7 @@
                                 </div>
                             </div>
 
-                            <!-- AI COACH (Local GPT: Kumru) -->
+                            <!-- AI COACH (Neon / Groq) -->
                             <div class="dash-sub-section" id="dash-ai-coach">
                                 <h2 class="sub-section-title" data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</h2>
                                 <div class="ai-chat-shell glass-card">
@@ -542,7 +539,7 @@
                             <div class="dash-sub-section" id="dash-history">
                                 <h2 class="sub-section-title" data-tr="Tüm İşlemler" data-en="Full Transaction History">Full Transaction History</h2>
                                 <div class="dash-card transactions-card">
-                                    <div class="tx-list" id="fullTransactionHistory">
+                                    <div class="tx-list tx-list-modern" id="fullTransactionHistory">
                                         <p data-tr="Henüz işlem bulunamadı." data-en="No transactions found.">No transactions found.</p>
                                     </div>
                                 </div>
@@ -550,7 +547,11 @@
 
                             <!-- ========== ADMIN PANEL ========== -->
                             <div class="dash-sub-section" id="dash-admin">
-                                <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel">🛡️ Admin Panel</h2>
+                                <div class="card-header-modern admin-panel-header">
+                                    <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel" style="margin:0;">🛡️ Admin Panel</h2>
+                                    <button type="button" class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh admin panel">↻</button>
+                                </div>
+                                <p class="dash-hint admin-last-updated" id="adminLastUpdated" data-tr="Veriler yükleniyor..." data-en="Loading data...">Loading data...</p>
                                 
                                 <!-- System Stats -->
                                 <div class="admin-stats-grid" id="adminStatsGrid">
@@ -568,6 +569,16 @@
                                         <span class="admin-stat-icon">📊</span>
                                         <span class="admin-stat-value" id="adminTotalTx">0</span>
                                         <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💵</span>
+                                        <span class="admin-stat-value" id="adminTotalDeposits">0</span>
+                                        <span class="admin-stat-label" data-tr="Para Yatırma" data-en="Deposits">Deposits</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">↔️</span>
+                                        <span class="admin-stat-value" id="adminTotalTransfers">0</span>
+                                        <span class="admin-stat-label" data-tr="Transferler" data-en="Transfers">Transfers</span>
                                     </div>
                                     <div class="glass-card admin-stat-card">
                                         <span class="admin-stat-icon">💰</span>
@@ -593,7 +604,7 @@
                                         <table class="vireon-table-modern" id="adminUsersTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>#</th>
                                                     <th data-tr="Ad Soyad" data-en="Name">Name</th>
                                                     <th data-tr="E-posta" data-en="Email">Email</th>
                                                     <th data-tr="Hesap No" data-en="Account No">Account No</th>
@@ -614,7 +625,7 @@
                                         <table class="vireon-table-modern" id="adminTxTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>#</th>
                                                     <th data-tr="Tür" data-en="Type">Type</th>
                                                     <th data-tr="Gönderen" data-en="Sender">Sender</th>
                                                     <th data-tr="Alıcı" data-en="Receiver">Receiver</th>
@@ -640,7 +651,7 @@
                                         <table class="vireon-table-modern" id="adminFraudTable">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>#</th>
                                                     <th data-tr="Hesap" data-en="Account">Account</th>
                                                     <th data-tr="Risk Tipi" data-en="Risk Type">Risk Type</th>
                                                     <th data-tr="Açıklama" data-en="Description">Description</th>
@@ -793,16 +804,16 @@
                         <div class="tech-track">
                             <span class="tech-item">ASP.NET Core</span>
                             <span class="tech-item">C#</span>
-                            <span class="tech-item">MySQL</span>
+                            <span class="tech-item">SQLite</span>
                             <span class="tech-item">EF Core</span>
-                            <span class="tech-item">WPF</span>
+                            <span class="tech-item">PWA</span>
                             <span class="tech-item">FluentValidation</span>
                             <span class="tech-item">Web API</span>
                             <span class="tech-item">AutoMapper</span>
                             <span class="tech-item">ASP.NET Core</span>
                             <span class="tech-item">C#</span>
-                            <span class="tech-item">MySQL</span>
-                            <span class="tech-item">EF Core</span>
+                            <span class="tech-item">SQLite</span>
+                            <span class="tech-item">Chart.js</span>
                         </div>
                     </div>
                 </div>
@@ -1100,7 +1111,7 @@
                                 <div class="layer-icon">🗄️</div>
                                 <div class="layer-info">
                                     <h4>Database Layer</h4>
-                                    <p data-tr="MySQL - ACID Compliant Transactions" data-en="MySQL - ACID Compliant Transactions">MySQL - ACID Compliant Transactions</p>
+                                    <p data-tr="SQLite - ACID uyumlu işlemler (paylaşımlı vireon_local.db)" data-en="SQLite - ACID compliant transactions (shared vireon_local.db)">SQLite - ACID compliant transactions (shared vireon_local.db)</p>
                                 </div>
                             </div>
                         </div>
@@ -1239,58 +1250,54 @@
                 <div class="testimonials-grid">
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="Projenin frontend tarafı, WPF masaüstü uygulaması, TransferService (ACID/Rollback/Concurrency) ve veritabanı bağlantı konfigürasyonundan sorumluyum."
-                            data-en="Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and database connection configuration.">
-                            Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and
-                            database connection configuration.</p>
+                            data-tr="Modern web arayüzü (PWA), TransactionManager ile ACID transfer akışı, paylaşımlı SQLite yolu ve admin/DB Explorer panelinden sorumluyum."
+                            data-en="Responsible for the modern web UI (PWA), ACID transfers via TransactionManager, shared SQLite path, and admin/DB Explorer panels.">
+                            Responsible for the modern web UI (PWA), ACID transfers via TransactionManager, shared SQLite path, and admin/DB Explorer panels.</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">CBS</div>
                             </div>
                             <div class="author-info">
                                 <h5>Cavit Batu Soylu</h5>
-                                <p>Frontend & DB Connection</p>
+                                <p>Frontend &amp; DB path</p>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="AccountService, FraudService, LedgerService ve tüm API Controller yazımından sorumluyum. Backend servis katmanı benim görev alanım."
-                            data-en="Responsible for AccountService, FraudService, LedgerService, and all API Controllers. Backend service layer is my domain.">
-                            Responsible for AccountService, FraudService, LedgerService, and all API Controllers.
-                            Backend service layer is my domain.</p>
+                            data-tr="API Controller'lar, TransactionManager, FraudModelService, NeonAIService ve doğrulama katmanından sorumluyum. Ayrı microservice yok; tek solution içinde katmanlı mimari."
+                            data-en="Responsible for API controllers, TransactionManager, FraudModelService, NeonAIService, and validation. No separate microservices—layered architecture in one solution.">
+                            Responsible for API controllers, TransactionManager, FraudModelService, NeonAIService, and validation. No separate microservices—layered architecture in one solution.</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">EK</div>
                             </div>
                             <div class="author-info">
                                 <h5>Enes Kaya</h5>
-                                <p>Backend Services</p>
+                                <p>API &amp; Business Layer</p>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="Entity modellerin yazılması, DbContext tanımı, DailyLimit servisi ve seed data hazırlanmasından sorumluyum."
-                            data-en="Responsible for entity models, DbContext definition, DailyLimit service, and seed data preparation.">
-                            Responsible for entity models, DbContext definition, DailyLimit service, and seed data
-                            preparation.</p>
+                            data-tr="Entity modeller, VireonContext, EF Core migration'lar ve seed (DATABASE_DOCUMENTATION.md) tarafımdan."
+                            data-en="Entity models, VireonContext, EF Core migrations, and seed data (see DATABASE_DOCUMENTATION.md).">
+                            Entity models, VireonContext, EF Core migrations, and seed data (see DATABASE_DOCUMENTATION.md).</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">KA</div>
                             </div>
                             <div class="author-info">
                                 <h5>Kerem Arslan</h5>
-                                <p>Entity Models & Data</p>
+                                <p>Migrations &amp; Seed</p>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="Vireon; ASP.NET Core Web API, Entity Framework Core, MySQL ve modern web teknolojileri ile geliştirilmiş kapsamlı bir dijital banka çekirdek sistemi simülasyonudur."
-                            data-en="Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web API, Entity Framework Core, MySQL, and modern web technologies.">
-                            Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web
-                            API, Entity Framework Core, MySQL, and modern web technologies.</p>
+                            data-tr="Vireon; ASP.NET Core Web API, SQLite, Entity Framework Core ve PWA web arayüzü ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur. Sunum: DEMO.md — demo http://localhost:5202"
+                            data-en="Vireon is a digital bank core simulation built with ASP.NET Core Web API, SQLite, EF Core, and a PWA web UI. Presentation: DEMO.md — demo at http://localhost:5202">
+                            Vireon is a digital bank core simulation built with ASP.NET Core Web API, SQLite, EF Core, and a PWA web UI. Presentation: DEMO.md — demo at http://localhost:5202</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">VP</div>
@@ -1340,11 +1347,9 @@
                             data-en="This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a Computer Engineering 2nd year final project.">
                             This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a
                             Computer Engineering 2nd year final project.</p>
-                        <p data-tr="Sistem; MySQL üzerinde çalışır, ASP.NET Core Web API mimarisi kullanır, Entity Framework ile veri yönetir, ACID prensiplerini uygular ve modern web arayüzü ile veritabanına doğrudan erişim sağlar."
-                            data-en="The system runs on MySQL, uses ASP.NET Core Web API architecture, manages data with Entity Framework, applies ACID principles, and provides direct database access through a modern web interface.">
-                            The system runs on MySQL, uses ASP.NET Core Web API architecture, manages data with
-                            Entity Framework, applies ACID principles, and provides direct database access through a modern web
-                            interface.</p>
+                        <p data-tr="Sistem; SQLite (Database/vireon_local.db) üzerinde çalışır, katmanlı ASP.NET Core mimarisi kullanır, ACID transfer ve immutable ledger uygular. Otomatik test projesi yoktur (final kapsamı). Electron masaüstü opsiyoneldir."
+                            data-en="The system uses SQLite (Database/vireon_local.db), layered ASP.NET Core architecture, ACID transfers, and an immutable ledger. No automated test project (final scope). Electron desktop is optional.">
+                            The system uses SQLite (Database/vireon_local.db), layered ASP.NET Core architecture, ACID transfers, and an immutable ledger. No automated test project (final scope). Electron desktop is optional.</p>
                     </div>
                 </div>
             </div>
@@ -1454,7 +1459,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260605-3" defer></script>
+    <script src="vireon.js?v=20260605-11" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
