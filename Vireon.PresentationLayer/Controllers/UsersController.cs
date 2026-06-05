@@ -23,16 +23,18 @@ namespace Vireon.PresentationLayer.Controllers
         [HttpGet]
         public IActionResult GetUsers()
         {
-            var users = _context.Users.Select(u => new
-            {
-                u.Id,
-                u.Name,
-                u.Surname,
-                u.Email,
-                u.AccountNumber,
-                u.CreatedAt,
-                u.Role
-            }).ToList();
+            var users = _context.Users
+                .OrderByDescending(u => u.Id)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name,
+                    u.Surname,
+                    u.Email,
+                    u.AccountNumber,
+                    u.CreatedAt,
+                    u.Role
+                }).ToList();
             return Ok(users);
         }
 
@@ -303,7 +305,8 @@ namespace Vireon.PresentationLayer.Controllers
         public IActionResult GetAdminUsers()
         {
             var users = _context.Users
-                .OrderByDescending(u => u.Role == "Admin")
+                .OrderByDescending(u => u.Id)
+                .ThenByDescending(u => u.Role == "Admin")
                 .ThenBy(u => u.Name)
                 .ThenBy(u => u.Surname)
                 .Select(u => new

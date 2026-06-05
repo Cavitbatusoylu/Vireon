@@ -90,6 +90,20 @@ Ayrıca her kullanıcı için `DailyLimit` (100.000 TRY) ve ilk `LedgerEntry` ol
 | `Database/vireon_local.db` | ✅ Takip edilir (ekip paylaşımı) |
 | `*.db-shm`, `*.db-wal` | ❌ `.gitignore` (çalışma anı) |
 
+### Ekip senkronu (önemli)
+
+SQLite **sunucu değildir**; her PC kendi dosya kopyasını okur. Başka bilgisayarda açılan hesap, **o PC'den DB push edilmeden** senin makinede görünmez.
+
+```powershell
+# Veri değişince (API kapalıyken)
+powershell -File scripts/sync-database.ps1
+
+# Diğer PC
+git pull origin Cavit-login
+```
+
+Uygulama açılışında log: `📂 Paylaşımlı SQLite: ...\Database\vireon_local.db`
+
 ---
 
 ## 6. Kerem — Kontrol Listesi
