@@ -1,4 +1,4 @@
-namespace Vireon.PresentationLayer.DTOs
+namespace Vireon.DtoLayer.DTOs
 {
     /// <summary>
     /// Standart API response formatı - Tüm endpoint'ler bu formatı kullanmalı

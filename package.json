@@ -4,6 +4,8 @@
   "description": "Vireon Immutable Ledger - Digital Banking Core System",
   "main": "main.js",
   "scripts": {
+    "icon": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-electron-icon.ps1",
+    "prestart": "npm run icon",
     "start": "electron .",
     "dev": "electron . --enable-logging"
   },
@@ -21,7 +23,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "Vireon.PresentationLayer/wwwroot/images/vireon-logo-transparent-new.png"
+      "icon": "electron/icon.ico"
     }
   }
 }

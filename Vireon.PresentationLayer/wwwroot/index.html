@@ -12,7 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260605-6">
+    <link rel="stylesheet" href="vireon.css?v=20260605-7">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -360,7 +360,7 @@
                                 </div>
                             </div>
 
-                            <!-- AI COACH (Local GPT: Kumru) -->
+                            <!-- AI COACH (Neon / Groq) -->
                             <div class="dash-sub-section" id="dash-ai-coach">
                                 <h2 class="sub-section-title" data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</h2>
                                 <div class="ai-chat-shell glass-card">
@@ -804,16 +804,16 @@
                         <div class="tech-track">
                             <span class="tech-item">ASP.NET Core</span>
                             <span class="tech-item">C#</span>
-                            <span class="tech-item">MySQL</span>
+                            <span class="tech-item">SQLite</span>
                             <span class="tech-item">EF Core</span>
-                            <span class="tech-item">WPF</span>
+                            <span class="tech-item">PWA</span>
                             <span class="tech-item">FluentValidation</span>
                             <span class="tech-item">Web API</span>
                             <span class="tech-item">AutoMapper</span>
                             <span class="tech-item">ASP.NET Core</span>
                             <span class="tech-item">C#</span>
-                            <span class="tech-item">MySQL</span>
-                            <span class="tech-item">EF Core</span>
+                            <span class="tech-item">SQLite</span>
+                            <span class="tech-item">Chart.js</span>
                         </div>
                     </div>
                 </div>
@@ -1111,7 +1111,7 @@
                                 <div class="layer-icon">🗄️</div>
                                 <div class="layer-info">
                                     <h4>Database Layer</h4>
-                                    <p data-tr="MySQL - ACID Compliant Transactions" data-en="MySQL - ACID Compliant Transactions">MySQL - ACID Compliant Transactions</p>
+                                    <p data-tr="SQLite - ACID uyumlu işlemler (paylaşımlı vireon_local.db)" data-en="SQLite - ACID compliant transactions (shared vireon_local.db)">SQLite - ACID compliant transactions (shared vireon_local.db)</p>
                                 </div>
                             </div>
                         </div>
@@ -1250,58 +1250,54 @@
                 <div class="testimonials-grid">
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="Projenin frontend tarafı, WPF masaüstü uygulaması, TransferService (ACID/Rollback/Concurrency) ve veritabanı bağlantı konfigürasyonundan sorumluyum."
-                            data-en="Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and database connection configuration.">
-                            Responsible for frontend (WPF desktop app), TransferService (ACID/Rollback/Concurrency), and
-                            database connection configuration.</p>
+                            data-tr="Modern web arayüzü (PWA), TransactionManager ile ACID transfer akışı, paylaşımlı SQLite yolu ve admin/DB Explorer panelinden sorumluyum."
+                            data-en="Responsible for the modern web UI (PWA), ACID transfers via TransactionManager, shared SQLite path, and admin/DB Explorer panels.">
+                            Responsible for the modern web UI (PWA), ACID transfers via TransactionManager, shared SQLite path, and admin/DB Explorer panels.</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">CBS</div>
                             </div>
                             <div class="author-info">
                                 <h5>Cavit Batu Soylu</h5>
-                                <p>Frontend & DB Connection</p>
+                                <p>Frontend &amp; DB path</p>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="AccountService, FraudService, LedgerService ve tüm API Controller yazımından sorumluyum. Backend servis katmanı benim görev alanım."
-                            data-en="Responsible for AccountService, FraudService, LedgerService, and all API Controllers. Backend service layer is my domain.">
-                            Responsible for AccountService, FraudService, LedgerService, and all API Controllers.
-                            Backend service layer is my domain.</p>
+                            data-tr="API Controller'lar, TransactionManager, FraudModelService, NeonAIService ve doğrulama katmanından sorumluyum. Ayrı microservice yok; tek solution içinde katmanlı mimari."
+                            data-en="Responsible for API controllers, TransactionManager, FraudModelService, NeonAIService, and validation. No separate microservices—layered architecture in one solution.">
+                            Responsible for API controllers, TransactionManager, FraudModelService, NeonAIService, and validation. No separate microservices—layered architecture in one solution.</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">EK</div>
                             </div>
                             <div class="author-info">
                                 <h5>Enes Kaya</h5>
-                                <p>Backend Services</p>
+                                <p>API &amp; Business Layer</p>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="Entity modellerin yazılması, DbContext tanımı, DailyLimit servisi ve seed data hazırlanmasından sorumluyum."
-                            data-en="Responsible for entity models, DbContext definition, DailyLimit service, and seed data preparation.">
-                            Responsible for entity models, DbContext definition, DailyLimit service, and seed data
-                            preparation.</p>
+                            data-tr="Entity modeller, VireonContext, EF Core migration'lar ve seed (DATABASE_DOCUMENTATION.md) tarafımdan."
+                            data-en="Entity models, VireonContext, EF Core migrations, and seed data (see DATABASE_DOCUMENTATION.md).">
+                            Entity models, VireonContext, EF Core migrations, and seed data (see DATABASE_DOCUMENTATION.md).</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">KA</div>
                             </div>
                             <div class="author-info">
                                 <h5>Kerem Arslan</h5>
-                                <p>Entity Models & Data</p>
+                                <p>Migrations &amp; Seed</p>
                             </div>
                         </div>
                     </div>
                     <div class="testimonial-card">
                         <p class="testimonial-text"
-                            data-tr="Vireon; ASP.NET Core Web API, Entity Framework Core, MySQL ve modern web teknolojileri ile geliştirilmiş kapsamlı bir dijital banka çekirdek sistemi simülasyonudur."
-                            data-en="Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web API, Entity Framework Core, MySQL, and modern web technologies.">
-                            Vireon is a comprehensive digital bank core system simulation built with ASP.NET Core Web
-                            API, Entity Framework Core, MySQL, and modern web technologies.</p>
+                            data-tr="Vireon; ASP.NET Core Web API, SQLite, Entity Framework Core ve PWA web arayüzü ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur. Sunum: DEMO.md — demo http://localhost:5202"
+                            data-en="Vireon is a digital bank core simulation built with ASP.NET Core Web API, SQLite, EF Core, and a PWA web UI. Presentation: DEMO.md — demo at http://localhost:5202">
+                            Vireon is a digital bank core simulation built with ASP.NET Core Web API, SQLite, EF Core, and a PWA web UI. Presentation: DEMO.md — demo at http://localhost:5202</p>
                         <div class="testimonial-author">
                             <div class="author-avatar">
                                 <div class="avatar-placeholder">VP</div>
@@ -1351,11 +1347,9 @@
                             data-en="This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a Computer Engineering 2nd year final project.">
                             This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a
                             Computer Engineering 2nd year final project.</p>
-                        <p data-tr="Sistem; MySQL üzerinde çalışır, ASP.NET Core Web API mimarisi kullanır, Entity Framework ile veri yönetir, ACID prensiplerini uygular ve modern web arayüzü ile veritabanına doğrudan erişim sağlar."
-                            data-en="The system runs on MySQL, uses ASP.NET Core Web API architecture, manages data with Entity Framework, applies ACID principles, and provides direct database access through a modern web interface.">
-                            The system runs on MySQL, uses ASP.NET Core Web API architecture, manages data with
-                            Entity Framework, applies ACID principles, and provides direct database access through a modern web
-                            interface.</p>
+                        <p data-tr="Sistem; SQLite (Database/vireon_local.db) üzerinde çalışır, katmanlı ASP.NET Core mimarisi kullanır, ACID transfer ve immutable ledger uygular. Otomatik test projesi yoktur (final kapsamı). Electron masaüstü opsiyoneldir."
+                            data-en="The system uses SQLite (Database/vireon_local.db), layered ASP.NET Core architecture, ACID transfers, and an immutable ledger. No automated test project (final scope). Electron desktop is optional.">
+                            The system uses SQLite (Database/vireon_local.db), layered ASP.NET Core architecture, ACID transfers, and an immutable ledger. No automated test project (final scope). Electron desktop is optional.</p>
                     </div>
                 </div>
             </div>
@@ -1465,7 +1459,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260605-6" defer></script>
+    <script src="vireon.js?v=20260605-7" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
