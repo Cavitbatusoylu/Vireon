@@ -45,7 +45,7 @@ namespace Vireon.DtoLayer.DTOs
             };
         }
 
-        public static ApiResponse ErrorResponse(string message, string? code = null)
+        public static new ApiResponse ErrorResponse(string message, string? code = null)
         {
             return new ApiResponse
             {
