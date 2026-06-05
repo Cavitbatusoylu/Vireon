@@ -373,7 +373,7 @@ namespace Vireon.PresentationLayer.Controllers
             if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase)
                 || e == "cavit@vireon.com")
                 return 100_000m;
-            if (e == "enes@vireon.com")
+            if (e == "enes@vireon.com" || e == "kerem@vireon.com")
                 return 50_000m;
             return actualBalance;
         }

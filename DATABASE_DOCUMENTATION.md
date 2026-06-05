@@ -96,7 +96,7 @@ SQLite **sunucu değildir**; her PC kendi dosya kopyasını okur. Başka bilgisa
 
 ```powershell
 # Veri değişince (API kapalıyken)
-powershell -File scripts/sync-database.ps1
+npm run sync-db
 
 # Diğer PC
 git pull origin Cavit-login

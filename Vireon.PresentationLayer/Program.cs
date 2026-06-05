@@ -276,6 +276,75 @@ internal class Program
 
                     logger.LogInformation("✅ Sistem sadece Ana Admin (Cavit) ve Enes ile hazırlandı!");
                 }
+
+                // ============================================================
+                // TEST KULLANICISINI KALDIR (testuser@example.com)
+                // ============================================================
+                var testUser = context.Users.FirstOrDefault(u => u.Email == "testuser@example.com");
+                if (testUser != null)
+                {
+                    var testAccountIds = context.Accounts.Where(a => a.UserId == testUser.Id).Select(a => a.Id).ToList();
+                    foreach (var accId in testAccountIds)
+                    {
+                        context.LedgerEntries.RemoveRange(context.LedgerEntries.Where(l => l.AccountId == accId));
+                        context.FraudLogs.RemoveRange(context.FraudLogs.Where(f => f.AccountId == accId));
+                        context.Transactions.RemoveRange(
+                            context.Transactions.Where(t => t.SenderAccountId == accId || t.ReceiverAccountId == accId));
+                    }
+                    context.DailyLimits.RemoveRange(context.DailyLimits.Where(d => d.UserId == testUser.Id));
+                    context.Accounts.RemoveRange(context.Accounts.Where(a => a.UserId == testUser.Id));
+                    context.Users.Remove(testUser);
+                    context.SaveChanges();
+                    logger.LogInformation("🗑️ Test kullanıcısı silindi: testuser@example.com");
+                }
+
+                // ============================================================
+                // KEREM DEMO HESABI (yoksa oluştur)
+                // ============================================================
+                if (!context.Users.Any(u => u.Email == "kerem@vireon.com"))
+                {
+                    var keremUser = new User
+                    {
+                        Name = "Kerem",
+                        Surname = "Arslan",
+                        Email = "kerem@vireon.com",
+                        Password = BCrypt.Net.BCrypt.HashPassword("kerem123"),
+                        AccountNumber = "VR-77777",
+                        CreatedAt = DateTime.Now,
+                        Role = "User"
+                    };
+                    context.Users.Add(keremUser);
+                    context.SaveChanges();
+
+                    var keremAccount = new Account
+                    {
+                        UserId = keremUser.Id,
+                        AccountNumber = "VR-77777",
+                        Balance = 50000m,
+                        Currency = "TRY"
+                    };
+                    context.Accounts.Add(keremAccount);
+                    context.SaveChanges();
+
+                    context.DailyLimits.Add(new DailyLimit
+                    {
+                        UserId = keremUser.Id,
+                        MaxDailyLimit = 100000m,
+                        UsedLimit = 0m,
+                        LastResetDate = DateTime.Now.Date
+                    });
+                    context.LedgerEntries.Add(new LedgerEntry
+                    {
+                        AccountId = keremAccount.Id,
+                        Amount = 50000m,
+                        PreviousBalance = 0m,
+                        NewBalance = 50000m,
+                        Description = "Hesap oluşturma - Seed data",
+                        CreatedAt = DateTime.Now
+                    });
+                    context.SaveChanges();
+                    logger.LogInformation("🌱 Kerem hesabı eklendi: kerem@vireon.com (VR-77777)");
+                }
             }
             catch (Exception ex)
             {

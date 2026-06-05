@@ -28,6 +28,7 @@ dotnet run
 |-----|---------|-------|----------|
 | Admin | cavit@vireon.com | admin123 | VR-99999 |
 | Kullanıcı | enes@vireon.com | enes123 | VR-88888 |
+| Kullanıcı | kerem@vireon.com | kerem123 | VR-77777 |
 
 ---
 
@@ -89,7 +90,7 @@ git pull origin Cavit-login   # güncel vireon_local.db
 Yeni kullanıcı veya işlem ekledikten sonra:
 
 ```powershell
-powershell -File scripts/sync-database.ps1
+npm run sync-db
 ```
 
 ## Sorun Giderme (sunum anı)
