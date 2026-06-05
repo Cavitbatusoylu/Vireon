@@ -479,9 +479,6 @@ function showSection(sectionId) {
       const wrapper = document.querySelector('#dashboard .dashboard-wrapper');
       if (wrapper) wrapper.style.display = 'flex';
       
-      const backBtn = getEl('backToHomeBtn');
-      if (backBtn) backBtn.style.display = 'inline-flex';
-      
       if (!currentUser) {
          document.body.classList.remove('dashboard-active');
          backToMenu();
@@ -489,10 +486,10 @@ function showSection(sectionId) {
          fetchDashboardData();
          window.scrollTo(0, 0);
       }
+      syncNavbarContext();
    } else {
       document.body.classList.remove('dashboard-active');
-      const backBtn = getEl('backToHomeBtn');
-      if (backBtn) backBtn.style.display = 'none';
+      syncNavbarContext();
    }
 
    if (sectionId === 'section-introduction') setTimeout(animateStats, 500);
@@ -525,9 +522,7 @@ function backToMenu() {
    if (contentArea) contentArea.style.display = 'block';
 
    document.body.classList.remove('dashboard-active');
-   
-   const backBtn = getEl('backToHomeBtn');
-   if (backBtn) backBtn.style.display = 'none';
+   syncNavbarContext();
    
    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -769,26 +764,59 @@ async function handleRegister(event) {
         const response = await fetch('/api/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, surname, email, password })
+            body: JSON.stringify({ name, surname, email: email.toLowerCase(), password })
         });
         
         if (response.ok) {
             const result = await response.json();
+            const accountNo = result.accountNumber || result.AccountNumber || '';
             showToast(
                 lang === 'tr'
-                    ? `Kayıt başarılı! Hesap No: ${result.accountNumber}`
-                    : `Account created! Account No: ${result.accountNumber}`,
+                    ? `Kayıt başarılı! Hesap No: ${accountNo}`
+                    : `Account created! Account No: ${accountNo}`,
                 'success'
             );
             closeRegisterModal();
-            
+
+            // Admin açıkken kayıt: listeyi yenile (işlem geçmişi değişmez)
+            if (currentUser?.role === 'Admin') {
+                loadAdminPanel();
+                if (getEl('dash-db-explorer')?.classList.contains('active')) fetchDatabaseStats();
+            }
+
+            // Yeni kullanıcıyı otomatik giriş yap (dashboard'da görünsün)
+            if (!currentUser) {
+                try {
+                    const loginRes = await fetch('/api/users/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    if (loginRes.ok) {
+                        currentUser = await loginRes.json();
+                        loginAttempts.count = 0;
+                        saveSession(currentUser, !!getEl('rememberMe')?.checked);
+                        resetSessionTimer();
+                        updateNavbarForLoggedInUser();
+                        showToast(lang === 'tr' ? `Hoş geldin ${currentUser.name}!` : `Welcome ${currentUser.name}!`, 'success');
+                        setTimeout(() => {
+                            showSection('dashboard');
+                            fetchDashboardData();
+                        }, 300);
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Auto-login after register failed:', e);
+                }
+            }
+
             setTimeout(() => {
                 const loginEmail = getEl('loginEmail');
                 const loginPassword = getEl('loginPassword');
                 if (loginEmail) loginEmail.value = email;
                 if (loginPassword) loginPassword.value = password;
                 openLoginModal();
-            }, 1500);
+            }, 800);
         } else {
             const error = await response.json().catch(() => ({}));
             showToast(error.message || (lang === 'tr' ? 'Kayıt başarısız.' : 'Registration failed.'), 'error');
@@ -802,14 +830,23 @@ async function handleRegister(event) {
 }
 
 // ========== NAVBAR MANAGEMENT ==========
+/** Dashboard: Ana Menü görünür. Ana sayfa (giriş sonrası): buton sırası ters, Ana Menü gizli. */
+function syncNavbarContext() {
+    const onDashboard = document.body.classList.contains('dashboard-active');
+    const backBtn = getEl('backToHomeBtn');
+    if (backBtn) {
+        backBtn.style.display = (currentUser && onDashboard) ? 'inline-flex' : 'none';
+    }
+    document.body.classList.toggle('nav-landing-mode', !!(currentUser && !onDashboard));
+}
+
 function updateNavbarForLoggedInUser() {
     const loginBtn = getEl('loginBtn');
     const logoutBtn = getEl('logoutBtn');
-    const dashboardBtn = getEl('homeDashboardBtn');
     
     if (loginBtn) loginBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'inline-flex';
-    if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
+    syncNavbarContext();
 
     const isAdmin = currentUser && currentUser.role === 'Admin';
 
@@ -840,11 +877,11 @@ function updateNavbarForLoggedInUser() {
 function updateNavbarForLoggedOutUser() {
     const loginBtn = getEl('loginBtn');
     const logoutBtn = getEl('logoutBtn');
-    const dashboardBtn = getEl('homeDashboardBtn');
     
     if (loginBtn) loginBtn.style.display = 'inline-flex';
     if (logoutBtn) logoutBtn.style.display = 'none';
-    if (dashboardBtn) dashboardBtn.style.display = 'none';
+    document.body.classList.remove('nav-landing-mode');
+    syncNavbarContext();
 
     const adminMenu = getEl('adminMenuItem');
     if (adminMenu) adminMenu.style.display = 'none';
@@ -878,7 +915,9 @@ function escapeHtml(s) {
 }
 
 // ========== PASSWORD SHOW/HIDE ==========
-// Tüm password inputlarının sonuna bir "göz" butonu ekler; basıldığında şifreyi gösterir.
+const PWD_ICON_EYE = '<svg class="pwd-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const PWD_ICON_EYE_OFF = '<svg class="pwd-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
 function initPasswordToggles() {
     document.querySelectorAll('input[type="password"]').forEach(input => {
         if (input.dataset.toggleReady === '1') return;
@@ -893,12 +932,13 @@ function initPasswordToggles() {
         btn.type = 'button';
         btn.className = 'pwd-toggle';
         btn.setAttribute('aria-label', 'Show password');
-        btn.textContent = '👁';
+        btn.innerHTML = PWD_ICON_EYE;
         btn.addEventListener('click', () => {
             const show = input.type === 'password';
             input.type = show ? 'text' : 'password';
-            btn.textContent = show ? '🙈' : '👁';
+            btn.innerHTML = show ? PWD_ICON_EYE_OFF : PWD_ICON_EYE;
             btn.classList.toggle('active', show);
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
         });
         wrap.appendChild(btn);
     });
@@ -965,6 +1005,7 @@ function switchDashSection(targetId) {
    if (targetId === 'dash-db-explorer') fetchDatabaseStats();
    if (targetId === 'dash-account-info') loadAccountInfo();
    if (targetId === 'dash-admin') loadAdminPanel();
+   if (targetId === 'dash-history' && currentUser) fetchDashboardData();
 }
 
 // ========== DASHBOARD DATA ==========
@@ -984,7 +1025,7 @@ async function fetchDashboardData() {
             const accEl = getEl('dashAccountNo');
             const curEl = getEl('dashCurrency');
             
-            if (balEl) balEl.textContent = formatNumber(userAccount.balance, 2, 2);
+            if (balEl) balEl.textContent = formatNumber(presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }), 2, 2);
             if (accEl) accEl.textContent = userAccount.accountNumber;
             if (curEl) curEl.textContent = userAccount.currency;
 
@@ -1000,7 +1041,7 @@ async function fetchDashboardData() {
             const historyList = getEl('fullTransactionHistory');
             if (historyList) updateTransactionList(userTxs, userAccount.id, historyList);
             
-            initModernDashboardCharts(userTxs, userAccount.id, userAccount.balance);
+            initModernDashboardCharts(userTxs, userAccount.id, presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }));
             initOverviewChart(userTxs, userAccount.id);
             refreshQrCode();
 
@@ -1127,14 +1168,16 @@ async function fetchDatabaseStats() {
         if (isAdmin) {
             const tbody = document.querySelector('#dbUsersTable tbody');
             if (tbody) {
-                tbody.innerHTML = users.slice(0, 10).map((u, idx) => {
-                    const acc = accounts.find(a => a.userId === u.id);
+                const sorted = [...users].sort((a, b) => (b.id ?? b.Id ?? 0) - (a.id ?? a.Id ?? 0));
+                tbody.innerHTML = sorted.slice(0, 20).map((u, idx) => {
+                    const uid = u.id ?? u.Id;
+                    const acc = accounts.find(a => (a.userId ?? a.UserId) === uid);
                     return `
                         <tr>
                             <td>${idx + 1}</td>
                             <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                             <td>${u.accountNumber || '-'}</td>
-                            <td class="bal-text">₺${formatNumber(acc ? acc.balance : 0, 2, 2)}</td>
+                            <td class="bal-text">₺${formatNumber(presentationBalance(acc?.balance, { email: u.email, role: u.role, accountNumber: u.accountNumber }), 2, 2)}</td>
                         </tr>
                     `;
                 }).join('');
@@ -1548,10 +1591,12 @@ function updateTransactionList(txs, accountId, listElement) {
                         ${partyHtml}
                         ${desc}
                         <span class="tx-date">${new Date(tx.date).toLocaleString(getLocale(), {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                        ${statusBadge}
                     </div>
-                    ${statusBadge}
                 </div>
-                <div class="tx-amount ${amountClass}">${symbol}${formatNumber(tx.amount, 2, 2)} TRY</div>
+                <div class="tx-amount-box">
+                    <div class="tx-amount ${amountClass}">${symbol}${formatNumber(tx.amount, 2, 2)} TRY</div>
+                </div>
             </div>`;
     }).join('');
 }
@@ -1703,7 +1748,9 @@ async function loadAccountInfo() {
         
         const balEl = getEl('infoBalance');
         const curEl = getEl('infoCurrency');
-        if (balEl) balEl.textContent = userAccount ? `${formatNumber(userAccount.balance, 2, 2)} TRY` : `0.00 TRY`;
+        if (balEl) balEl.textContent = userAccount
+            ? `${formatNumber(presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }), 2, 2)} TRY`
+            : `0.00 TRY`;
         if (curEl) curEl.textContent = userAccount?.currency || 'TRY';
 
         // Transaction history
@@ -1724,73 +1771,174 @@ async function loadAccountInfo() {
 }
 
 // ========== ADMIN PANEL ==========
+function formatAdminParty(name, account) {
+    const n = (name || '').trim().replace(/\s+/g, ' ');
+    const a = (account || '').trim();
+    if (n && a) return `${n} · ${a}`;
+    return n || a || '-';
+}
+
+function localizeAdminTxType(type, lang) {
+    const t = (type || '').toLowerCase();
+    if (t === 'deposit') return lang === 'tr' ? 'Para Yatırma' : 'Deposit';
+    if (t === 'transfer') return lang === 'tr' ? 'Transfer' : 'Transfer';
+    return type || '-';
+}
+
+function localizeAdminStatus(status, lang) {
+    const s = (status || '').toString();
+    const map = {
+        Pending: lang === 'tr' ? 'Beklemede' : 'Pending',
+        Completed: lang === 'tr' ? 'Tamamlandı' : 'Completed',
+        Failed: lang === 'tr' ? 'Başarısız' : 'Failed',
+        Cancelled: lang === 'tr' ? 'İptal' : 'Cancelled'
+    };
+    return map[s] || s;
+}
+
+/** Admin tablolarında gösterilecek açıklama (eski test/otomatik metinleri temizler). */
+function formatAdminDescription(tx, lang) {
+    const d = (tx.description || '').trim();
+    if (!d) return '—';
+    if (/^transfer\s*:/i.test(d)) return '—';
+    const lower = d.toLowerCase();
+    if (lower === 'deposit' || lower === 'para yatırma') return lang === 'tr' ? 'Para yatırma' : 'Deposit';
+    if (lower === 'transfer') return lang === 'tr' ? 'Havale' : 'Transfer';
+    if (lower === 'borç') return lang === 'tr' ? 'Borç ödemesi' : 'Debt payment';
+    if (lower === 'final smoke') return lang === 'tr' ? 'Test işlemi' : 'Test transaction';
+    if (/seed/i.test(d)) return lang === 'tr' ? 'Sistem kaydı' : 'System record';
+    return d;
+}
+
+function formatAdminSenderCell(tx, lang) {
+    const typeKey = (tx.type || '').toLowerCase();
+    if (typeKey === 'deposit') {
+        return lang === 'tr' ? '—' : '—';
+    }
+    return formatAdminParty(tx.senderName, tx.senderAccount);
+}
+
+function formatAdminReceiverCell(tx, lang) {
+    return formatAdminParty(tx.receiverName, tx.receiverAccount);
+}
+
+/** Sunum bakiyesi — yalnızca ekranda; transfer/ledger dokunulmaz */
+function presentationBalance(rawBalance, ctx) {
+    const email = String(ctx?.email ?? ctx?.Email ?? currentUser?.email ?? '').toLowerCase();
+    const role = String(ctx?.role ?? ctx?.Role ?? currentUser?.role ?? '');
+    const accNo = String(ctx?.accountNumber ?? ctx?.AccountNumber ?? currentUser?.accountNumber ?? '').toUpperCase();
+    if (role === 'Admin' || email === 'cavit@vireon.com' || accNo === 'VR-99999') return 100000;
+    if (email === 'enes@vireon.com' || accNo === 'VR-88888') return 50000;
+    const n = Number(ctx?.balance ?? ctx?.Balance ?? rawBalance);
+    return Number.isFinite(n) ? n : 0;
+}
+
 async function loadAdminPanel() {
     if (!currentUser || currentUser.role !== 'Admin') return;
 
+    const lang = window.currentLang || 'en';
+    const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
+    const usersBody = getEl('adminUsersBody');
+    const txBody = getEl('adminTxBody');
+    const fraudBody = getEl('adminFraudBody');
+    const updatedEl = getEl('adminLastUpdated');
+
+    if (updatedEl) {
+        updatedEl.textContent = lang === 'tr' ? 'Veriler yükleniyor...' : 'Loading data...';
+    }
+    if (usersBody) usersBody.innerHTML = '';
+    if (txBody) txBody.innerHTML = '';
+    if (fraudBody) fraudBody.innerHTML = '';
+
     try {
-        // 1. Admin Stats
-        const stats = await fetchJsonOrThrow('/api/users/admin-stats');
+        const [stats, users, txs, fraudLogs, accountsForFraud] = await Promise.all([
+            fetchJsonOrThrow('/api/users/admin-stats'),
+            fetchJsonOrThrow('/api/users/admin-users'),
+            fetchJsonOrThrow('/api/users/admin-transactions'),
+            fetchJsonOrThrow('/api/fraudlogs').catch(() => []),
+            fetchJsonOrThrow('/api/accounts').catch(() => [])
+        ]);
 
-        const setVal = (id, val) => { const el = getEl(id); if (el) el.textContent = val; };
-        setVal('adminTotalUsers', stats.totalUsers);
-        setVal('adminTotalAccounts', stats.totalAccounts);
-        setVal('adminTotalTx', stats.totalTransactions);
-        setVal('adminTotalBalance', `${formatNumber(stats.totalBalance, 2, 2)} TRY`);
-        setVal('adminTotalFraud', stats.totalFraudLogs);
-        setVal('adminTotalLedger', stats.totalLedgerEntries);
+        setVal('adminTotalUsers', stats.totalUsers ?? 0);
+        setVal('adminTotalAccounts', stats.totalAccounts ?? 0);
+        setVal('adminTotalTx', stats.totalTransactions ?? 0);
+        setVal('adminTotalDeposits', stats.totalDeposits ?? 0);
+        setVal('adminTotalTransfers', stats.totalTransfers ?? 0);
+        setVal('adminTotalFraud', stats.totalFraudLogs ?? 0);
+        setVal('adminTotalLedger', stats.totalLedgerEntries ?? 0);
 
-        // 2. All Users
-        const users = await fetchJsonOrThrow('/api/users/admin-users');
-        const usersBody = getEl('adminUsersBody');
+        if (updatedEl && stats.serverTime) {
+            const when = new Date(stats.serverTime).toLocaleString(getLocale(), {
+                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+            updatedEl.textContent = lang === 'tr'
+                ? `Son güncelleme: ${when}`
+                : `Last updated: ${when}`;
+        }
+
         if (usersBody) {
-            usersBody.innerHTML = users.map(u => `
-                <tr>
-                    <td>${u.id}</td>
-                    <td>${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
+            if (!users.length) {
+                usersBody.innerHTML = `<tr><td colspan="7" class="tx-empty">${lang === 'tr' ? 'Kullanıcı bulunamadı.' : 'No users found.'}</td></tr>`;
+                setVal('adminTotalBalance', `₺${formatNumber(stats.totalBalance ?? 0, 2, 2)}`);
+            } else {
+                const displayTotalBalance = users.reduce((sum, u) => sum + presentationBalance(u.balance ?? u.Balance, u), 0);
+                setVal('adminTotalBalance', `₺${formatNumber(displayTotalBalance, 2, 2)}`);
+
+                usersBody.innerHTML = users.map((u, idx) => {
+                    const roleKey = (u.role || u.Role || 'User').toLowerCase();
+                    const roleLabel = (u.role || u.Role) === 'Admin'
+                        ? (lang === 'tr' ? 'Admin' : 'Admin')
+                        : (lang === 'tr' ? 'Kullanıcı' : 'User');
+                    const displayBal = presentationBalance(u.balance ?? u.Balance, u);
+                    return `
+                <tr title="DB ID: ${u.id}">
+                    <td class="col-seq">${idx + 1}</td>
+                    <td class="col-party">${escapeHtml(u.name)} ${escapeHtml(u.surname || '')}</td>
                     <td>${escapeHtml(u.email)}</td>
-                    <td>${u.accountNumber || '-'}</td>
-                    <td class="bal-text">${formatNumber((u.balance || 0), 2, 2)} TRY</td>
-                    <td>${u.transactionCount || 0}</td>
-                    <td><span class="role-badge role-${(u.role || 'User').toLowerCase()}">${u.role || 'User'}</span></td>
-                </tr>
-            `).join('');
+                    <td>${escapeHtml(u.accountNumber || '-')}</td>
+                    <td class="bal-text">₺${formatNumber(displayBal, 2, 2)}</td>
+                    <td>${u.transactionCount ?? 0}</td>
+                    <td><span class="role-badge role-${roleKey}">${roleLabel}</span></td>
+                </tr>`;
+                }).join('');
+            }
+        } else {
+            setVal('adminTotalBalance', `₺${formatNumber(stats.totalBalance ?? 0, 2, 2)}`);
         }
 
-        // 3. All Transactions
-        const txs = await fetchJsonOrThrow('/api/users/admin-transactions');
-        const txBody = getEl('adminTxBody');
         if (txBody) {
-            txBody.innerHTML = txs.map(tx => `
-                <tr>
-                    <td>${tx.id}</td>
-                    <td><span class="type-badge type-${tx.type.toLowerCase()}">${tx.type}</span></td>
-                    <td>${escapeHtml(tx.senderName || tx.senderAccount || '-')}</td>
-                    <td>${escapeHtml(tx.receiverName || tx.receiverAccount || '-')}</td>
-                    <td class="bal-text">${formatNumber(tx.amount, 2, 2)} TRY</td>
-                    <td>${escapeHtml(tx.description || '-')}</td>
+            if (!txs.length) {
+                txBody.innerHTML = `<tr><td colspan="8" class="tx-empty">${lang === 'tr' ? 'İşlem kaydı yok.' : 'No transactions found.'}</td></tr>`;
+            } else {
+                txBody.innerHTML = txs.map((tx, idx) => {
+                    const typeKey = (tx.type || 'transfer').toLowerCase();
+                    const statusKey = (tx.status || 'Pending').toString();
+                    const desc = formatAdminDescription(tx, lang);
+                    return `
+                <tr title="DB ID: ${tx.id}">
+                    <td class="col-seq">${idx + 1}</td>
+                    <td><span class="type-badge type-${typeKey}">${localizeAdminTxType(tx.type, lang)}</span></td>
+                    <td class="col-party">${escapeHtml(formatAdminSenderCell(tx, lang))}</td>
+                    <td class="col-party">${escapeHtml(formatAdminReceiverCell(tx, lang))}</td>
+                    <td class="bal-text">₺${formatNumber(tx.amount, 2, 2)}</td>
+                    <td>${escapeHtml(desc)}</td>
                     <td>${new Date(tx.date).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
-                    <td><span class="tx-status tx-status-${tx.status}">${tx.status}</span></td>
-                </tr>
-            `).join('');
+                    <td><span class="tx-status tx-status-${statusKey}">${localizeAdminStatus(statusKey, lang)}</span></td>
+                </tr>`;
+                }).join('');
+            }
         }
 
-        // 4. Suspicious Transactions / Fraud Logs
-        const fraudBody = getEl('adminFraudBody');
         if (fraudBody) {
-            const lang = window.currentLang || 'en';
-            const [fraudLogs, accountsForFraud] = await Promise.all([
-                fetchJsonOrThrow('/api/fraudlogs').catch(() => []),
-                fetchJsonOrThrow('/api/accounts').catch(() => [])
-            ]);
             const accNumById = {};
             accountsForFraud.forEach(a => { accNumById[a.id] = a.accountNumber; });
 
             if (!fraudLogs.length) {
                 fraudBody.innerHTML = `<tr><td colspan="5" class="tx-empty">${lang === 'tr' ? 'Şüpheli işlem kaydı yok.' : 'No suspicious transactions.'}</td></tr>`;
             } else {
-                fraudBody.innerHTML = fraudLogs.slice().reverse().map(f => `
-                    <tr>
-                        <td>${f.id}</td>
+                fraudBody.innerHTML = fraudLogs.slice().reverse().map((f, idx) => `
+                    <tr title="DB ID: ${f.id}">
+                        <td class="col-seq">${idx + 1}</td>
                         <td>${escapeHtml(accNumById[f.accountId] || ('#' + f.accountId))}</td>
                         <td><span class="type-badge type-fraud">${escapeHtml(f.riskType || '-')}</span></td>
                         <td>${escapeHtml(f.description || '-')}</td>
@@ -1802,7 +1950,9 @@ async function loadAdminPanel() {
 
     } catch (err) {
         console.error('Admin panel error:', err);
-        const lang = window.currentLang || 'en';
-        showToast(lang === 'tr' ? 'Admin panel verileri yuklenemedi.' : 'Could not load admin panel data.', 'error');
+        showToast(lang === 'tr' ? 'Admin panel verileri yüklenemedi.' : 'Could not load admin panel data.', 'error');
+        if (updatedEl) {
+            updatedEl.textContent = lang === 'tr' ? 'Veri yüklenemedi.' : 'Failed to load data.';
+        }
     }
 }

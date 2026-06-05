@@ -7,8 +7,9 @@ const CACHE_NAME = `vireon-v${CACHE_VERSION}`;
 
 // Sadece değişmeyecek asset'ler cache'lenir
 const STATIC_ASSETS = [
+  '/images/pwa/icon-192.png',
+  '/images/pwa/icon-512.png',
   '/images/vireon-logo-transparent-new.png',
-  '/images/vireon-logo-new.png',
   '/images/vireon_robot.png',
   '/manifest.json'
 ];
