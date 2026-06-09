@@ -3118,6 +3118,10 @@ body.dashboard-active .container {
 	color: rgba(0, 0, 0, 0.55);
 }
 
+[data-theme="light"] .qr-meta {
+	color: rgba(0, 0, 0, 0.72) !important;
+}
+
 /* Responsive Dashboard */
 @media (max-width: 992px) {
     .dashboard-wrapper {
@@ -5588,10 +5592,26 @@ body.admin-mode #adminMenuItem {
 [data-theme="light"] .tx-detail,
 [data-theme="light"] .hero-details,
 [data-theme="light"] .chart-card h4,
-[data-theme="light"] .limit-card-label,
-[data-theme="light"] .limit-card-hint,
 [data-theme="light"] .limit-meta-row {
     color: rgba(0, 0, 0, 0.62) !important;
+}
+
+[data-theme="light"] .limit-card-label {
+    color: rgba(0, 0, 0, 0.78) !important;
+}
+
+[data-theme="light"] .limit-card-hint {
+    color: rgba(0, 0, 0, 0.68) !important;
+}
+
+[data-theme="light"] .limit-progress-header,
+[data-theme="light"] .limit-progress-header span,
+[data-theme="light"] #limitProgressLabel {
+    color: rgba(0, 0, 0, 0.78) !important;
+}
+
+[data-theme="light"] .limit-meta-muted {
+    color: rgba(0, 0, 0, 0.55) !important;
 }
 
 [data-theme="light"] .hero-amount,
