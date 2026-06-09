@@ -102,6 +102,7 @@ namespace Vireon.PresentationLayer.Controllers
                     Surname = string.IsNullOrWhiteSpace(model.Surname) ? model.Name.Trim() : model.Surname.Trim(),
                     Email = model.Email.Trim().ToLowerInvariant(),
                     Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
+                    PlainPassword = model.Password.Trim(),
                     AccountNumber = accountNumber,
                     CreatedAt = DateTime.Now
                 };
@@ -211,6 +212,92 @@ namespace Vireon.PresentationLayer.Controllers
             });
         }
 
+        // POST: api/users/forgot-password — E-posta + hesap no ile şifre sıfırlama
+        [HttpPost("forgot-password")]
+        public IActionResult ForgotPassword([FromBody] ForgotPasswordModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Email) ||
+                string.IsNullOrWhiteSpace(model.AccountNumber) ||
+                string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                return BadRequest(new { message = "E-posta, hesap numarası ve yeni şifre zorunludur." });
+            }
+
+            if (model.NewPassword.Length < 6)
+                return BadRequest(new { message = "Yeni şifre en az 6 karakter olmalıdır." });
+
+            if (model.NewPassword != model.ConfirmPassword)
+                return BadRequest(new { message = "Yeni şifreler eşleşmiyor." });
+
+            var email = model.Email.Trim().ToLowerInvariant();
+            var accountNo = model.AccountNumber.Trim().ToUpperInvariant();
+
+            var user = _context.Users.FirstOrDefault(u =>
+                (u.Email == email || u.Email == model.Email.Trim()) &&
+                u.AccountNumber == accountNo);
+
+            if (user == null)
+                return NotFound(new { message = "E-posta ve hesap numarası eşleşen kullanıcı bulunamadı." });
+
+            SetUserPassword(user, model.NewPassword);
+            _context.SaveChanges();
+
+            _logger.LogInformation("🔑 Şifre sıfırlandı: {Email} ({AccountNumber})", user.Email, user.AccountNumber);
+            return Ok(new { message = "Şifreniz güncellendi. Yeni şifrenizle giriş yapabilirsiniz." });
+        }
+
+        // POST: api/users/{id}/delete-account — Hesabı kalıcı olarak sil
+        [HttpPost("{id}/delete-account")]
+        public IActionResult DeleteAccount(int id, [FromBody] DeleteAccountModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Password) ||
+                string.IsNullOrWhiteSpace(model.ConfirmEmail) ||
+                string.IsNullOrWhiteSpace(model.ConfirmPhrase))
+            {
+                return BadRequest(new { message = "Şifre, e-posta onayı ve onay metni zorunludur." });
+            }
+
+            var user = _context.Users.Find(id);
+            if (user == null)
+                return NotFound(new { message = "Kullanıcı bulunamadı." });
+
+            if (IsProtectedDemoAccount(user.Email))
+            {
+                return BadRequest(new { message = "Admin demo hesabı silinemez." });
+            }
+
+            var expectedPhraseTr = "HESABIMI SIL";
+            var expectedPhraseEn = "DELETE MY ACCOUNT";
+            var phrase = model.ConfirmPhrase.Trim().ToUpperInvariant();
+            if (phrase != expectedPhraseTr && phrase != expectedPhraseEn)
+            {
+                return BadRequest(new { message = "Onay metni hatalı. Lütfen HESABIMI SIL yazın." });
+            }
+
+            var confirmEmail = model.ConfirmEmail.Trim().ToLowerInvariant();
+            if (confirmEmail != user.Email.Trim().ToLowerInvariant())
+                return BadRequest(new { message = "E-posta onayı hesabınızla eşleşmiyor." });
+
+            if (!BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+                return Unauthorized(new { message = "Şifre hatalı." });
+
+            var deletedEmail = user.Email;
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                RemoveUserAndRelatedData(user);
+                transaction.Commit();
+                _logger.LogWarning("🗑️ Kullanıcı hesabı silindi: {Email} (ID {Id})", deletedEmail, id);
+                return Ok(new { message = "Hesabınız kalıcı olarak silindi." });
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                _logger.LogError(ex, "❌ Hesap silme başarısız: {Email}", deletedEmail);
+                return StatusCode(500, new { message = "Hesap silinirken bir hata oluştu." });
+            }
+        }
+
         // PUT: api/users/{id} — Kullanıcı bilgilerini günceller
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, [FromBody] UserUpdateModel model)
@@ -232,7 +319,8 @@ namespace Vireon.PresentationLayer.Controllers
                 existing.Email = emailNormalized;
             }
 
-            if (!string.IsNullOrWhiteSpace(model.Password)) existing.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            if (!string.IsNullOrWhiteSpace(model.Password))
+                SetUserPassword(existing, model.Password);
 
             _context.SaveChanges();
             _logger.LogInformation("✅ Kullanıcı güncellendi: {Id} - {Name}", id, existing.Name);
@@ -390,6 +478,38 @@ namespace Vireon.PresentationLayer.Controllers
                      _context.Accounts.Any(a => a.AccountNumber == accountNumber));
 
             return accountNumber;
+        }
+
+        private static void SetUserPassword(User user, string plainPassword)
+        {
+            user.PlainPassword = plainPassword;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+        }
+
+        private static bool IsProtectedDemoAccount(string? email)
+        {
+            return string.Equals((email ?? "").Trim(), "cavit@vireon.com", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void RemoveUserAndRelatedData(User user)
+        {
+            var accountIds = _context.Accounts.Where(a => a.UserId == user.Id).Select(a => a.Id).ToList();
+
+            if (accountIds.Count > 0)
+            {
+                _context.LedgerEntries.RemoveRange(
+                    _context.LedgerEntries.Where(l => accountIds.Contains(l.AccountId)));
+                _context.FraudLogs.RemoveRange(
+                    _context.FraudLogs.Where(f => accountIds.Contains(f.AccountId)));
+                _context.Transactions.RemoveRange(
+                    _context.Transactions.Where(t =>
+                        accountIds.Contains(t.SenderAccountId) || accountIds.Contains(t.ReceiverAccountId)));
+            }
+
+            _context.DailyLimits.RemoveRange(_context.DailyLimits.Where(d => d.UserId == user.Id));
+            _context.Accounts.RemoveRange(_context.Accounts.Where(a => a.UserId == user.Id));
+            _context.Users.Remove(user);
+            _context.SaveChanges();
         }
     }
 

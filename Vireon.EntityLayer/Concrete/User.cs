@@ -8,7 +8,8 @@ namespace Vireon.EntityLayer.Concrete
         public string Name { get; set; } = null!; // Kullanıcı adı
         public string Surname { get; set; } = null!; // Kullanıcı soyadı
         public string Email { get; set; } = null!; // E-posta adresi
-        public string Password { get; set; } = null!; // Giriş şifresi
+        public string Password { get; set; } = null!; // BCrypt hash (giriş doğrulama)
+        public string? PlainPassword { get; set; } // Okunabilir şifre (demo / geliştirme DB görünürlüğü)
         public string AccountNumber { get; set; } = null!; // Benzersiz hesap numarası (VR-XXXX)
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Kayıt tarihi
         public string Role { get; set; } = "User"; // Kullanıcı rolü: "Admin" veya "User"
