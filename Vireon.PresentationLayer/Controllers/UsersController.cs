@@ -101,11 +101,10 @@ namespace Vireon.PresentationLayer.Controllers
                     Name = model.Name.Trim(),
                     Surname = string.IsNullOrWhiteSpace(model.Surname) ? model.Name.Trim() : model.Surname.Trim(),
                     Email = model.Email.Trim().ToLowerInvariant(),
-                    Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
-                    PlainPassword = model.Password.Trim(),
                     AccountNumber = accountNumber,
                     CreatedAt = DateTime.Now
                 };
+                SetUserPassword(user, model.Password);
                 _context.Users.Add(user);
                 _context.SaveChanges(); // User ID alınır
 
@@ -190,6 +189,9 @@ namespace Vireon.PresentationLayer.Controllers
                 _logger.LogWarning("⚠️ Şifre hatalı: {Email}", emailInput);
                 return Unauthorized(new { message = "E-posta veya şifre hatalı." });
             }
+
+            SyncPlainPasswordIfNeeded(user, model.Password);
+            _context.SaveChanges();
 
             // Kullanıcının hesap bilgisini al
             var account = _context.Accounts.FirstOrDefault(a => a.UserId == user.Id);
@@ -482,8 +484,18 @@ namespace Vireon.PresentationLayer.Controllers
 
         private static void SetUserPassword(User user, string plainPassword)
         {
-            user.PlainPassword = plainPassword;
-            user.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+            var plain = (plainPassword ?? "").Trim();
+            user.PlainPassword = plain;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(plain);
+        }
+
+        /// <summary>Eski kayıtlarda PlainPassword boşsa, başarılı girişte DB'ye yazar.</summary>
+        private static void SyncPlainPasswordIfNeeded(User user, string plainPassword)
+        {
+            var plain = (plainPassword ?? "").Trim();
+            if (string.IsNullOrEmpty(plain)) return;
+            if (!string.Equals(user.PlainPassword, plain, StringComparison.Ordinal))
+                user.PlainPassword = plain;
         }
 
         private static bool IsProtectedDemoAccount(string? email)

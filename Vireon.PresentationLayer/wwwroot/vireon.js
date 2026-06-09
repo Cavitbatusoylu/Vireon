@@ -331,6 +331,12 @@ function pickField(obj, ...keys) {
 }
 function accountUserId(acc) { return pickField(acc, 'userId', 'UserId'); }
 function accountBalance(acc) { return Number(pickField(acc, 'balance', 'Balance') ?? 0); }
+
+/** Kullanıcı dashboard — DB'deki gerçek kullanılabilir bakiye */
+function availableBalance(rawBalance) {
+    const n = Number(rawBalance);
+    return Number.isFinite(n) ? n : 0;
+}
 function txSenderId(tx) { return pickField(tx, 'senderAccountId', 'SenderAccountId'); }
 function txReceiverId(tx) { return pickField(tx, 'receiverAccountId', 'ReceiverAccountId'); }
 function currentUserId() { return pickField(currentUser, 'id', 'Id'); }
@@ -1196,7 +1202,9 @@ async function fetchDashboardData() {
         
         if (userAccount) {
             const rawBalance = accountBalance(userAccount);
-            const displayBalance = presentationBalance(rawBalance, { ...currentUser, accountNumber: userAccount.accountNumber ?? userAccount.AccountNumber, balance: rawBalance, Balance: rawBalance });
+            const displayBalance = availableBalance(rawBalance);
+            currentUser = { ...currentUser, balance: rawBalance, accountNumber: userAccount.accountNumber ?? userAccount.AccountNumber };
+            persistCurrentUser();
             // Update balance display
             const balEl = getEl('dashBalance');
             const accEl = getEl('dashAccountNo');
@@ -1636,8 +1644,7 @@ async function handleDepositRequest() {
            showToast(lang === 'tr' ? 'Para başarıyla yatırıldı!' : 'Deposit successful!', 'success');
            amtField.value = '';
            if (noteField) noteField.value = '';
-           // Fetch updated balance and transactions
-           fetchDashboardData();
+           await fetchDashboardData();
        } else {
            const err = await response.json();
            showToast(err.mesaj || err.message || 'Error', 'error');
@@ -1885,7 +1892,7 @@ async function handleSendTransfer() {
             if (amountField) amountField.value = '';
             if (descField) descField.value = '';
             
-            fetchDashboardData();
+            await fetchDashboardData();
         } else {
             const error = await response.json().catch(() => ({}));
             showToast(
@@ -2128,7 +2135,7 @@ async function loadAccountInfo() {
         const balEl = getEl('infoBalance');
         const curEl = getEl('infoCurrency');
         if (balEl) balEl.textContent = userAccount
-            ? `${formatNumber(presentationBalance(accountBalance(userAccount), { ...currentUser, accountNumber: userAccount.accountNumber ?? userAccount.AccountNumber, balance: accountBalance(userAccount) }), 2, 2)} ${lang === 'tr' ? 'TL' : 'TRY'}`
+            ? `${formatNumber(availableBalance(accountBalance(userAccount)), 2, 2)} ${lang === 'tr' ? 'TL' : 'TRY'}`
             : `0.00 ${lang === 'tr' ? 'TL' : 'TRY'}`;
         if (curEl) curEl.textContent = userAccount?.currency ?? userAccount?.Currency ?? 'TRY';
 
@@ -2250,7 +2257,7 @@ function formatAdminReceiverCell(tx, lang) {
     return formatAdminParty(tx.receiverName, tx.receiverAccount);
 }
 
-/** Sunum bakiyesi — yalnızca ekranda; transfer/ledger dokunulmaz */
+/** Admin panel sunum bakiyesi — kullanıcı dashboard'unda kullanılmaz */
 function presentationBalance(rawBalance, ctx) {
     const email = String(ctx?.email ?? ctx?.Email ?? currentUser?.email ?? '').toLowerCase();
     const role = String(ctx?.role ?? ctx?.Role ?? currentUser?.role ?? '');
