@@ -266,30 +266,73 @@ async function fetchJsonOrThrow(url, options) {
 // ========== SESSION ==========
 // "Beni Hatırla" işaretliyse localStorage (kalıcı), değilse sessionStorage (sekme kapanınca silinir).
 const SESSION_KEY = 'vireonUser';
+const REMEMBER_KEY = 'vireonRemember';
+const REMEMBER_EMAIL_KEY = 'vireonRememberEmail';
+const AI_HISTORY_KEY = 'vireonAiHistory';
+
 function saveSession(user, remember) {
    const data = JSON.stringify(user);
    if (remember) {
       localStorage.setItem(SESSION_KEY, data);
+      localStorage.setItem(REMEMBER_KEY, '1');
       sessionStorage.removeItem(SESSION_KEY);
    } else {
       sessionStorage.setItem(SESSION_KEY, data);
       localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(REMEMBER_KEY);
    }
 }
-function loadSession() {
+function loadSessionRaw() {
    return sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+}
+function loadSession() {
+   return loadSessionRaw();
+}
+function isRememberedSession() {
+   return localStorage.getItem(REMEMBER_KEY) === '1' && !!localStorage.getItem(SESSION_KEY);
+}
+function restoreLoginFormFromRemember() {
+   const rememberEl = getEl('rememberMe');
+   const emailEl = getEl('loginEmail');
+   const remembered = isRememberedSession();
+   const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY);
+   if (rememberEl) rememberEl.checked = remembered || !!savedEmail;
+   if (savedEmail && emailEl && !emailEl.value) emailEl.value = savedEmail;
 }
 function clearSession() {
    localStorage.removeItem(SESSION_KEY);
    sessionStorage.removeItem(SESSION_KEY);
+   localStorage.removeItem(REMEMBER_KEY);
+}
+function clearRememberedEmail() {
+   localStorage.removeItem(REMEMBER_EMAIL_KEY);
 }
 // currentUser güncellendiğinde mevcut oturumu (hangi store kullanılıyorsa) yeniden yazar.
 function persistCurrentUser() {
    if (!currentUser) return;
    const data = JSON.stringify(currentUser);
-   if (localStorage.getItem(SESSION_KEY) !== null) localStorage.setItem(SESSION_KEY, data);
-   else if (sessionStorage.getItem(SESSION_KEY) !== null) sessionStorage.setItem(SESSION_KEY, data);
+   const remember = isRememberedSession();
+   if (remember || localStorage.getItem(SESSION_KEY) !== null) {
+      localStorage.setItem(SESSION_KEY, data);
+      localStorage.setItem(REMEMBER_KEY, '1');
+      sessionStorage.removeItem(SESSION_KEY);
+   } else if (sessionStorage.getItem(SESSION_KEY) !== null) {
+      sessionStorage.setItem(SESSION_KEY, data);
+   }
 }
+
+function pickField(obj, ...keys) {
+   if (!obj) return undefined;
+   for (const k of keys) {
+      if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+   }
+   return undefined;
+}
+function accountUserId(acc) { return pickField(acc, 'userId', 'UserId'); }
+function accountBalance(acc) { return Number(pickField(acc, 'balance', 'Balance') ?? 0); }
+function txSenderId(tx) { return pickField(tx, 'senderAccountId', 'SenderAccountId'); }
+function txReceiverId(tx) { return pickField(tx, 'receiverAccountId', 'ReceiverAccountId'); }
+function currentUserId() { return pickField(currentUser, 'id', 'Id'); }
 
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
@@ -314,8 +357,13 @@ document.addEventListener('DOMContentLoaded', () => {
        initInteractions();
        initPasswordToggles();
        initFormValidation();
-       // Landing sayfasında metrikler ilk açılışta da dolsun.
-       setTimeout(animateStats, 300);
+       restoreLoginFormFromRemember();
+       loadAiChatHistoryFromStorage();
+       renderAiHistoryPanel();
+
+       if (window.location.hash === '#section-introduction') {
+           applyIntroPanelState('explore', { scrollPanel: false });
+       }
    } catch (e) {
        console.error("NEON AI: Init Error", e);
    }
@@ -338,7 +386,7 @@ function initNavigation() {
    });
 }
 
-function scrollToSection(id) {
+function scrollToSection(id, options = {}) {
     const target = getEl(id);
     if (!target) return;
 
@@ -362,7 +410,67 @@ function scrollToSection(id) {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.history.replaceState(null, '', `#${id}`);
 
-    if (id === 'section-introduction') setTimeout(animateStats, 500);
+    if (id === 'section-introduction') {
+        applyIntroPanelState(options.introPanel || 'explore', { scrollPanel: false });
+    }
+}
+
+function applyIntroPanelState(mode, options = {}) {
+    const scrollPanel = options.scrollPanel === true;
+    const doc = getEl('intro-documentation');
+    const explore = getEl('intro-explore');
+    const primaryBtn = document.querySelector('#section-introduction .intro-cta-primary');
+    const secondaryBtn = document.querySelector('#section-introduction .intro-cta-secondary');
+
+    const showDoc = mode === 'documentation';
+    const showExplore = mode === 'explore';
+
+    if (doc) {
+        doc.hidden = !showDoc;
+        doc.classList.toggle('is-active', showDoc);
+    }
+    if (explore) {
+        explore.hidden = !showExplore;
+        explore.classList.toggle('is-active', showExplore);
+    }
+
+    primaryBtn?.classList.toggle('is-active', showExplore);
+    secondaryBtn?.classList.toggle('is-active', showDoc);
+
+    if (showExplore) {
+        animateStats();
+    }
+
+    if (!scrollPanel) return;
+
+    window.setTimeout(() => {
+        if (showDoc && doc) {
+            doc.classList.add('intro-doc-highlight');
+            doc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            window.setTimeout(() => doc.classList.remove('intro-doc-highlight'), 1800);
+        } else if (showExplore && explore) {
+            explore.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, 300);
+}
+
+function showIntroPanel(mode, options = {}) {
+    const scrollPanel = options.scrollPanel !== false;
+    const onIntro = window.location.hash === '#section-introduction';
+
+    if (!onIntro) {
+        scrollToSection('section-introduction', { introPanel: mode });
+        if (scrollPanel && mode === 'documentation') {
+            window.setTimeout(() => applyIntroPanelState('documentation', { scrollPanel: true }), 450);
+        }
+        return;
+    }
+
+    applyIntroPanelState(mode, { scrollPanel });
+}
+
+function scrollToIntroDocumentation() {
+    showIntroPanel('documentation');
 }
 
 function initInteractions() {
@@ -395,11 +503,11 @@ function initInteractions() {
       });
    }
 
-   document.querySelectorAll('.intro-cta-primary').forEach(btn => {
-      btn.addEventListener('click', () => scrollToSection('section-components'));
+   document.querySelectorAll('#section-introduction .intro-cta-primary').forEach(btn => {
+      btn.addEventListener('click', () => showIntroPanel('explore'));
    });
-   document.querySelectorAll('.intro-cta-secondary').forEach(btn => {
-      btn.addEventListener('click', () => scrollToSection('section-architecture'));
+   document.querySelectorAll('#section-introduction .intro-cta-secondary').forEach(btn => {
+      btn.addEventListener('click', () => showIntroPanel('documentation'));
    });
 
    const contactForm = document.querySelector('.contact-form');
@@ -492,7 +600,6 @@ function showSection(sectionId) {
       syncNavbarContext();
    }
 
-   if (sectionId === 'section-introduction') setTimeout(animateStats, 500);
 }
 
 function backToMenu() {
@@ -580,6 +687,7 @@ function openLoginModal(e) {
     if (e) e.preventDefault();
     closeRegisterModal();
     closeForgotPasswordModal();
+    restoreLoginFormFromRemember();
     const modal = getEl('loginModal');
     if (modal) {
         modal.classList.add('active');
@@ -705,6 +813,8 @@ async function handleLogin(event) {
             currentUser = user;
             loginAttempts.count = 0; // başarılı girişte rate limit sayacını sıfırla
             const remember = !!getEl('rememberMe')?.checked;
+            if (remember) localStorage.setItem(REMEMBER_EMAIL_KEY, email.toLowerCase());
+            else clearRememberedEmail();
             saveSession(user, remember);
             resetSessionTimer();
 
@@ -895,6 +1005,8 @@ function handleLogout() {
     currentUser = null;
     clearSession();
     chatHistory = [];
+    persistAiChatHistoryToStorage();
+    renderAiHistoryPanel();
     if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
     document.body.classList.remove('admin-mode');
 
@@ -1006,6 +1118,8 @@ function switchDashSection(targetId) {
    if (targetId === 'dash-account-info') loadAccountInfo();
    if (targetId === 'dash-admin') loadAdminPanel();
    if (targetId === 'dash-history' && currentUser) fetchDashboardData();
+   if (targetId === 'dash-ai-coach') renderAiHistoryPanel();
+   if (targetId === 'dash-limits' && currentUser) fetchDashboardData();
 }
 
 // ========== DASHBOARD DATA ==========
@@ -1017,44 +1131,42 @@ async function fetchDashboardData() {
         // Karşı taraf isimlerini gösterebilmek için kullanıcı rehberini oluştur.
         const directoryUsers = await fetchJsonOrThrow('/api/users').catch(() => []);
         buildAccountDirectory(accounts, directoryUsers);
-        const userAccount = accounts.find(a => a.userId === currentUser.id);
+        const userAccount = accounts.find(a => accountUserId(a) === currentUserId());
         
         if (userAccount) {
+            const rawBalance = accountBalance(userAccount);
+            const displayBalance = presentationBalance(rawBalance, { ...currentUser, accountNumber: userAccount.accountNumber ?? userAccount.AccountNumber, balance: rawBalance, Balance: rawBalance });
             // Update balance display
             const balEl = getEl('dashBalance');
             const accEl = getEl('dashAccountNo');
             const curEl = getEl('dashCurrency');
             
-            if (balEl) balEl.textContent = formatNumber(presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }), 2, 2);
-            if (accEl) accEl.textContent = userAccount.accountNumber;
-            if (curEl) curEl.textContent = userAccount.currency;
+            if (balEl) balEl.textContent = formatNumber(displayBalance, 2, 2);
+            if (accEl) accEl.textContent = userAccount.accountNumber ?? userAccount.AccountNumber;
+            if (curEl) curEl.textContent = userAccount.currency ?? userAccount.Currency ?? 'TRY';
 
             // Fetch transactions
             const transactions = await fetchJsonOrThrow('/api/transactions');
-            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
+            const acctId = userAccount.id ?? userAccount.Id;
+            const userTxs = transactions.filter(t => txSenderId(t) === acctId || txReceiverId(t) === acctId);
             
             // Update overview transaction list
             const overviewList = getEl('overviewTransactions');
-            if (overviewList) updateTransactionList(userTxs, userAccount.id, overviewList);
+            if (overviewList) updateTransactionList(userTxs, acctId, overviewList);
             
             // Update full history
             const historyList = getEl('fullTransactionHistory');
-            if (historyList) updateTransactionList(userTxs, userAccount.id, historyList);
+            if (historyList) updateTransactionList(userTxs, acctId, historyList);
             
-            initModernDashboardCharts(userTxs, userAccount.id, presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }));
-            initOverviewChart(userTxs, userAccount.id);
+            initModernDashboardCharts(userTxs, acctId, displayBalance);
+            initOverviewChart(userTxs, acctId);
             refreshQrCode();
 
             // Update daily limits
             try {
                 const limits = await fetchJsonOrThrow('/api/dailylimits');
-                const userLimit = limits.find(l => l.userId === currentUser.id);
-                if (userLimit) {
-                    const maxEl = getEl('maxLimit');
-                    const usedEl = getEl('usedLimit');
-                    if (maxEl) maxEl.textContent = formatNumber(userLimit.maxDailyLimit, 0, 2);
-                    if (usedEl) usedEl.textContent = formatNumber(userLimit.usedLimit, 0, 2);
-                }
+                const userLimit = limits.find(l => (l.userId ?? l.UserId) === currentUserId());
+                if (userLimit) updateLimitsDisplay(userLimit);
             } catch (e) { 
                 console.error('Limits fetch error:', e); 
             }
@@ -1094,16 +1206,19 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
     if (balanceChart) balanceChart.destroy();
     if (expensePieChart) expensePieChart.destroy();
 
-    const labels = txs.slice(-6).map(t => formatDate(t.date, { day: 'numeric', month: 'short' }));
-    const dataPoints = txs.slice(-6).map(t => t.amount);
+    const lang = window.currentLang || 'tr';
+    const sorted = [...txs].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const timeline = buildBalanceTimeline(sorted, accountId, Number(currentBalance) || 0);
+    const labels = timeline.map(p => formatDate(p.date, { day: 'numeric', month: 'short' }));
+    const dataPoints = timeline.map(p => p.balance);
 
     balanceChart = new Chart(lineCtx, {
         type: 'line',
         data: {
-            labels: labels.length ? labels : ['Starting'],
+            labels: labels.length ? labels : [lang === 'tr' ? 'Başlangıç' : 'Start'],
             datasets: [{
-                label: 'Balance',
-                data: labels.length ? dataPoints : [currentBalance],
+                label: lang === 'tr' ? 'Bakiye' : 'Balance',
+                data: dataPoints.length ? dataPoints : [currentBalance],
                 borderColor: '#00b4d8',
                 backgroundColor: 'rgba(0, 180, 216, 0.1)',
                 tension: 0.4,
@@ -1114,19 +1229,42 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.05)' } } }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: document.documentElement.getAttribute('data-theme') === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)' },
+                    ticks: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#64748b' : 'rgba(255,255,255,0.6)' }
+                },
+                x: {
+                    ticks: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#64748b' : 'rgba(255,255,255,0.6)' }
+                }
+            }
         }
     });
 
-    const sent = txs.filter(t => t.senderAccountId === accountId).reduce((sum, t) => sum + t.amount, 0);
-    const received = txs.filter(t => t.receiverAccountId === accountId).reduce((sum, t) => sum + t.amount, 0);
+    const sent = sorted
+        .filter(t => txSenderId(t) === accountId && txReceiverId(t) !== accountId)
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const received = sorted
+        .filter(t => txReceiverId(t) === accountId && txSenderId(t) !== accountId)
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const deposits = sorted
+        .filter(t => txSenderId(t) === accountId && txReceiverId(t) === accountId)
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const incoming = received + deposits;
+    const outgoing = sent;
+    const pieLabels = [
+        lang === 'tr' ? 'Giden' : 'Outgoing',
+        lang === 'tr' ? 'Gelen' : 'Incoming'
+    ];
+    const pieData = incoming === 0 && outgoing === 0 ? [1, 0] : [outgoing, incoming];
 
     expensePieChart = new Chart(pieCtx, {
         type: 'doughnut',
         data: {
-            labels: [(window.currentLang === 'tr' ? 'Giden' : 'Outgoing'), (window.currentLang === 'tr' ? 'Gelen' : 'Incoming')],
+            labels: pieLabels,
             datasets: [{
-                data: [sent || 1, received || 1],
+                data: pieData,
                 backgroundColor: ['#e11d48', '#00b4d8'],
                 hoverOffset: 4,
                 borderWidth: 0
@@ -1135,9 +1273,29 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { color: '#fff', boxWidth: 10 } } }
+            plugins: { legend: { position: 'bottom', labels: { color: document.documentElement.getAttribute('data-theme') === 'light' ? '#334155' : '#fff', boxWidth: 10 } } }
         }
     });
+}
+
+function buildBalanceTimeline(sortedTxs, accountId, currentBalance) {
+    if (!sortedTxs.length) {
+        return [{ date: new Date(), balance: currentBalance }];
+    }
+    const points = [];
+    let running = currentBalance;
+    for (let i = sortedTxs.length - 1; i >= 0; i--) {
+        const t = sortedTxs[i];
+        points.unshift({ date: t.date, balance: running });
+        const sender = txSenderId(t);
+        const receiver = txReceiverId(t);
+        const amt = Number(t.amount || 0);
+        const isDeposit = sender === receiver;
+        if (isDeposit && sender === accountId) running -= amt;
+        else if (sender === accountId && receiver !== accountId) running += amt;
+        else if (receiver === accountId && sender !== accountId) running -= amt;
+    }
+    return points;
 }
 
 async function fetchDatabaseStats() {
@@ -1153,9 +1311,9 @@ async function fetchDatabaseStats() {
         const container = getEl('dbStatsContainer');
         if (container) {
             container.innerHTML = `
-                <div class="db-stat-mini glass-card"><span>Users</span><strong>${users.length}</strong></div>
-                <div class="db-stat-mini glass-card"><span>Accounts</span><strong>${accounts.length}</strong></div>
-                <div class="db-stat-mini glass-card"><span>Transactions</span><strong>${transactions.length}</strong></div>
+                <div class="db-stat-mini glass-card"><span>${window.currentLang === 'tr' ? 'Kullanıcı' : 'Users'}</span><strong>${users.length}</strong></div>
+                <div class="db-stat-mini glass-card"><span>${window.currentLang === 'tr' ? 'Hesap' : 'Accounts'}</span><strong>${accounts.length}</strong></div>
+                <div class="db-stat-mini glass-card"><span>${window.currentLang === 'tr' ? 'İşlem' : 'Transactions'}</span><strong>${transactions.length}</strong></div>
             `;
         }
 
@@ -1187,6 +1345,71 @@ async function fetchDatabaseStats() {
 }
 
 // ========== AI CHAT ==========
+function formatBotMessageHtml(text) {
+   if (!text) return '';
+   const lines = String(text).split('\n').map(l => l.trim()).filter(Boolean);
+   const bulletLines = lines.filter(l => /^[•\-\*]/.test(l) || l.includes(':**') || (l.startsWith('•')));
+   if (bulletLines.length >= 2 || (lines.length >= 3 && bulletLines.length >= 1)) {
+      const items = lines.map(line => {
+         let clean = line.replace(/^[•\-\*]\s*/, '');
+         clean = clean.replace(/\*\*([^*]+)\*\*:\s*/g, '$1: ');
+         clean = clean.replace(/\*\*([^*]+)\*\*/g, '$1');
+         return `<li>${escapeHtml(clean)}</li>`;
+      }).join('');
+      return `<ul class="bot-help-list">${items}</ul>`;
+   }
+   return escapeHtml(text).replace(/\n/g, '<br>');
+}
+
+function persistAiChatHistoryToStorage() {
+   try {
+      localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(chatHistory.slice(-20)));
+   } catch (_) { /* ignore quota */ }
+}
+
+function loadAiChatHistoryFromStorage() {
+   try {
+      const raw = localStorage.getItem(AI_HISTORY_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) chatHistory = parsed.slice(-20);
+   } catch (_) {
+      chatHistory = [];
+   }
+}
+
+function renderAiHistoryPanel() {
+   const lists = [getEl('aiChatHistoryList'), getEl('floatingAiHistoryList')];
+   const lang = window.currentLang || 'tr';
+   const empty = lang === 'tr' ? 'Henüz mesaj yok.' : 'No messages yet.';
+   const html = chatHistory.length
+      ? chatHistory.slice(-10).reverse().map(entry => {
+         const role = entry.role === 'user'
+            ? (lang === 'tr' ? 'Siz' : 'You')
+            : 'Neon';
+         const preview = escapeHtml(String(entry.content || '').slice(0, 80));
+         return `<li><span class="ai-history-role">${role}</span><span class="ai-history-text">${preview}</span></li>`;
+      }).join('')
+      : `<li class="ai-history-empty">${empty}</li>`;
+   lists.forEach(list => { if (list) list.innerHTML = html; });
+}
+
+function clearAiChatHistory() {
+   chatHistory = [];
+   persistAiChatHistoryToStorage();
+   renderAiHistoryPanel();
+   const lang = window.currentLang || 'tr';
+   showToast(lang === 'tr' ? 'Sohbet geçmişi temizlendi.' : 'Chat history cleared.', 'info');
+}
+
+function pushAiChatExchange(userText, botText) {
+   chatHistory.push({ role: 'user', content: userText });
+   chatHistory.push({ role: 'assistant', content: botText });
+   if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+   persistAiChatHistoryToStorage();
+   renderAiHistoryPanel();
+}
+
 function toggleAIChat() {
    const win = getEl('aiChatWindow');
    const launcher = getEl('aiLauncher');
@@ -1207,30 +1430,27 @@ async function sendAiMessage() {
     const display = getEl('aiChatContent');
     if (!input || !display || !input.value.trim()) return;
 
-    const userText = escapeHtml(input.value.trim());
+    const userText = input.value.trim();
     input.value = '';
 
-    display.innerHTML += `<div class="user-bubble"><div class="bubble-text">${userText}</div></div>`;
+    display.innerHTML += `<div class="user-bubble"><div class="bubble-text">${escapeHtml(userText)}</div></div>`;
     display.scrollTop = display.scrollHeight;
 
     try {
         const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText, history: chatHistory, lang: window.currentLang || 'en' })
+            body: JSON.stringify({ message: userText, history: chatHistory, lang: window.currentLang || 'tr' })
         });
         const data = await response.json();
         const botResponse = data.response || 'Hata oluştu.';
 
-        // Sohbet geçmişini güncelle (son 10 mesaj çifti)
-        chatHistory.push({ role: 'user', content: userText });
-        chatHistory.push({ role: 'assistant', content: botResponse });
-        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+        pushAiChatExchange(userText, botResponse);
 
         display.innerHTML += `
             <div class="bot-bubble">
                 <div class="bubble-icon">🤖</div>
-                <div class="bubble-text">${escapeHtml(botResponse)}</div>
+                <div class="bubble-text">${formatBotMessageHtml(botResponse)}</div>
             </div>
         `;
     } catch (err) {
@@ -1272,16 +1492,14 @@ async function sendAIMessage() {
          if (!response.ok) text = `Server error (${response.status})`;
       }
       if (text) {
-         chatHistory.push({ role: 'user', content: message });
-         chatHistory.push({ role: 'assistant', content: text });
-         if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+         pushAiChatExchange(message, text);
       }
       const loadingEl = getEl(loadingId);
       if (loadingEl) {
          loadingEl.innerHTML = '';
-         const p = document.createElement('p');
-         p.textContent = text;
-         loadingEl.appendChild(p);
+         const wrap = document.createElement('div');
+         wrap.innerHTML = formatBotMessageHtml(text);
+         loadingEl.appendChild(wrap);
       }
    } catch (err) {
       const loadingEl = getEl(loadingId);
@@ -1335,11 +1553,18 @@ async function handleDepositRequest() {
    if (btn) btn.disabled = true;
 
    try {
+       const accounts = await fetchJsonOrThrow('/api/accounts');
+       const userAccount = accounts.find(a => accountUserId(a) === currentUserId());
+       const accountNumber = userAccount?.accountNumber ?? userAccount?.AccountNumber ?? currentUser.accountNumber ?? currentUser.AccountNumber;
+       if (!accountNumber) {
+           showToast(lang === 'tr' ? 'Hesap numarası bulunamadı.' : 'Account number not found.', 'error');
+           return;
+       }
        const response = await fetch('/api/transfers/deposit', {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify({
-               accountNumber: currentUser.accountNumber,
+               accountNumber: accountNumber,
                amount: amt,
                description: note || (lang === 'tr' ? 'Para Yatırma' : 'Deposit')
            })
@@ -1557,19 +1782,23 @@ function updateTransactionList(txs, accountId, listElement) {
    const fromLabel = lang === 'tr' ? 'Gönderen' : 'From';
 
    listElement.innerHTML = txs.slice().reverse().map(tx => {
-      const isDeposit = tx.senderAccountId === tx.receiverAccountId;
-      const isOut = !isDeposit && tx.senderAccountId === accountId;
+      const isDeposit = txSenderId(tx) === txReceiverId(tx);
+      const isOut = !isDeposit && txSenderId(tx) === accountId;
       const amountClass = isDeposit ? 'tx-in' : (isOut ? 'tx-out' : 'tx-in');
       const symbol = isDeposit ? '+' : (isOut ? '-' : '+');
       const label = isDeposit ? depositLabel : (isOut ? outLabel : inLabel);
       const icon = isDeposit ? '💰' : (isOut ? '📤' : '📥');
-      const statusText = typeof tx.status === 'number' ? ['Pending','Completed','Failed','Cancelled'][tx.status] || '' : (tx.status || '');
-      const statusBadge = statusText ? `<span class="tx-status tx-status-${statusText}">${statusText}</span>` : '';
+      const statusRaw = typeof tx.status === 'number'
+         ? ['Pending', 'Completed', 'Failed', 'Cancelled'][tx.status] || ''
+         : (tx.status || tx.Status || 'Completed');
+      const statusText = localizeAdminStatus(statusRaw, lang);
+      const statusKey = String(statusRaw).replace(/\s+/g, '');
+      const statusBadge = statusText ? `<span class="tx-status tx-status-${statusKey}">${statusText}</span>` : '';
 
       // Karşı taraf (hangi hesaba/kimden) bilgisini göster.
       let partyHtml = '';
       if (!isDeposit) {
-         const partyId = isOut ? tx.receiverAccountId : tx.senderAccountId;
+         const partyId = isOut ? txReceiverId(tx) : txSenderId(tx);
          const party = accountDirectory[partyId];
          const partyLabel = isOut ? toLabel : fromLabel;
          if (party) {
@@ -1579,8 +1808,8 @@ function updateTransactionList(txs, accountId, listElement) {
       }
 
       // Kullanıcının girdiği özel açıklamayı göster (otomatik "Transfer: ..." metnini tekrarlama).
-      const customDesc = (tx.description && !/^transfer\s*:/i.test(tx.description)) ? tx.description : '';
-      const desc = customDesc ? `<span class="tx-detail">${escapeHtml(customDesc)}</span>` : '';
+      const formattedDesc = formatTxDescription(tx.description, lang);
+      const desc = formattedDesc ? `<span class="tx-detail">${escapeHtml(formattedDesc)}</span>` : '';
 
       return `
             <div class="tx-item">
@@ -1595,7 +1824,7 @@ function updateTransactionList(txs, accountId, listElement) {
                     </div>
                 </div>
                 <div class="tx-amount-box">
-                    <div class="tx-amount ${amountClass}">${symbol}${formatNumber(tx.amount, 2, 2)} TRY</div>
+                    <div class="tx-amount ${amountClass}">${symbol}${formatNumber(tx.amount, 2, 2)} ${lang === 'tr' ? 'TL' : 'TRY'}</div>
                 </div>
             </div>`;
     }).join('');
@@ -1618,19 +1847,26 @@ function initOverviewChart(txs, accountId) {
     sortedTxs.forEach(t => {
         const dateStr = new Date(t.date).toLocaleDateString(window.currentLang === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' });
         labels.push(dateStr);
-        if (t.senderAccountId === accountId) {
-            outgoingData.push(t.amount);
+        const sender = txSenderId(t);
+        const receiver = txReceiverId(t);
+        const isDeposit = sender === receiver;
+        if (isDeposit && sender === accountId) {
+            incomingData.push(Number(t.amount || 0));
+            outgoingData.push(0);
+        } else if (sender === accountId && receiver !== accountId) {
+            outgoingData.push(Number(t.amount || 0));
             incomingData.push(0);
+        } else if (receiver === accountId && sender !== accountId) {
+            incomingData.push(Number(t.amount || 0));
+            outgoingData.push(0);
         } else {
-            incomingData.push(t.amount);
+            incomingData.push(0);
             outgoingData.push(0);
         }
     });
 
     if (labels.length === 0) {
-        labels.push('Demo 1', 'Demo 2', 'Demo 3', 'Demo 4');
-        incomingData.push(5000, 2000, 4500, 3000);
-        outgoingData.push(1200, 3100, 800, 2500);
+        return;
     }
 
     overviewChartInstance = new Chart(ctx, {
@@ -1744,22 +1980,23 @@ async function loadAccountInfo() {
         const accounts = await fetchJsonOrThrow('/api/accounts');
         const directoryUsers = await fetchJsonOrThrow('/api/users').catch(() => []);
         buildAccountDirectory(accounts, directoryUsers);
-        const userAccount = accounts.find(a => a.userId === currentUser.id);
+        const userAccount = accounts.find(a => accountUserId(a) === currentUserId());
+        const acctId = userAccount ? (userAccount.id ?? userAccount.Id) : null;
         
         const balEl = getEl('infoBalance');
         const curEl = getEl('infoCurrency');
         if (balEl) balEl.textContent = userAccount
-            ? `${formatNumber(presentationBalance(userAccount.balance, { ...currentUser, accountNumber: userAccount.accountNumber }), 2, 2)} TRY`
-            : `0.00 TRY`;
-        if (curEl) curEl.textContent = userAccount?.currency || 'TRY';
+            ? `${formatNumber(presentationBalance(accountBalance(userAccount), { ...currentUser, accountNumber: userAccount.accountNumber ?? userAccount.AccountNumber, balance: accountBalance(userAccount) }), 2, 2)} ${lang === 'tr' ? 'TL' : 'TRY'}`
+            : `0.00 ${lang === 'tr' ? 'TL' : 'TRY'}`;
+        if (curEl) curEl.textContent = userAccount?.currency ?? userAccount?.Currency ?? 'TRY';
 
         // Transaction history
-        if (userAccount) {
+        if (userAccount && acctId) {
             const transactions = await fetchJsonOrThrow('/api/transactions');
-            const userTxs = transactions.filter(t => t.senderAccountId === userAccount.id || t.receiverAccountId === userAccount.id);
+            const userTxs = transactions.filter(t => txSenderId(t) === acctId || txReceiverId(t) === acctId);
             
             const historyEl = getEl('infoTransactionHistory');
-            if (historyEl) updateTransactionList(userTxs, userAccount.id, historyEl);
+            if (historyEl) updateTransactionList(userTxs, acctId, historyEl);
             
             const txCountEl = getEl('infoTxCount');
             if (txCountEl) txCountEl.textContent = userTxs.length;
@@ -1791,23 +2028,72 @@ function localizeAdminStatus(status, lang) {
         Pending: lang === 'tr' ? 'Beklemede' : 'Pending',
         Completed: lang === 'tr' ? 'Tamamlandı' : 'Completed',
         Failed: lang === 'tr' ? 'Başarısız' : 'Failed',
-        Cancelled: lang === 'tr' ? 'İptal' : 'Cancelled'
+        Cancelled: lang === 'tr' ? 'İptal' : 'Cancelled',
+        completed: lang === 'tr' ? 'Tamamlandı' : 'Completed',
+        failed: lang === 'tr' ? 'Başarısız' : 'Failed'
     };
-    return map[s] || s;
+    return map[s] || map[s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()] || s;
+}
+
+function localizeFraudRiskType(type, lang) {
+    const key = String(type || '').toUpperCase();
+    const map = {
+        SUSPICIOUS_NIGHT_TRANSFER: lang === 'tr' ? 'Gece Transferi' : 'Night Transfer',
+        HIGH_AMOUNT: lang === 'tr' ? 'Yüksek Tutar' : 'High Amount',
+        FREQUENT_TRANSFER: lang === 'tr' ? 'Sık Transfer' : 'Frequent Transfer'
+    };
+    return map[key] || type || '-';
 }
 
 /** Admin tablolarında gösterilecek açıklama (eski test/otomatik metinleri temizler). */
 function formatAdminDescription(tx, lang) {
-    const d = (tx.description || '').trim();
-    if (!d) return '—';
-    if (/^transfer\s*:/i.test(d)) return '—';
+    return formatTxDescription(tx.description, lang) || '—';
+}
+
+/** Kullanıcı işlem listelerinde gösterilecek açıklama */
+function formatTxDescription(rawDesc, lang) {
+    const d = (rawDesc || '').trim();
+    if (!d || /^transfer\s*:/i.test(d)) return '';
     const lower = d.toLowerCase();
+    if (lower === 'final smoke') return lang === 'tr' ? 'Havale işlemi' : 'Transfer';
     if (lower === 'deposit' || lower === 'para yatırma') return lang === 'tr' ? 'Para yatırma' : 'Deposit';
     if (lower === 'transfer') return lang === 'tr' ? 'Havale' : 'Transfer';
     if (lower === 'borç') return lang === 'tr' ? 'Borç ödemesi' : 'Debt payment';
-    if (lower === 'final smoke') return lang === 'tr' ? 'Test işlemi' : 'Test transaction';
     if (/seed/i.test(d)) return lang === 'tr' ? 'Sistem kaydı' : 'System record';
     return d;
+}
+
+function updateLimitsDisplay(userLimit) {
+    const lang = window.currentLang || 'tr';
+    const max = Number(userLimit.maxDailyLimit ?? userLimit.MaxDailyLimit ?? 0);
+    const used = Number(userLimit.usedLimit ?? userLimit.UsedLimit ?? 0);
+    const remaining = Math.max(0, max - used);
+    const pct = max > 0 ? Math.min(100, (used / max) * 100) : 0;
+    const resetRaw = userLimit.lastResetDate ?? userLimit.LastResetDate;
+
+    const maxEl = getEl('maxLimit');
+    const usedEl = getEl('usedLimit');
+    const remEl = getEl('remainingLimit');
+    const pctEl = getEl('limitUsagePct');
+    const fillEl = getEl('limitProgressFill');
+    const labelEl = getEl('limitProgressLabel');
+    const resetEl = getEl('lastResetDate');
+
+    if (maxEl) maxEl.textContent = formatNumber(max, 0, 2);
+    if (usedEl) usedEl.textContent = formatNumber(used, 0, 2);
+    if (remEl) remEl.textContent = formatNumber(remaining, 0, 2);
+    if (pctEl) pctEl.textContent = `${pct.toFixed(1)}% ${lang === 'tr' ? 'kullanıldı' : 'used'}`;
+    if (fillEl) fillEl.style.width = `${pct}%`;
+    if (labelEl) {
+        labelEl.textContent = lang === 'tr'
+            ? `₺${formatNumber(used, 0, 2)} / ₺${formatNumber(max, 0, 2)}`
+            : `₺${formatNumber(used, 0, 2)} / ₺${formatNumber(max, 0, 2)}`;
+    }
+    if (resetEl) {
+        resetEl.textContent = resetRaw
+            ? new Date(resetRaw).toLocaleString(getLocale(), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : '—';
+    }
 }
 
 function formatAdminSenderCell(tx, lang) {
@@ -1941,7 +2227,7 @@ async function loadAdminPanel() {
                     <tr title="DB ID: ${f.id}">
                         <td class="col-seq">${idx + 1}</td>
                         <td>${escapeHtml(accNumById[f.accountId] || ('#' + f.accountId))}</td>
-                        <td><span class="type-badge type-fraud">${escapeHtml(f.riskType || '-')}</span></td>
+                        <td><span class="type-badge type-fraud">${escapeHtml(localizeFraudRiskType(f.riskType, lang))}</span></td>
                         <td>${escapeHtml(f.description || '-')}</td>
                         <td>${new Date(f.logDate).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
                     </tr>

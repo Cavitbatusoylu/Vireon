@@ -12,14 +12,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260605-11">
+    <link rel="stylesheet" href="vireon.css?v=20260605-17">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
     <link rel="shortcut icon" href="images/pwa/icon-192.png">
     <link rel="apple-touch-icon" sizes="192x192" href="images/pwa/icon-192.png">
-    <link rel="manifest" href="manifest.json?v=20260605-11">
+    <link rel="manifest" href="manifest.json?v=20260605-14">
     <meta name="theme-color" content="#00b4d8">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -195,7 +195,6 @@
                 
             </div>
             <h1 class="brand-name">Vireon</h1>
-            <p class="tagline">IMMUTABLE LEDGER</p>
         </div>
 
         <!-- Menu Grid (Compact Version) -->
@@ -216,6 +215,10 @@
                 <div class="menu-badge">TM</div>
                 <div class="menu-title" data-tr="Ekip" data-en="Team">Team</div>
             </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-desktop')">
+                <div class="menu-badge">DT</div>
+                <div class="menu-title" data-tr="Masaüstü" data-en="Desktop">Desktop</div>
+            </div>
             <div class="menu-item initial-load" onclick="scrollToSection('section-about')">
                 <div class="menu-badge">AB</div>
                 <div class="menu-title" data-tr="Hakkında" data-en="About">About</div>
@@ -223,10 +226,6 @@
             <div class="menu-item initial-load" onclick="scrollToSection('section-contact')">
                 <div class="menu-badge">CT</div>
                 <div class="menu-title" data-tr="İletişim" data-en="Contact">Contact</div>
-            </div>
-            <div class="menu-item initial-load" onclick="scrollToSection('section-desktop')">
-                <div class="menu-badge">DT</div>
-                <div class="menu-title" data-tr="Masaüstü" data-en="Desktop">Desktop</div>
             </div>
         </div>
 
@@ -252,6 +251,9 @@
                                         <span class="sidebar-icon">📊</span>
                                         <span data-tr="Genel Bakış" data-en="Overview">Overview</span>
                                     </li>
+                                    <li class="sidebar-group-label" aria-hidden="true">
+                                        <span data-tr="Finans" data-en="Finance">Finans</span>
+                                    </li>
                                     <li data-dash="dash-transfers" onclick="switchDashSection('dash-transfers')">
                                         <span class="sidebar-icon">💸</span>
                                         <span data-tr="Para Gönder" data-en="Send Money">Send Money</span>
@@ -274,7 +276,7 @@
                                     </li>
                                     <li data-dash="dash-db-explorer" onclick="switchDashSection('dash-db-explorer')">
                                         <span class="sidebar-icon">🗄️</span>
-                                        <span data-tr="DB Explorer" data-en="DB Explorer">DB Explorer</span>
+                                        <span data-tr="Veritabanı İzleyici" data-en="DB Explorer">Veritabanı İzleyici</span>
                                     </li>
                                     <li data-dash="dash-account-info" onclick="switchDashSection('dash-account-info')">
                                         <span class="sidebar-icon">📋</span>
@@ -282,7 +284,7 @@
                                     </li>
                                     <li data-dash="dash-ai-coach" onclick="switchDashSection('dash-ai-coach')">
                                         <span class="sidebar-icon">🤖</span>
-                                        <span data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</span>
+                                        <span data-tr="Neon Yapay Zeka" data-en="Neon AI Coach">Neon Yapay Zeka</span>
                                     </li>
                                     <li data-dash="dash-profile" onclick="switchDashSection('dash-profile')">
                                         <span class="sidebar-icon">👤</span>
@@ -362,7 +364,7 @@
 
                             <!-- AI COACH (Neon / Groq) -->
                             <div class="dash-sub-section" id="dash-ai-coach">
-                                <h2 class="sub-section-title" data-tr="Neon AI Coach" data-en="Neon AI Coach">Neon AI Coach</h2>
+                                <h2 class="sub-section-title" data-tr="Neon Yapay Zeka" data-en="Neon AI Coach">Neon Yapay Zeka</h2>
                                 <div class="ai-chat-shell glass-card">
                                     <div class="ai-chat-body" id="aiChatContent">
                                         <div class="bot-bubble">
@@ -373,6 +375,13 @@
                                     <div class="ai-chat-footer">
                                         <input type="text" id="aiInput" placeholder="Neon'a sor..." data-tr-placeholder="Neon'a sor..." data-en-placeholder="Ask Neon..." onkeypress="if(event.key==='Enter') sendAiMessage()">
                                         <button class="ai-send-btn" onclick="sendAiMessage()" aria-label="Send message">➤</button>
+                                    </div>
+                                    <div class="ai-chat-history-panel">
+                                        <div class="ai-history-header">
+                                            <span data-tr="Sohbet Geçmişi" data-en="Chat History">Sohbet Geçmişi</span>
+                                            <button type="button" class="ai-history-clear" onclick="clearAiChatHistory()" data-tr="Temizle" data-en="Clear">Temizle</button>
+                                        </div>
+                                        <ul class="ai-history-list" id="aiChatHistoryList"></ul>
                                     </div>
                                 </div>
                             </div>
@@ -512,16 +521,39 @@
                             </div>
                             <div class="dash-sub-section" id="dash-limits">
                                 <h2 class="sub-section-title" data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</h2>
-                                <div class="dashboard-grid">
-                                    <div class="dash-card limit-card">
-                                        <h4 data-tr="Maksimum Limit" data-en="Max Daily Limit">Max Daily Limit</h4>
+                                <div class="limits-dashboard-grid">
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Maksimum Limit" data-en="Max Daily Limit">Maksimum Limit</span>
                                         <div class="limit-value">₺<span id="maxLimit">0</span></div>
                                         <button type="button" class="edit-limit-btn" onclick="toggleLimitEdit()" data-tr="Düzenle" data-en="Edit">Edit</button>
                                     </div>
-                                    <div class="dash-card limit-card">
-                                        <h4 data-tr="Kullanılan Limit" data-en="Used Limit">Used Limit</h4>
-                                        <div class="limit-value">₺<span id="usedLimit">0</span></div>
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Kullanılan Limit" data-en="Used Limit">Kullanılan Limit</span>
+                                        <div class="limit-value limit-value-used">₺<span id="usedLimit">0</span></div>
+                                        <span class="limit-card-hint" id="limitUsagePct">0%</span>
                                     </div>
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Kalan Limit" data-en="Remaining Limit">Kalan Limit</span>
+                                        <div class="limit-value limit-value-remaining">₺<span id="remainingLimit">0</span></div>
+                                        <span class="limit-card-hint" id="limitResetHint" data-tr="Bugün geçerli" data-en="Valid today">Bugün geçerli</span>
+                                    </div>
+                                </div>
+                                <div class="glass-card limit-progress-card">
+                                    <div class="limit-progress-header">
+                                        <span data-tr="Limit Kullanımı" data-en="Limit Usage">Limit Kullanımı</span>
+                                        <span id="limitProgressLabel">0 / 0 TL</span>
+                                    </div>
+                                    <div class="limit-progress-track">
+                                        <div class="limit-progress-fill" id="limitProgressFill" style="width: 0%"></div>
+                                    </div>
+                                    <p class="limit-meta-row">
+                                        <span data-tr="Son sıfırlama:" data-en="Last reset:">Son sıfırlama:</span>
+                                        <strong id="lastResetDate">—</strong>
+                                    </p>
+                                    <p class="limit-meta-row limit-meta-muted" data-tr="Günlük transfer limitiniz her gece 00:00'da sıfırlanır. Para yatırma işlemleri bu limite dahil değildir."
+                                        data-en="Your daily transfer limit resets at midnight. Deposits are not counted toward this limit.">
+                                        Günlük transfer limitiniz her gece 00:00'da sıfırlanır. Para yatırma işlemleri bu limite dahil değildir.
+                                    </p>
                                 </div>
                                 
                                 <!-- Edit Limit Form (Hidden by default) -->
@@ -696,14 +728,33 @@
                             traceable financial transaction management.
                         </p>
                         <div class="intro-cta-group">
-                            <button class="intro-cta-primary" data-tr="Sistemi Keşfet" data-en="Explore System">
+                            <button class="intro-cta-primary is-active" type="button" data-tr="Sistemi Keşfet" data-en="Explore System">
                                 Explore
                                 System
                             </button>
-                            <button class="intro-cta-secondary" data-tr="Dokümantasyon"
+                            <button class="intro-cta-secondary" type="button" data-tr="Dokümantasyon"
                                     data-en="Documentation">
                                 Documentation
                             </button>
+                        </div>
+                        <div class="intro-doc-panel glass-card intro-panel intro-panel-doc" id="intro-documentation" hidden>
+                            <h3 class="intro-doc-title" data-tr="Proje Dokümantasyonu" data-en="Project Documentation">Proje Dokümantasyonu</h3>
+                            <p class="intro-doc-lead" data-tr="Vireon; katmanlı mimari ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur."
+                                data-en="Vireon is a digital bank core simulation built with layered architecture.">
+                                Vireon; katmanlı mimari ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur.
+                            </p>
+                            <ul class="intro-doc-list">
+                                <li data-tr="Sunum Katmanı: ASP.NET Core Web API + web arayüzü (PWA)" data-en="Presentation: ASP.NET Core Web API + web UI (PWA)">Sunum Katmanı: ASP.NET Core Web API + web arayüzü (PWA)</li>
+                                <li data-tr="İş Katmanı: TransactionManager, FraudModelService, NeonAIService" data-en="Business: TransactionManager, FraudModelService, NeonAIService">İş Katmanı: TransactionManager, FraudModelService, NeonAIService</li>
+                                <li data-tr="Veri Katmanı: Entity Framework Core + VireonContext" data-en="Data access: Entity Framework Core + VireonContext">Veri Katmanı: Entity Framework Core + VireonContext</li>
+                                <li data-tr="Veritabanı: SQLite — paylaşımlı vireon_local.db" data-en="Database: SQLite — shared vireon_local.db">Veritabanı: SQLite — paylaşımlı vireon_local.db</li>
+                                <li data-tr="Demo hesapları ve sunum akışı: DEMO.md" data-en="Demo accounts and walkthrough: DEMO.md">Demo hesapları ve sunum akışı: DEMO.md</li>
+                                <li data-tr="Tablo ve seed şeması: DATABASE_DOCUMENTATION.md" data-en="Tables and seed schema: DATABASE_DOCUMENTATION.md">Tablo ve seed şeması: DATABASE_DOCUMENTATION.md</li>
+                            </ul>
+                            <p class="intro-doc-note" data-tr="Yerel çalıştırma: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202"
+                                data-en="Local run: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202">
+                                Yerel çalıştırma: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202
+                            </p>
                         </div>
                     </div>
                     <div class="intro-hero-visual">
@@ -722,14 +773,15 @@
                         <div class="intro-floating-card card-3">
                             <span class="card-icon">📊</span>
                             <span class="card-text" data-tr="Değişmez Defter" data-en="Immutable Ledger">
-                                Immutable
-                                Ledger
+                                Değişmez Defter
                             </span>
                         </div>
                         <div class="intro-orb"></div>
                     </div>
                 </div>
 
+                <!-- Sistemi Keşfet: metrikler + katman kartları -->
+                <div class="intro-panel intro-panel-explore is-active" id="intro-explore">
                 <!-- Metrics Strip -->
                 <div class="intro-metrics">
                     <div class="metric-item">
@@ -760,38 +812,36 @@
                     </div>
                 </div>
 
-                <!-- Core Values -->
+                <!-- Core Values (katmanlı mimariye uygun) -->
                 <div class="intro-values">
                     <div class="value-card">
-                        <img src="images/process-optimized.jpg" alt="ACID" class="value-card-img">
+                        <img src="images/process-optimized.jpg" alt="Sunum Katmanı" class="value-card-img">
                         <div class="value-number">01</div>
-                        <h3 data-tr="ACID Transaction" data-en="ACID Transaction">ACID Transaction</h3>
-                        <p data-tr="Tüm finansal işlemler veritabanı transactionı içerisinde yürütülür. Atomicity, Consistency, Isolation ve Durability prensipleri eksiksiz uygulanır."
-                           data-en="All financial operations run within database transactions. Atomicity, Consistency, Isolation, and Durability principles are fully implemented.">
-                            All financial operations run within database transactions. Atomicity, Consistency,
-                            Isolation, and Durability principles are fully implemented.
+                        <h3 data-tr="Sunum Katmanı" data-en="Presentation Layer">Sunum Katmanı</h3>
+                        <p data-tr="ASP.NET Core Web API ve modern web arayüzü. Kullanıcı istekleri bu katmandan sisteme girer."
+                           data-en="ASP.NET Core Web API and modern web UI. User requests enter the system through this layer.">
+                            ASP.NET Core Web API ve modern web arayüzü. Kullanıcı istekleri bu katmandan sisteme girer.
                         </p>
                     </div>
                     <div class="value-card">
-                        <img src="images/tech-audit.jpg" alt="Fraud" class="value-card-img">
+                        <img src="images/tech-audit.jpg" alt="İş Katmanı" class="value-card-img">
                         <div class="value-number">02</div>
-                        <h3 data-tr="Fraud Analizi" data-en="Fraud Analysis">Fraud Analysis</h3>
-                        <p data-tr="Kural tabanlı risk analizi ile şüpheli işlemler otomatik tespit edilir ve FraudLogs tablosuna kaydedilir."
-                           data-en="Rule-based risk analysis automatically detects suspicious transactions and logs them to the FraudLogs table.">
-                            Rule-based risk analysis automatically detects suspicious transactions and logs them to the
-                            FraudLogs table.
+                        <h3 data-tr="İş Katmanı" data-en="Business Layer">İş Katmanı</h3>
+                        <p data-tr="TransactionManager ile güvenli transferler, FraudModelService ile şüpheli işlem tespiti ve NeonAIService ile akıllı asistan."
+                           data-en="Secure transfers via TransactionManager, suspicious activity detection via FraudModelService, and NeonAIService assistant.">
+                            TransactionManager ile güvenli transferler, FraudModelService ile şüpheli işlem tespiti ve NeonAIService ile akıllı asistan.
                         </p>
                     </div>
                     <div class="value-card">
-                        <img src="images/digital-strategy.jpg" alt="Ledger" class="value-card-img">
+                        <img src="images/digital-strategy.jpg" alt="Veri Katmanı" class="value-card-img">
                         <div class="value-number">03</div>
-                        <h3 data-tr="Değişmez Defter" data-en="Immutable Ledger">Immutable Ledger</h3>
-                        <p data-tr="Muhasebe defteri kayıtları append-only mantıkla çalışır. Finansal kayıtlar değiştirilemez ve silinemez."
-                           data-en="Ledger entries work on an append-only basis. Financial records cannot be modified or deleted.">
-                            Ledger entries work on an append-only basis. Financial records cannot be modified or
-                            deleted.
+                        <h3 data-tr="Veri ve Veritabanı" data-en="Data & Database">Veri ve Veritabanı</h3>
+                        <p data-tr="Entity Framework Core ile veri erişimi; paylaşımlı SQLite (vireon_local.db) üzerinde değiştirilemez muhasebe defteri."
+                           data-en="Data access via Entity Framework Core; immutable ledger on shared SQLite (vireon_local.db).">
+                            Entity Framework Core ile veri erişimi; paylaşımlı SQLite (vireon_local.db) üzerinde değiştirilemez muhasebe defteri.
                         </p>
                     </div>
+                </div>
                 </div>
 
                 <!-- Tech Stack Preview -->
@@ -840,7 +890,7 @@
 
                 <div class="tabs-container">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab(this, 'backend')" data-tr="Backend" data-en="Backend">Backend</button>
+                        <button class="tab-btn active" onclick="switchTab(this, 'backend')" data-tr="Sunucu" data-en="Backend">Sunucu</button>
                         <button class="tab-btn" onclick="switchTab(this, 'database')" data-tr="Veritabanı" data-en="Database">Database</button>
                         <button class="tab-btn" onclick="switchTab(this, 'security')" data-tr="Güvenlik" data-en="Security">Security</button>
                         <button class="tab-btn" onclick="switchTab(this, 'desktop')" data-tr="Masaüstü" data-en="Desktop">Desktop</button>
@@ -1086,7 +1136,7 @@
                             <div class="arch-layer">
                                 <div class="layer-icon">🌐</div>
                                 <div class="layer-info">
-                                    <h4>Presentation Layer</h4>
+                                    <h4 data-tr="Sunum Katmanı" data-en="Presentation Layer">Sunum Katmanı</h4>
                                     <p data-tr="ASP.NET Core Web API + Modern Web UI" data-en="ASP.NET Core Web API + Modern Web UI">ASP.NET Core Web API + Modern Web UI</p>
                                 </div>
                             </div>
@@ -1094,24 +1144,24 @@
                             <div class="arch-layer">
                                 <div class="layer-icon">⚙️</div>
                                 <div class="layer-info">
-                                    <h4>Business Layer</h4>
-                                    <p data-tr="Transaction Manager, Fraud Detection, AI Services" data-en="Transaction Manager, Fraud Detection, AI Services">Transaction Manager, Fraud Detection, AI Services</p>
+                                    <h4 data-tr="İş Katmanı" data-en="Business Layer">İş Katmanı</h4>
+                                    <p data-tr="TransactionManager, FraudModelService, NeonAIService" data-en="TransactionManager, FraudModelService, NeonAIService">TransactionManager, FraudModelService, NeonAIService</p>
                                 </div>
                             </div>
                             <div class="arch-arrow">↓</div>
                             <div class="arch-layer">
                                 <div class="layer-icon">💾</div>
                                 <div class="layer-info">
-                                    <h4>Data Access Layer</h4>
-                                    <p data-tr="Entity Framework Core + Repository Pattern" data-en="Entity Framework Core + Repository Pattern">Entity Framework Core + Repository Pattern</p>
+                                    <h4 data-tr="Veri Erişim Katmanı" data-en="Data Access Layer">Veri Erişim Katmanı</h4>
+                                    <p data-tr="Entity Framework Core + VireonContext" data-en="Entity Framework Core + VireonContext">Entity Framework Core + VireonContext</p>
                                 </div>
                             </div>
                             <div class="arch-arrow">↓</div>
                             <div class="arch-layer">
                                 <div class="layer-icon">🗄️</div>
                                 <div class="layer-info">
-                                    <h4>Database Layer</h4>
-                                    <p data-tr="SQLite - ACID uyumlu işlemler (paylaşımlı vireon_local.db)" data-en="SQLite - ACID compliant transactions (shared vireon_local.db)">SQLite - ACID compliant transactions (shared vireon_local.db)</p>
+                                    <h4 data-tr="Veritabanı Katmanı" data-en="Database Layer">Veritabanı Katmanı</h4>
+                                    <p data-tr="SQLite — ACID uyumlu işlemler (paylaşımlı vireon_local.db)" data-en="SQLite — ACID compliant transactions (shared vireon_local.db)">SQLite — ACID uyumlu işlemler (paylaşımlı vireon_local.db)</p>
                                 </div>
                             </div>
                         </div>
@@ -1125,13 +1175,13 @@
                         </div>
                         <div class="arch-feature-card glass-card">
                             <div class="feature-icon">📊</div>
-                            <h4 data-tr="Immutable Ledger" data-en="Immutable Ledger">Immutable Ledger</h4>
-                            <p data-tr="Değişmez muhasebe defteri - kayıtlar silinemez veya değiştirilemez" data-en="Immutable accounting ledger - records cannot be deleted or modified">Immutable accounting ledger - records cannot be deleted or modified</p>
+                            <h4 data-tr="Değişmez Defter" data-en="Immutable Ledger">Değişmez Defter</h4>
+                            <p data-tr="Değişmez muhasebe defteri — kayıtlar silinemez veya değiştirilemez" data-en="Immutable accounting ledger — records cannot be deleted or modified">Değişmez muhasebe defteri — kayıtlar silinemez veya değiştirilemez</p>
                         </div>
                         <div class="arch-feature-card glass-card">
                             <div class="feature-icon">🛡️</div>
-                            <h4 data-tr="Fraud Detection" data-en="Fraud Detection">Fraud Detection</h4>
-                            <p data-tr="Gerçek zamanlı kural tabanlı fraud analizi ve risk skorlama" data-en="Real-time rule-based fraud analysis and risk scoring">Real-time rule-based fraud analysis and risk scoring</p>
+                            <h4 data-tr="Dolandırıcılık Tespiti" data-en="Fraud Detection">Dolandırıcılık Tespiti</h4>
+                            <p data-tr="Gerçek zamanlı kural tabanlı risk analizi ve skorlama" data-en="Real-time rule-based fraud analysis and risk scoring">Gerçek zamanlı kural tabanlı risk analizi ve skorlama</p>
                         </div>
                     </div>
                 </div>
@@ -1154,26 +1204,26 @@
                         data-en="Developed by Computer Engineering students">Developed by Computer Engineering students</p>
                 </div>
 
-                <div class="team-grid">
-                    <div class="team-card">
-                        <img src="images/about-our-team.jpg" alt="Team" class="team-photo">
+                <div class="team-grid team-grid-avatars">
+                    <div class="team-card team-card-avatar">
+                        <div class="team-avatar" aria-hidden="true">CBS</div>
                         <div class="team-info">
                             <h4>Cavit Batu Soylu</h4>
-                            <p>Full Stack Developer</p>
+                            <p data-tr="Full Stack & Yapay Zeka" data-en="Full Stack & AI">Full Stack & Yapay Zeka</p>
                         </div>
                     </div>
-                    <div class="team-card">
-                        <img src="images/design-screen.jpg" alt="Team" class="team-photo">
+                    <div class="team-card team-card-avatar">
+                        <div class="team-avatar" aria-hidden="true">EK</div>
                         <div class="team-info">
                             <h4>Enes Kaya</h4>
-                            <p>Backend Developer</p>
+                            <p data-tr="Backend Geliştirici" data-en="Backend Developer">Backend Geliştirici</p>
                         </div>
                     </div>
-                    <div class="team-card">
-                        <img src="images/brand-identity.jpg" alt="Team" class="team-photo">
+                    <div class="team-card team-card-avatar">
+                        <div class="team-avatar" aria-hidden="true">KA</div>
                         <div class="team-info">
                             <h4>Kerem Arslan</h4>
-                            <p>Database Specialist</p>
+                            <p data-tr="Veritabanı Uzmanı" data-en="Database Specialist">Veritabanı Uzmanı</p>
                         </div>
                     </div>
                 </div>
@@ -1448,6 +1498,13 @@
                 <input type="text" id="floatingAiInput" class="ai-input" placeholder="Mesajınızı yazın..." autocomplete="off" onkeydown="if(event.key === 'Enter') { event.preventDefault(); sendAIMessage(); }">
                 <button type="button" class="ai-send-btn" onclick="sendAIMessage()" aria-label="Send message">➤</button>
             </div>
+            <div class="ai-chat-history-panel ai-chat-history-panel--floating">
+                <div class="ai-history-header">
+                    <span data-tr="Sohbet Geçmişi" data-en="Chat History">Sohbet Geçmişi</span>
+                    <button type="button" class="ai-history-clear" onclick="clearAiChatHistory()" data-tr="Temizle" data-en="Clear">Temizle</button>
+                </div>
+                <ul class="ai-history-list" id="floatingAiHistoryList"></ul>
+            </div>
         </div>
 
         <!-- Footer -->
@@ -1459,11 +1516,11 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260605-11" defer></script>
+    <script src="vireon.js?v=20260605-17" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
-            window.currentLang = localStorage.getItem('vireon-lang') || 'en';
+            window.currentLang = localStorage.getItem('vireon-lang') || 'tr';
         }
 
 
