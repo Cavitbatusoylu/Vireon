@@ -145,6 +145,10 @@ Vireon/
 │   └── appsettings.json          # Configuration
 │
 ├── Database/                     # 🗃️ Paylaşımlı SQLite (vireon_local.db)
+├── scripts/                      # 🔧 Yardımcı scriptler
+│   ├── sync-database.ps1         # DB'yi GitHub'a push (ekip senkronu)
+│   ├── build-electron-icon.ps1   # Electron pencere ikonu
+│   └── build-pwa-icons.ps1       # PWA manifest ikonları
 ├── DATABASE_DOCUMENTATION.md     # Migration & seed (Kerem)
 ├── DEMO.md                       # Sunum senaryosu & demo hesapları
 └── Vireon.slnx                   # Solution file
@@ -245,7 +249,8 @@ Tüm ekip **aynı** `Database/vireon_local.db` dosyasını kullanır. Başka bil
 **Veri ekledikten sonra (kayıt, transfer, vb.):**
 ```powershell
 # API kapalı olsun (Ctrl+C veya taskkill)
-powershell -File scripts/sync-database.ps1
+npm run sync-db
+# veya: powershell -File scripts/sync-database.ps1
 ```
 
 **Diğer bilgisayarda güncel veriyi al:**

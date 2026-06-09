@@ -7,6 +7,7 @@
     "icon": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-electron-icon.ps1",
     "pwa-icons": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-pwa-icons.ps1",
     "icons": "npm run icon && npm run pwa-icons",
+    "sync-db": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-database.ps1",
     "prestart": "npm run icons",
     "start": "electron .",
     "dev": "electron . --enable-logging"
