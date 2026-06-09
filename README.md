@@ -103,13 +103,27 @@ Katmanlı mimari: Sunum → İş → Veri → Entity.
 
 ASP.NET Core 8 · C# · EF Core · SQLite · BCrypt · FluentValidation · AutoMapper · Chart.js · PWA · Serilog
 
-## Ekip
+## Ekip ve görev dağılımı
 
-| Kişi | Alan |
-|------|------|
-| Cavit Batu Soylu | Full stack / UI, deploy |
-| Enes Kaya | API, iş kuralları, servisler |
-| Kerem Arslan | Veritabanı, migration, seed |
+| Kişi | Ana alan |
+|------|----------|
+| **Cavit Batu Soylu** | Full stack / UI, **Neon AI**, deploy |
+| **Enes Kaya** | API controller'lar, iş kuralları, doğrulama |
+| **Kerem Arslan** | Veritabanı, migration, seed |
+
+### Cavit Batu Soylu
+- Web arayüzü (PWA, dashboard, admin panel, profil)
+- **Neon AI:** `NeonAIService`, `AIController`, Groq entegrasyonu, sohbet UI (floating + dashboard)
+- Paylaşımlı SQLite yolu, `SharedDatabaseGitSync`, `UsersController`, oturum akışları
+- Deployment, README, landing içerikleri
+
+### Enes Kaya
+- API controller'lar (`Transfers`, `Accounts`, `Transactions`, `FraudLogs`, `LedgerEntries`, `DailyLimits`)
+- `TransactionManager`, `FraudModelService`, FluentValidation, AutoMapper
+
+### Kerem Arslan
+- Entity modeller, `VireonContext`, EF Core migration'lar
+- Demo seed (`Program.cs`), `DailyLimit` şeması, veritabanı bütünlüğü
 
 ## Notlar
 
