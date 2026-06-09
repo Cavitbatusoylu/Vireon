@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Vireon.EntityLayer.Concrete;
 
 namespace Vireon.DataAccessLayer.Concrete.EntityFramework
@@ -139,6 +141,16 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
             }
             return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            // Hesap bakiyesi güncellendiğinde veya yeni eklendiğinde RowVersion'ı yeni rastgele bir değerle değiştir
+            foreach (var entry in ChangeTracker.Entries<Account>().Where(e => e.State == EntityState.Modified || e.State == EntityState.Added))
+            {
+                entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
+            }
+            return base.SaveChangesAsync(cancellationToken);
         }
 
     }

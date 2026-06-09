@@ -35,8 +35,8 @@ namespace Vireon.BusinessLayer.Concrete
                 "Hesap bakiyeniz ana panelde en üstte gösterilmektedir. Güncel bakiye bilgisi için sayfayı yenileyebilirsiniz."
             }},
             { "para", new[] {
-                "Para transferi yapmak için 'Para Gönder' sekmesini kullanabilirsiniz. Yatırmak için 'Para Yatır' sekmesine göz atın.",
-                "Para işlemlerinizi sol menüdeki Finans kategorisinden yönetebilirsiniz. Hangi işlemi yapmak istersiniz?"
+                "Para transferi için sol menüdeki Finans bölümünden Para Gönder sekmesini kullanabilirsiniz. Yatırmak için Para Yatır sekmesine göz atın.",
+                "Finans menüsündeki Para Gönder ve Para Yatır seçenekleriyle işlemlerinizi yönetebilirsiniz. Hangi işlemi yapmak istersiniz?"
             }},
             { "transfer", new[] {
                 "Para göndermek için sol menüden 💸 Para Gönder sekmesine gidin. Alıcı hesap numarası (VR-XXXXX) ve tutarı girin.",
@@ -63,14 +63,18 @@ namespace Vireon.BusinessLayer.Concrete
                 "Güvenlik önlemlerimiz: BCrypt şifreleme, ACID transaction'lar, Fraud analizi ve kural tabanlı risk puanlama sistemi."
             }},
             { "yardım", new[] {
-                "Size şu konularda detaylı yardımcı olabilirim:\n\n" +
-                "• 💰 **Bakiye Sorgulama:** Mevcut bakiyenizi dashboard üzerinden anlık görebilirsiniz.\n" +
-                "• 💸 **Para Transferi:** VR-XXXX formatlı hesaplara hızlı gönderim yapabilirsiniz.\n" +
-                "• ⚡ **Günlük Limitler:** Transfer limitlerinizi kontrol edebilir ve güncelleyebilirsiniz.\n" +
-                "• 📊 **İşlem Geçmişi:** Tüm hesap hareketlerinizi Ledger sayfasından takip edebilirsiniz.\n" +
-                "• 🔐 **Güvenlik & Fraud:** Şüpheli işlemlerin nasıl engellendiğini öğrenebilirsiniz.\n" +
-                "• 📋 **Hesap Detayları:** IBAN ve hesap numaranızı görüntüleyebilirsiniz.\n\n" +
+                "Size şu konularda yardımcı olabilirim:\n" +
+                "• Bakiye Sorgulama: Mevcut bakiyenizi Genel Bakış sayfasından görebilirsiniz.\n" +
+                "• Para Transferi: Finans menüsünden VR-XXXX formatlı hesaplara gönderim yapabilirsiniz.\n" +
+                "• Günlük Limitler: Transfer limitlerinizi kontrol edebilir ve güncelleyebilirsiniz.\n" +
+                "• İşlem Geçmişi: Tüm hesap hareketlerinizi İşlem Geçmişi sayfasından takip edebilirsiniz.\n" +
+                "• Güvenlik: Şüpheli işlemlerin nasıl engellendiğini öğrenebilirsiniz.\n" +
+                "• Hesap Detayları: Hesap numaranızı Hesap Bilgileri sayfasından görüntüleyebilirsiniz.\n" +
                 "Hangi konuda daha fazla bilgi istersiniz?"
+            }},
+            { "nasilsin", new[] {
+                "Çok iyiyim! Bir yapay zeka asistanı olarak her zaman yardıma hazırım. Sizin için neler yapabilirim?",
+                "Sistemlerim sorunsuz çalışıyor, harikayım! Sizin gününüz nasıl geçiyor?"
             }},
             { "fraud", new[] {
                 "Vireon, kural tabanlı yapay zeka risk motoru ile şüpheli işlemleri otomatik olarak tespit eder. Yüksek tutarlı veya sık tekrarlayan işlemler FraudLogs tablosuna kaydedilir.",
@@ -107,8 +111,13 @@ namespace Vireon.BusinessLayer.Concrete
                 "Our security measures: BCrypt encryption, ACID transactions, fraud analysis and a rule-based risk scoring system."
             }},
             { "help", new[] {
-                "I can help you with:\n• 💰 Balance inquiries\n• 💸 Money transfers\n• ⚡ Limit info\n• 📋 Account details\n• 🔐 Security\n• 📊 Transaction history",
-                "As Neon AI, I can guide you through banking operations. Pick a topic or just type your question!"
+                "I can help you with:\n" +
+                "• Balance inquiries on the Overview page\n" +
+                "• Money transfers via Send Money\n" +
+                "• Daily limit info under Daily Limits\n" +
+                "• Account details under Account Information\n" +
+                "• Security and transaction history\n" +
+                "Which topic would you like to explore?"
             }},
             { "fraud", new[] {
                 "Vireon uses a rule-based AI risk engine to detect suspicious transactions automatically. High-value or frequent transactions are logged to FraudLogs.",
@@ -188,12 +197,13 @@ namespace Vireon.BusinessLayer.Concrete
 
         private static string GetOfflineResponse(string message, bool isEnglish)
         {
-            var lower = message.ToLowerInvariant();
+            var lower = NormalizeForMatch(message);
             var dictionary = isEnglish ? _offlineResponsesEn : _offlineResponses;
 
-            foreach (var kvp in dictionary)
+            foreach (var kvp in dictionary.OrderByDescending(k => k.Key.Length))
             {
-                if (lower.Contains(kvp.Key))
+                var key = isEnglish ? kvp.Key.ToLowerInvariant() : NormalizeForMatch(kvp.Key);
+                if (lower.Contains(key))
                 {
                     var responses = kvp.Value;
                     return responses[Random.Shared.Next(responses.Length)];
@@ -221,6 +231,18 @@ namespace Vireon.BusinessLayer.Concrete
             };
 
             return generalResponses[Random.Shared.Next(generalResponses.Length)];
+        }
+
+        private static string NormalizeForMatch(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            return input.ToLowerInvariant()
+                .Replace('ı', 'i')
+                .Replace('ş', 's')
+                .Replace('ğ', 'g')
+                .Replace('ü', 'u')
+                .Replace('ö', 'o')
+                .Replace('ç', 'c');
         }
 
         private static string? ParseResponse(string body)
