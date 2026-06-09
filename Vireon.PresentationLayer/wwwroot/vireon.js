@@ -380,9 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
        initPasswordToggles();
        initFormValidation();
        initDeleteAccountGuard();
-       restoreLoginFormFromRemember();
-       loadAiChatHistoryFromStorage();
-       renderAiHistoryPanel();
 
        if (window.location.hash === '#section-introduction') {
            applyIntroPanelState('explore', { scrollPanel: false });
@@ -390,6 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
    } catch (e) {
        console.error("NEON AI: Init Error", e);
    }
+});
+
+// Tarayıcı geri/ileri veya bfcache ile dönüldüğünde de temiz başlangıç
+window.addEventListener('pageshow', (event) => {
+   if (!event.persisted || !currentUser) return;
+   showSection('dashboard');
 });
 
 function initNavigation() {
@@ -1059,18 +1062,12 @@ function updateNavbarForLoggedOutUser() {
 
 function handleLogout() {
     const lang = window.currentLang || 'en';
+    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
     currentUser = null;
     clearSession();
-    chatHistory = [];
-    persistAiChatHistoryToStorage();
-    renderAiHistoryPanel();
-    if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
+    clearRememberedEmail();
     document.body.classList.remove('admin-mode');
-
-    // Giriş formundaki bilgileri de temizle (önceki oturum sızmasın).
-    ['loginEmail', 'loginPassword'].forEach(id => { const el = getEl(id); if (el) el.value = ''; });
-    const remember = getEl('rememberMe');
-    if (remember) remember.checked = false;
+    resetAllApplicationUi();
 
     showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
     updateNavbarForLoggedOutUser();
@@ -1163,7 +1160,120 @@ window.onLanguageChange = function () {
     } catch (e) { console.error('Language refresh error:', e); }
 };
 
-// ========== DASHBOARD RESET (temiz giriş / yenileme) ==========
+// ========== FULL APPLICATION RESET (giriş / çıkış / yenileme) ==========
+function clearAccountInfoDisplay() {
+    const placeholders = {
+        infoAccountNumber: '-',
+        infoFullName: '-',
+        infoEmail: '-',
+        infoCreatedAt: '-',
+        infoCurrency: 'TRY',
+        infoTxCount: '0',
+        infoBalance: '₺0.00'
+    };
+    Object.entries(placeholders).forEach(([id, val]) => {
+        const el = getEl(id);
+        if (el) el.textContent = val;
+    });
+    const hist = getEl('infoTransactionHistory');
+    if (hist) hist.innerHTML = `<p class="tx-empty">${t('Yükleniyor...', 'Loading...')}</p>`;
+}
+
+function clearAdminPanelDisplay() {
+    const loading = t('Veriler yükleniyor...', 'Loading data...');
+    const statDefaults = {
+        adminTotalUsers: '0',
+        adminTotalAccounts: '0',
+        adminTotalTx: '0',
+        adminTotalDeposits: '0',
+        adminTotalTransfers: '0',
+        adminTotalBalance: '₺0',
+        adminTotalFraud: '0',
+        adminTotalLedger: '0'
+    };
+    Object.entries(statDefaults).forEach(([id, val]) => {
+        const el = getEl(id);
+        if (el) el.textContent = val;
+    });
+    const updatedEl = getEl('adminLastUpdated');
+    if (updatedEl) updatedEl.textContent = loading;
+    ['adminUsersBody', 'adminTxBody', 'adminFraudBody'].forEach(id => {
+        const el = getEl(id);
+        if (el) el.innerHTML = '';
+    });
+}
+
+function clearDbExplorerDisplay() {
+    const container = getEl('dbStatsContainer');
+    if (container) container.innerHTML = '';
+    const tbody = document.querySelector('#dbUsersTable tbody');
+    if (tbody) tbody.innerHTML = '';
+}
+
+function clearQrDisplay() {
+    const lbl = getEl('qrAccountLabel');
+    if (lbl) lbl.textContent = '-';
+    const img = getEl('qrPaymentImg');
+    if (img) {
+        img.removeAttribute('src');
+        img.alt = 'QR Code';
+    }
+}
+
+function clearAllFormInputs() {
+    const roots = ['#dashboard', '#loginModal', '#registerModal', '#forgotPasswordModal'];
+    roots.forEach(selector => {
+        const root = document.querySelector(selector);
+        if (!root) return;
+        root.querySelectorAll('input, textarea, select').forEach(el => {
+            if (el.type === 'checkbox' || el.type === 'radio') {
+                el.checked = false;
+            } else if (el.type !== 'file' && el.type !== 'button' && el.type !== 'submit') {
+                el.value = '';
+            }
+        });
+    });
+
+    const deleteBtn = getEl('deleteAccountBtn');
+    if (deleteBtn) deleteBtn.disabled = true;
+    const deleteEmailConfirm = getEl('deleteAccountEmailConfirm');
+    if (deleteEmailConfirm) deleteEmailConfirm.placeholder = '';
+
+    const receiverHint = getEl('transferReceiverName');
+    if (receiverHint) {
+        receiverHint.textContent = '';
+        receiverHint.className = 'receiver-name-hint';
+    }
+
+    document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    document.querySelectorAll('.field-error-msg').forEach(el => el.remove());
+}
+
+function resetAiChatUi() {
+    const dashWelcome = t(
+        'Merhaba! Ben Neon. Senin bankacılık işlemlerini analiz ediyorum. Sana nasıl yardımcı olabilirim?',
+        'Hi! I\'m Neon. I analyze your banking activity. How can I help you?'
+    );
+    const floatWelcome = t(
+        'Merhaba! Ben Neon. Bankacılık işlemlerinizde size nasıl yardımcı olabilirim?',
+        'Hello! I\'m Neon. How can I assist you with your banking transactions today?'
+    );
+
+    const aiContent = getEl('aiChatContent');
+    if (aiContent) {
+        aiContent.innerHTML = `<div class="bot-bubble"><div class="bubble-icon">🤖</div><div class="bubble-text">${escapeHtml(dashWelcome)}</div></div>`;
+    }
+    const aiBody = getEl('aiChatBody');
+    if (aiBody) {
+        aiBody.innerHTML = `<div class="ai-message bot"><p>${escapeHtml(floatWelcome)}</p></div>`;
+    }
+
+    chatHistory = [];
+    try { localStorage.removeItem(AI_HISTORY_KEY); } catch (_) { /* ignore */ }
+    persistAiChatHistoryToStorage();
+    renderAiHistoryPanel();
+}
+
 function clearLimitsDisplay() {
     ['maxLimit', 'usedLimit', 'remainingLimit'].forEach(id => {
         const el = getEl(id);
@@ -1183,8 +1293,23 @@ function clearLimitsDisplay() {
     if (newMax) newMax.value = '';
 }
 
-function resetDashboardState() {
+function resetAllApplicationUi() {
+    clearTimeout(_receiverLookupTimer);
+    _receiverLookupTimer = null;
+    accountDirectory = {};
+
+    if (balanceChart) { balanceChart.destroy(); balanceChart = null; }
+    if (expensePieChart) { expensePieChart.destroy(); expensePieChart = null; }
+    if (overviewChartInstance) { overviewChartInstance.destroy(); overviewChartInstance = null; }
+
     switchDashSection('dash-overview');
+
+    clearAllFormInputs();
+    clearLimitsDisplay();
+    clearAccountInfoDisplay();
+    clearAdminPanelDisplay();
+    clearDbExplorerDisplay();
+    clearQrDisplay();
 
     const balEl = getEl('dashBalance');
     const accEl = getEl('dashAccountNo');
@@ -1193,26 +1318,13 @@ function resetDashboardState() {
     if (accEl) accEl.textContent = '**** ****';
     if (curEl) curEl.textContent = 'TRY';
 
-    clearLimitsDisplay();
-
     const loadingMsg = t('Yükleniyor...', 'Loading...');
     const overviewList = getEl('overviewTransactions');
     const historyList = getEl('fullTransactionHistory');
     if (overviewList) overviewList.innerHTML = `<p class="tx-empty">${loadingMsg}</p>`;
     if (historyList) historyList.innerHTML = `<p class="tx-empty">${loadingMsg}</p>`;
 
-    ['transferTarget', 'transferAmount', 'transferDesc', 'depositAmount', 'depositNote'].forEach(id => {
-        const el = getEl(id);
-        if (el) el.value = '';
-    });
-    const receiverHint = getEl('transferReceiverName');
-    if (receiverHint) {
-        receiverHint.textContent = '';
-        receiverHint.className = 'receiver-name-hint';
-    }
-
-    const qrLbl = getEl('qrAccountLabel');
-    if (qrLbl) qrLbl.textContent = '-';
+    resetAiChatUi();
 
     const aiWin = getEl('aiChatWindow');
     const aiLauncher = getEl('aiLauncher');
@@ -1222,14 +1334,23 @@ function resetDashboardState() {
     }
     if (aiLauncher) aiLauncher.setAttribute('aria-expanded', 'false');
     const historyPanel = getEl('floatingAiHistoryPanel');
-    if (historyPanel) historyPanel.classList.remove('is-open');
+    if (historyPanel) {
+        historyPanel.classList.remove('is-open');
+        historyPanel.setAttribute('aria-hidden', 'true');
+    }
+    const historyBtn = getEl('floatingAiHistoryBtn');
+    if (historyBtn) historyBtn.setAttribute('aria-expanded', 'false');
 
-    if (balanceChart) { balanceChart.destroy(); balanceChart = null; }
-    if (expensePieChart) { expensePieChart.destroy(); expensePieChart = null; }
-    if (overviewChartInstance) { overviewChartInstance.destroy(); overviewChartInstance = null; }
+    closeLoginModal();
+    closeRegisterModal();
+    closeForgotPasswordModal();
+    document.body.style.overflow = '';
 
-    accountDirectory = {};
     window.scrollTo(0, 0);
+}
+
+function resetDashboardState() {
+    resetAllApplicationUi();
 }
 
 // ========== DASHBOARD NAVIGATION ==========
@@ -1255,6 +1376,20 @@ function switchDashSection(targetId) {
 
 function populateProfileSettingsFields() {
    if (!currentUser) return;
+
+   const sensitiveIds = [
+      'deleteAccountPassword', 'deleteAccountEmailConfirm', 'deleteAccountPhrase',
+      'profileResetNewPwd', 'profileResetConfirmPwd', 'pwdCurrent', 'pwdNew', 'pwdConfirm'
+   ];
+   sensitiveIds.forEach(id => {
+      const el = getEl(id);
+      if (el) el.value = '';
+   });
+   const deleteAck = getEl('deleteAccountAck');
+   if (deleteAck) deleteAck.checked = false;
+   const deleteBtn = getEl('deleteAccountBtn');
+   if (deleteBtn) deleteBtn.disabled = true;
+
    const pn = getEl('profileName');
    const ps = getEl('profileSurname');
    const pe = getEl('profileEmail');
@@ -1268,7 +1403,10 @@ function populateProfileSettingsFields() {
    if (resetAcc) resetAcc.value = currentUser.accountNumber || getEl('dashAccountNo')?.textContent?.trim() || '';
 
    const deleteEmailHint = getEl('deleteAccountEmailConfirm');
-   if (deleteEmailHint && !deleteEmailHint.value) deleteEmailHint.placeholder = currentUser.email || '';
+   if (deleteEmailHint) {
+      deleteEmailHint.value = '';
+      deleteEmailHint.placeholder = currentUser.email || '';
+   }
 }
 
 // ========== DASHBOARD DATA ==========
@@ -1912,6 +2050,8 @@ async function handleDeleteAccount() {
          showToast(data.message || (lang === 'tr' ? 'Hesap silindi.' : 'Account deleted.'), 'success');
          currentUser = null;
          clearSession();
+         clearRememberedEmail();
+         resetAllApplicationUi();
          updateNavbarForLoggedOutUser();
          backToMenu();
       } else {
