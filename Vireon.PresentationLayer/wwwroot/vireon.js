@@ -171,11 +171,19 @@ function getPasswordStrength(password) {
     if (/[A-Z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
-    if (score <= 1) return { level: 'weak', label: 'Weak', percent: 20 };
-    if (score <= 2) return { level: 'fair', label: 'Fair', percent: 40 };
-    if (score <= 3) return { level: 'good', label: 'Good', percent: 65 };
-    if (score <= 4) return { level: 'strong', label: 'Strong', percent: 85 };
-    return { level: 'excellent', label: 'Excellent', percent: 100 };
+    if (score <= 1) return { level: 'weak', label: t('Zayıf', 'Weak'), percent: 20 };
+    if (score <= 2) return { level: 'fair', label: t('Orta', 'Fair'), percent: 40 };
+    if (score <= 3) return { level: 'good', label: t('İyi', 'Good'), percent: 65 };
+    if (score <= 4) return { level: 'strong', label: t('Güçlü', 'Strong'), percent: 85 };
+    return { level: 'excellent', label: t('Mükemmel', 'Excellent'), percent: 100 };
+}
+
+function refreshPasswordStrengthMeters() {
+    document.querySelectorAll('.password-strength-meter').forEach(meter => {
+        const group = meter.closest('.form-group');
+        const input = group?.querySelector('input[type="password"], input[type="text"]');
+        if (input) updatePasswordStrengthMeter(input);
+    });
 }
 
 function initFormValidation() {
@@ -249,7 +257,15 @@ function updatePasswordStrengthMeter(inputEl) {
 // Safely get elements
 const getEl = (id) => document.getElementById(id);
 const getEls = (selector) => document.querySelectorAll(selector);
-const getLocale = () => (window.currentLang === 'tr' ? 'tr-TR' : 'en-US');
+const lang = () => window.currentLang || 'en';
+const t = (tr, en) => (lang() === 'tr' ? tr : en);
+const getLocale = () => (lang() === 'tr' ? 'tr-TR' : 'en-US');
+const pickApiMessage = (payload, fallbackTr, fallbackEn) => {
+   if (!payload) return t(fallbackTr, fallbackEn);
+   return lang() === 'tr'
+      ? (payload.mesaj || payload.message || t(fallbackTr, fallbackEn))
+      : (payload.message || payload.mesaj || t(fallbackTr, fallbackEn));
+};
 const formatNumber = (value, minimumFractionDigits = 2, maximumFractionDigits = 2) =>
    new Intl.NumberFormat(getLocale(), { minimumFractionDigits, maximumFractionDigits }).format(Number(value) || 0);
 const formatDate = (value, options) => new Date(value).toLocaleDateString(getLocale(), options);
@@ -1098,7 +1114,7 @@ function initPasswordToggles() {
             input.type = show ? 'text' : 'password';
             btn.innerHTML = show ? PWD_ICON_EYE_OFF : PWD_ICON_EYE;
             btn.classList.toggle('active', show);
-            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            btn.setAttribute('aria-label', show ? t('Şifreyi gizle', 'Hide password') : t('Şifreyi göster', 'Show password'));
         });
         wrap.appendChild(btn);
     });
@@ -1141,6 +1157,10 @@ function lookupReceiverName() {
 // içerik (işlem listeleri, admin tabloları) burada yeniden render edilir.
 window.onLanguageChange = function () {
     try {
+        renderAiHistoryPanel();
+        refreshPasswordStrengthMeters();
+        const transferTarget = getEl('transferTarget');
+        if (transferTarget && transferTarget.value.trim()) lookupReceiverName();
         if (currentUser) {
             fetchDashboardData();
             if (currentUser.role === 'Admin') loadAdminPanel();
@@ -1276,7 +1296,6 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
     if (balanceChart) balanceChart.destroy();
     if (expensePieChart) expensePieChart.destroy();
 
-    const lang = window.currentLang || 'tr';
     const sorted = [...txs].sort((a, b) => new Date(a.date) - new Date(b.date));
     const timeline = buildBalanceTimeline(sorted, accountId, Number(currentBalance) || 0);
     const labels = timeline.map(p => formatDate(p.date, { day: 'numeric', month: 'short' }));
@@ -1285,9 +1304,9 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
     balanceChart = new Chart(lineCtx, {
         type: 'line',
         data: {
-            labels: labels.length ? labels : [lang === 'tr' ? 'Başlangıç' : 'Start'],
+            labels: labels.length ? labels : [t('Başlangıç', 'Start')],
             datasets: [{
-                label: lang === 'tr' ? 'Bakiye' : 'Balance',
+                label: t('Bakiye', 'Balance'),
                 data: dataPoints.length ? dataPoints : [currentBalance],
                 borderColor: '#00b4d8',
                 backgroundColor: 'rgba(0, 180, 216, 0.1)',
@@ -1323,10 +1342,7 @@ function initModernDashboardCharts(txs, accountId, currentBalance) {
         .reduce((sum, t) => sum + Number(t.amount || 0), 0);
     const incoming = received + deposits;
     const outgoing = sent;
-    const pieLabels = [
-        lang === 'tr' ? 'Giden' : 'Outgoing',
-        lang === 'tr' ? 'Gelen' : 'Incoming'
-    ];
+    const pieLabels = [t('Giden', 'Outgoing'), t('Gelen', 'Incoming')];
     const pieData = incoming === 0 && outgoing === 0 ? [1, 0] : [outgoing, incoming];
 
     expensePieChart = new Chart(pieCtx, {
@@ -1450,13 +1466,10 @@ function loadAiChatHistoryFromStorage() {
 
 function renderAiHistoryPanel() {
    const lists = [getEl('aiChatHistoryList'), getEl('floatingAiHistoryList')];
-   const lang = window.currentLang || 'tr';
-   const empty = lang === 'tr' ? 'Henüz mesaj yok.' : 'No messages yet.';
+   const empty = t('Henüz mesaj yok.', 'No messages yet.');
    const html = chatHistory.length
       ? chatHistory.slice(-10).reverse().map(entry => {
-         const role = entry.role === 'user'
-            ? (lang === 'tr' ? 'Siz' : 'You')
-            : 'Neon';
+         const role = entry.role === 'user' ? t('Siz', 'You') : 'Neon';
          const preview = escapeHtml(String(entry.content || ''));
          return `<li><span class="ai-history-role">${role}</span><span class="ai-history-text">${preview}</span></li>`;
       }).join('')
@@ -1468,8 +1481,7 @@ function clearAiChatHistory() {
    chatHistory = [];
    persistAiChatHistoryToStorage();
    renderAiHistoryPanel();
-   const lang = window.currentLang || 'tr';
-   showToast(lang === 'tr' ? 'Sohbet geçmişi temizlendi.' : 'Chat history cleared.', 'info');
+   showToast(t('Sohbet geçmişi temizlendi.', 'Chat history cleared.'), 'info');
 }
 
 function pushAiChatExchange(userText, botText) {
@@ -1491,8 +1503,24 @@ function toggleAIChat() {
       if (open) {
          const inp = getEl('floatingAiInput');
          if (inp) setTimeout(() => inp.focus(), 100);
+      } else {
+         const historyPanel = getEl('floatingAiHistoryPanel');
+         if (historyPanel) historyPanel.classList.remove('is-open');
+         const historyBtn = getEl('floatingAiHistoryBtn');
+         if (historyBtn) historyBtn.setAttribute('aria-expanded', 'false');
       }
    }
+}
+
+function toggleFloatingAiHistory() {
+   const panel = getEl('floatingAiHistoryPanel');
+   const btn = getEl('floatingAiHistoryBtn');
+   if (!panel) return;
+   const willOpen = !panel.classList.contains('is-open');
+   panel.classList.toggle('is-open', willOpen);
+   if (btn) btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+   if (willOpen) renderAiHistoryPanel();
+   panel.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
 }
 
 async function sendAiMessage() {
@@ -1510,10 +1538,10 @@ async function sendAiMessage() {
         const response = await fetch('/api/ai/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText, history: chatHistory, lang: window.currentLang || 'tr' })
+            body: JSON.stringify({ message: userText, history: chatHistory, lang: lang() })
         });
         const data = await response.json();
-        const botResponse = data.response || 'Hata oluştu.';
+        const botResponse = data.response || t('Hata oluştu.', 'An error occurred.');
 
         pushAiChatExchange(userText, botResponse);
 
@@ -1527,7 +1555,7 @@ async function sendAiMessage() {
         display.innerHTML += `
             <div class="bot-bubble error">
                 <div class="bubble-icon">⚠️</div>
-                <div class="bubble-text">Neon AI şu an yanıt veremiyor.</div>
+                <div class="bubble-text">${escapeHtml(t('Neon AI şu an yanıt veremiyor.', 'Neon AI is unavailable right now.'))}</div>
             </div>
         `;
     }
@@ -1547,7 +1575,7 @@ async function sendAIMessage() {
       const response = await fetch('/api/ai/chat', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ message: message, history: chatHistory, lang: window.currentLang || 'en' })
+         body: JSON.stringify({ message: message, history: chatHistory, lang: lang() })
       });
       let text = '';
       const ct = response.headers.get('content-type') || '';
@@ -1573,7 +1601,7 @@ async function sendAIMessage() {
       }
    } catch (err) {
       const loadingEl = getEl(loadingId);
-      if (loadingEl) loadingEl.innerHTML = `<p>Neon System Error, please try again.</p>`;
+      if (loadingEl) loadingEl.innerHTML = `<p>${escapeHtml(t('Neon AI şu an yanıt veremiyor. Lütfen tekrar deneyin.', 'Neon AI is unavailable. Please try again.'))}</p>`;
    }
 }
 
@@ -1880,10 +1908,7 @@ async function handleSendTransfer() {
         
         if (response.ok) {
             const result = await response.json();
-            showToast(
-                lang === 'tr' ? (result.mesaj || 'Transfer başarılı!') : (result.message || 'Transfer successful!'),
-                'success'
-            );
+            showToast(pickApiMessage(result, 'Transfer başarılı!', 'Transfer successful!'), 'success');
             
             const targetField = getEl('transferTarget');
             const amountField = getEl('transferAmount');
@@ -1895,10 +1920,15 @@ async function handleSendTransfer() {
             await fetchDashboardData();
         } else {
             const error = await response.json().catch(() => ({}));
-            showToast(
-                lang === 'tr' ? (error.mesaj || 'Transfer başarısız!') : (error.message || 'Transfer failed!'),
-                'error'
-            );
+            const isBlocked = error.status === 'blocked';
+            const riskPct = error.riskScore != null ? Math.round(Number(error.riskScore) * 100) : null;
+            let msg = pickApiMessage(error, 'Transfer başarısız!', 'Transfer failed!');
+            if (isBlocked && riskPct != null) {
+                msg = lang === 'tr'
+                    ? `${msg} (Risk: %${riskPct})`
+                    : `${msg} (Risk: ${riskPct}%)`;
+            }
+            showToast(msg, isBlocked ? 'warning' : 'error');
         }
     } catch (err) {
         showToast(lang === 'tr' ? 'Sunucuya bağlanılamadı.' : 'Connection error.', 'error');
@@ -2189,7 +2219,10 @@ function localizeFraudRiskType(type, lang) {
     const map = {
         SUSPICIOUS_NIGHT_TRANSFER: lang === 'tr' ? 'Gece Transferi' : 'Night Transfer',
         HIGH_AMOUNT: lang === 'tr' ? 'Yüksek Tutar' : 'High Amount',
-        FREQUENT_TRANSFER: lang === 'tr' ? 'Sık Transfer' : 'Frequent Transfer'
+        FREQUENT_TRANSFER: lang === 'tr' ? 'Sık Transfer' : 'Frequent Transfer',
+        FREQUENT_TRANSACTIONS: lang === 'tr' ? 'Sık İşlem' : 'Frequent Transactions',
+        LIMIT_EXCEEDED: lang === 'tr' ? 'Limit Aşımı' : 'Limit Exceeded',
+        AI_BLOCKED: lang === 'tr' ? 'AI Engeli' : 'AI Blocked'
     };
     return map[key] || type || '-';
 }
@@ -2213,7 +2246,6 @@ function formatTxDescription(rawDesc, lang) {
 }
 
 function updateLimitsDisplay(userLimit) {
-    const lang = window.currentLang || 'tr';
     const max = Number(userLimit.maxDailyLimit ?? userLimit.MaxDailyLimit ?? 0);
     const used = Number(userLimit.usedLimit ?? userLimit.UsedLimit ?? 0);
     const remaining = Math.max(0, max - used);
@@ -2231,12 +2263,10 @@ function updateLimitsDisplay(userLimit) {
     if (maxEl) maxEl.textContent = formatNumber(max, 0, 2);
     if (usedEl) usedEl.textContent = formatNumber(used, 0, 2);
     if (remEl) remEl.textContent = formatNumber(remaining, 0, 2);
-    if (pctEl) pctEl.textContent = `${pct.toFixed(1)}% ${lang === 'tr' ? 'kullanıldı' : 'used'}`;
+    if (pctEl) pctEl.textContent = `${pct.toFixed(1)}% ${t('kullanıldı', 'used')}`;
     if (fillEl) fillEl.style.width = `${pct}%`;
     if (labelEl) {
-        labelEl.textContent = lang === 'tr'
-            ? `₺${formatNumber(used, 0, 2)} / ₺${formatNumber(max, 0, 2)}`
-            : `₺${formatNumber(used, 0, 2)} / ₺${formatNumber(max, 0, 2)}`;
+        labelEl.textContent = `₺${formatNumber(used, 0, 2)} / ₺${formatNumber(max, 0, 2)}`;
     }
     if (resetEl) {
         resetEl.textContent = resetRaw
@@ -2367,20 +2397,34 @@ async function loadAdminPanel() {
 
         if (fraudBody) {
             const accNumById = {};
-            accountsForFraud.forEach(a => { accNumById[a.id] = a.accountNumber; });
+            (accountsForFraud || []).forEach(a => {
+                const id = pickField(a, 'id', 'Id');
+                const num = pickField(a, 'accountNumber', 'AccountNumber');
+                if (id != null) accNumById[id] = num || ('#' + id);
+            });
 
-            if (!fraudLogs.length) {
+            const logs = Array.isArray(fraudLogs) ? fraudLogs : [];
+            if (!logs.length) {
                 fraudBody.innerHTML = `<tr><td colspan="5" class="tx-empty">${lang === 'tr' ? 'Şüpheli işlem kaydı yok.' : 'No suspicious transactions.'}</td></tr>`;
             } else {
-                fraudBody.innerHTML = fraudLogs.slice().reverse().map((f, idx) => `
-                    <tr title="DB ID: ${f.id}">
+                fraudBody.innerHTML = logs.slice().reverse().map((f, idx) => {
+                    const accountId = pickField(f, 'accountId', 'AccountId');
+                    const riskType = pickField(f, 'riskType', 'RiskType');
+                    const description = pickField(f, 'description', 'Description') || '-';
+                    const logDate = pickField(f, 'logDate', 'LogDate');
+                    const logId = pickField(f, 'id', 'Id');
+                    const dateStr = logDate
+                        ? new Date(logDate).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+                        : '—';
+                    return `
+                    <tr title="DB ID: ${logId ?? ''}">
                         <td class="col-seq">${idx + 1}</td>
-                        <td>${escapeHtml(accNumById[f.accountId] || ('#' + f.accountId))}</td>
-                        <td><span class="type-badge type-fraud">${escapeHtml(localizeFraudRiskType(f.riskType, lang))}</span></td>
-                        <td>${escapeHtml(f.description || '-')}</td>
-                        <td>${new Date(f.logDate).toLocaleString(getLocale(), { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</td>
-                    </tr>
-                `).join('');
+                        <td>${escapeHtml(accNumById[accountId] || ('#' + accountId))}</td>
+                        <td><span class="type-badge type-fraud">${escapeHtml(localizeFraudRiskType(riskType, lang))}</span></td>
+                        <td>${escapeHtml(description)}</td>
+                        <td>${dateStr}</td>
+                    </tr>`;
+                }).join('');
             }
         }
 

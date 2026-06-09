@@ -47,8 +47,13 @@ namespace Vireon.PresentationLayer.Controllers
             var frequency = _transactionService.GetRecentTransactionCount(requestDto.SenderAccountId, 60);
             var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount, hour, frequency);
 
-            if (isFraud && probability > 0.7) // %70 üzeri risk varsa işlemi engelle
+            if (isFraud) // %70 üzeri risk varsa işlemi engelle
             {
+                _transactionService.LogFraudEvent(
+                    requestDto.SenderAccountId,
+                    "AI_BLOCKED",
+                    $"AI risk motoru engelledi: {requestDto.Amount:N2} TRY (Risk: %{probability * 100:F0})");
+
                 return BadRequest(new
                 {
                     message = "AI risk engine flagged this transaction as high risk and blocked it automatically.",
@@ -117,8 +122,13 @@ namespace Vireon.PresentationLayer.Controllers
                 var frequency = _transactionService.GetRecentTransactionCount(senderAccount.Id, 60);
                 var (isFraud, probability) = _fraudModelService.Predict((float)dto.Amount, hour, frequency);
 
-                if (isFraud && probability > 0.7)
+                if (isFraud)
                 {
+                    _transactionService.LogFraudEvent(
+                        senderAccount.Id,
+                        "AI_BLOCKED",
+                        $"AI risk motoru engelledi: {dto.Amount:N2} TRY (Risk: %{probability * 100:F0})");
+
                     return BadRequest(new
                     {
                         message = "AI flagged this transaction as high risk.",
