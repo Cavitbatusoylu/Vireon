@@ -368,9 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
                updateNavbarForLoggedInUser();
                resetSessionTimer();
 
-               // Restore to dashboard immediately if session exists
+               // Restore to dashboard overview with a clean slate
                showSection('dashboard');
-               fetchDashboardData();
            } catch (e) {
                clearSession();
            }
@@ -617,8 +616,8 @@ function showSection(sectionId) {
          document.body.classList.remove('dashboard-active');
          backToMenu();
       } else {
+         resetDashboardState();
          fetchDashboardData();
-         window.scrollTo(0, 0);
       }
       syncNavbarContext();
    } else {
@@ -885,10 +884,7 @@ async function handleLogin(event) {
             closeLoginModal();
             updateNavbarForLoggedInUser();
             
-            setTimeout(() => {
-                showSection('dashboard');
-                fetchDashboardData();
-            }, 300);
+            setTimeout(() => showSection('dashboard'), 300);
         } else {
             const error = await response.json().catch(() => ({}));
             showToast(error.message || (lang === 'tr' ? 'E-posta veya şifre hatalı.' : 'Invalid email or password.'), 'error');
@@ -969,10 +965,7 @@ async function handleRegister(event) {
                         resetSessionTimer();
                         updateNavbarForLoggedInUser();
                         showToast(lang === 'tr' ? `Hoş geldin ${currentUser.name}!` : `Welcome ${currentUser.name}!`, 'success');
-                        setTimeout(() => {
-                            showSection('dashboard');
-                            fetchDashboardData();
-                        }, 300);
+                        setTimeout(() => showSection('dashboard'), 300);
                         return;
                     }
                 } catch (e) {
@@ -1169,6 +1162,75 @@ window.onLanguageChange = function () {
         }
     } catch (e) { console.error('Language refresh error:', e); }
 };
+
+// ========== DASHBOARD RESET (temiz giriş / yenileme) ==========
+function clearLimitsDisplay() {
+    ['maxLimit', 'usedLimit', 'remainingLimit'].forEach(id => {
+        const el = getEl(id);
+        if (el) el.textContent = '0';
+    });
+    const pctEl = getEl('limitUsagePct');
+    if (pctEl) pctEl.textContent = `0% ${t('kullanıldı', 'used')}`;
+    const fillEl = getEl('limitProgressFill');
+    if (fillEl) fillEl.style.width = '0%';
+    const labelEl = getEl('limitProgressLabel');
+    if (labelEl) labelEl.textContent = `₺0 / ₺0`;
+    const resetEl = getEl('lastResetDate');
+    if (resetEl) resetEl.textContent = '—';
+    const limitForm = getEl('limitEditForm');
+    if (limitForm) limitForm.style.display = 'none';
+    const newMax = getEl('newMaxLimit');
+    if (newMax) newMax.value = '';
+}
+
+function resetDashboardState() {
+    switchDashSection('dash-overview');
+
+    const balEl = getEl('dashBalance');
+    const accEl = getEl('dashAccountNo');
+    const curEl = getEl('dashCurrency');
+    if (balEl) balEl.textContent = '0.00';
+    if (accEl) accEl.textContent = '**** ****';
+    if (curEl) curEl.textContent = 'TRY';
+
+    clearLimitsDisplay();
+
+    const loadingMsg = t('Yükleniyor...', 'Loading...');
+    const overviewList = getEl('overviewTransactions');
+    const historyList = getEl('fullTransactionHistory');
+    if (overviewList) overviewList.innerHTML = `<p class="tx-empty">${loadingMsg}</p>`;
+    if (historyList) historyList.innerHTML = `<p class="tx-empty">${loadingMsg}</p>`;
+
+    ['transferTarget', 'transferAmount', 'transferDesc', 'depositAmount', 'depositNote'].forEach(id => {
+        const el = getEl(id);
+        if (el) el.value = '';
+    });
+    const receiverHint = getEl('transferReceiverName');
+    if (receiverHint) {
+        receiverHint.textContent = '';
+        receiverHint.className = 'receiver-name-hint';
+    }
+
+    const qrLbl = getEl('qrAccountLabel');
+    if (qrLbl) qrLbl.textContent = '-';
+
+    const aiWin = getEl('aiChatWindow');
+    const aiLauncher = getEl('aiLauncher');
+    if (aiWin) {
+        aiWin.classList.remove('active');
+        aiWin.setAttribute('aria-hidden', 'true');
+    }
+    if (aiLauncher) aiLauncher.setAttribute('aria-expanded', 'false');
+    const historyPanel = getEl('floatingAiHistoryPanel');
+    if (historyPanel) historyPanel.classList.remove('is-open');
+
+    if (balanceChart) { balanceChart.destroy(); balanceChart = null; }
+    if (expensePieChart) { expensePieChart.destroy(); expensePieChart = null; }
+    if (overviewChartInstance) { overviewChartInstance.destroy(); overviewChartInstance = null; }
+
+    accountDirectory = {};
+    window.scrollTo(0, 0);
+}
 
 // ========== DASHBOARD NAVIGATION ==========
 function switchDashSection(targetId) {
