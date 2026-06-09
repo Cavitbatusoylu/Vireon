@@ -5,12 +5,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Vireon.DataAccessLayer.Migrations
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Grup 1 — Temel 6 tablo: Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries.
+    /// </summary>
     public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // 1/6 — Users
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -29,6 +32,7 @@ namespace Vireon.DataAccessLayer.Migrations
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
+            // 2/6 — Accounts
             migrationBuilder.CreateTable(
                 name: "Accounts",
                 columns: table => new
@@ -51,6 +55,7 @@ namespace Vireon.DataAccessLayer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // 3/6 — DailyLimits
             migrationBuilder.CreateTable(
                 name: "DailyLimits",
                 columns: table => new
@@ -73,6 +78,7 @@ namespace Vireon.DataAccessLayer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // 4/6 — FraudLogs
             migrationBuilder.CreateTable(
                 name: "FraudLogs",
                 columns: table => new
@@ -95,6 +101,7 @@ namespace Vireon.DataAccessLayer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // 5/6 — LedgerEntries
             migrationBuilder.CreateTable(
                 name: "LedgerEntries",
                 columns: table => new
@@ -119,6 +126,7 @@ namespace Vireon.DataAccessLayer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // 6/6 — Transactions
             migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new

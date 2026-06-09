@@ -149,13 +149,13 @@ namespace Vireon.BusinessLayer.Concrete
                     });
                 }
                 var currentHour = DateTime.Now.Hour;
-                if ((currentHour >= 0 && currentHour <= 5) && transaction.Amount > 5000)
+                if ((currentHour >= 0 && currentHour <= 5) && amountInSenderCurrency > 5000)
                 {
                     _context.FraudLogs.Add(new FraudLog
                     {
                         AccountId = senderAccount.Id,
                         RiskType = "SUSPICIOUS_NIGHT_TRANSFER",
-                        Description = $"Gece yarısı yüksek tutarlı transfer denemesi: {transaction.Amount:N2} TRY (Saat: {currentHour:D2}:00)",
+                        Description = $"Gece yarısı yüksek tutarlı transfer: {amountInSenderCurrency:N2} {senderAccount.Currency} (Saat: {currentHour:D2}:00)",
                         LogDate = DateTime.Now
                     });
                 }
@@ -268,6 +268,18 @@ namespace Vireon.BusinessLayer.Concrete
             var timeLimit = DateTime.Now.AddMinutes(-minutes);
             return _context.Transactions
                 .Count(t => t.SenderAccountId == accountId && t.CreatedAt >= timeLimit);
+        }
+
+        public void LogFraudEvent(int accountId, string riskType, string description)
+        {
+            _context.FraudLogs.Add(new FraudLog
+            {
+                AccountId = accountId,
+                RiskType = riskType,
+                Description = description,
+                LogDate = DateTime.Now
+            });
+            _context.SaveChanges();
         }
     }
 }
