@@ -10,32 +10,44 @@ Veritabanı merkezli dijital banka çekirdek sistemi simülasyonu — ACID trans
 [![SQLite](https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite)](https://www.sqlite.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-[Demo (yerel)](http://localhost:5202) · [Sunum senaryosu](DEMO.md) · [Veritabanı dokümantasyonu](DATABASE_DOCUMENTATION.md)
+[Demo (yerel)](http://localhost:5202) · [GitHub](https://github.com/Cavitbatusoylu/Vireon)
 
 </div>
 
 ## Öne çıkanlar
 
-- ACID uyumlu para transferi ve bakiye yönetimi
+- ACID uyumlu para transferi, para yatırma ve bakiye yönetimi
 - Değiştirilemez muhasebe defteri (`LedgerEntries`)
 - Kural tabanlı fraud tespiti (`FraudModelService`)
-- Günlük limit kontrolü
+- Günlük transfer limiti
 - Neon AI asistan (Groq — opsiyonel API anahtarı)
 - PWA destekli web arayüzü, TR/EN dil seçimi
+- Profil ayarları: bilgi güncelleme, şifre sıfırlama, hesap silme
+- Paylaşımlı SQLite + otomatik Git senkronu (ekip)
 
 ## Hızlı başlangıç
 
-**Gereksinimler:** .NET 8 SDK, Git (opsiyonel: Node.js — Electron)
+**Gereksinimler:** .NET 8 SDK, Git
 
 ```bash
 git clone https://github.com/Cavitbatusoylu/Vireon.git
-cd Vireon/Vireon.PresentationLayer
+cd Vireon
+git checkout Cavit-login
+cd Vireon.PresentationLayer
 dotnet run
 ```
 
 Tarayıcı: **http://localhost:5202**
 
-Demo hesapları ve adım adım sunum akışı için → [DEMO.md](DEMO.md)
+### Demo hesapları
+
+| Rol | E-posta | Şifre | Hesap no |
+|-----|---------|-------|----------|
+| Admin | cavit@vireon.com | admin123 | VR-99999 |
+| Kullanıcı | enes@vireon.com | enes123 | VR-88888 |
+| Kullanıcı | kerem@vireon.com | kerem123 | VR-77777 |
+
+Demo hesaplar her uygulama açılışında `Program.cs` içindeki seed ile senkronize edilir. Yeni kayıtlar ayrı kullanıcı olarak eklenir.
 
 ### Neon AI (opsiyonel)
 
@@ -47,7 +59,13 @@ copy appsettings.Development.json.example appsettings.Development.json
 
 ### Paylaşımlı veritabanı (ekip)
 
-Veri değişikliğinden sonra:
+`Database/vireon_local.db` repoda tutulur. `appsettings.json` → `SharedDatabase`:
+
+- `PullOnStartup: true` — açılışta GitHub'dan çeker
+- `AutoGitSync: true` — DB değişince ~8 sn sonra push dener
+- `GitBranch: Cavit-login` — senkron branch
+
+Manuel yedek:
 
 ```powershell
 npm run sync-db
@@ -64,17 +82,26 @@ Vireon/
 ├── Vireon.DtoLayer/             # API DTO'ları
 ├── Vireon.BusinessLayer/        # TransactionManager, Fraud, Neon AI
 ├── Vireon.PresentationLayer/    # Web API + wwwroot (UI)
+│   └── Services/                # SharedDatabaseGitSync
 ├── Database/vireon_local.db     # Paylaşımlı SQLite
-├── scripts/                     # sync-database, ikon scriptleri
-├── DEMO.md
-└── DATABASE_DOCUMENTATION.md
+└── scripts/                     # sync-database, ikon scriptleri
 ```
 
-Katmanlı mimari: Sunum → İş → Veri → Entity. Ayrı microservice yok.
+Katmanlı mimari: Sunum → İş → Veri → Entity.
+
+## API özeti
+
+| Alan | Endpoint |
+|------|----------|
+| Kayıt / giriş | `POST /api/users/register`, `POST /api/users/login` |
+| Şifre sıfırlama | `POST /api/users/forgot-password` |
+| Hesap silme | `POST /api/users/{id}/delete-account` |
+| Transfer | `POST /api/transfers` |
+| İşlemler | `GET /api/transactions` |
 
 ## Teknolojiler
 
-ASP.NET Core 8 · C# · EF Core · SQLite · FluentValidation · AutoMapper · Chart.js · PWA · Electron (opsiyonel)
+ASP.NET Core 8 · C# · EF Core · SQLite · BCrypt · FluentValidation · AutoMapper · Chart.js · PWA · Serilog
 
 ## Ekip
 
@@ -86,12 +113,11 @@ ASP.NET Core 8 · C# · EF Core · SQLite · FluentValidation · AutoMapper · C
 
 ## Notlar
 
+- Giriş şifreleri BCrypt hash ile saklanır; geliştirme için `PlainPassword` sütunu okunabilir şifre tutar.
+- Admin demo hesabı (`cavit@vireon.com`) silinemez.
 - Otomatik test projesi yok (final kapsamı).
-- Şema, seed ve tablo detayları → [DATABASE_DOCUMENTATION.md](DATABASE_DOCUMENTATION.md)
-- Electron: `dotnet run` sonrası kök dizinden `npm start` (sunum için tarayıcı yeterli)
+- Electron: kök dizinden `npm start` (sunum için tarayıcı yeterli)
 
 ## Lisans
 
 MIT — eğitim amaçlı final projesi (2026).
-
-Proje: [github.com/Cavitbatusoylu/Vireon](https://github.com/Cavitbatusoylu/Vireon)
