@@ -7,6 +7,7 @@ using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
 using Vireon.EntityLayer.Concrete;
 using Vireon.PresentationLayer.Middleware;
+using Vireon.PresentationLayer.Services;
 
 internal class Program
 {
@@ -83,8 +84,16 @@ internal class Program
 
         builder.Services.AddSingleton<Vireon.BusinessLayer.Concrete.FraudModelService>();
 
+        builder.Services.Configure<SharedDatabaseGitSyncOptions>(builder.Configuration.GetSection("SharedDatabase"));
+        builder.Services.AddSingleton<SharedDatabaseGitSync>();
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<SharedDatabaseGitSync>());
+
         var app = builder.Build();
         var isDevelopment = app.Environment.IsDevelopment();
+        var dbGitSync = app.Services.GetRequiredService<SharedDatabaseGitSync>();
+
+        // Önce GitHub'daki güncel DB'yi çek (ekip senkronu)
+        dbGitSync.PullOnStartupIfEnabled();
 
         // ============================================================
         // OTOMATIK DATABASE MIGRATION VE SEED DATA
@@ -184,18 +193,19 @@ internal class Program
                     logger.LogInformation("🔐 {Count} kullanıcının şifresi hash'leniyor...", usersWithPlainPassword.Count);
                     foreach (var user in usersWithPlainPassword)
                     {
-                        user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-                        logger.LogInformation("  → {Email} şifresi hash'lendi", user.Email);
+                        if (string.IsNullOrEmpty(user.PlainPassword))
+                            user.PlainPassword = user.Password;
+                        user.Password = BCrypt.Net.BCrypt.HashPassword(user.PlainPassword);
+                        logger.LogInformation("  → {Email} şifresi hash'lendi (PlainPassword korundu)", user.Email);
                     }
                     context.SaveChanges();
                     logger.LogInformation("✅ Tüm şifreler güvenli hale getirildi!");
                 }
 
                 // ============================================================
-                // ADMIN HESABI ROL ATAMASI
-                // admin@vireon.com hesabının rolünü otomatik "Admin" yap
+                // ADMIN ROLÜ — cavit@vireon.com (EnsureDemoAccounts ile de güncellenir)
                 // ============================================================
-                var adminUser = context.Users.FirstOrDefault(u => u.Email == "admin@vireon.com");
+                var adminUser = context.Users.FirstOrDefault(u => u.Email == "cavit@vireon.com");
                 if (adminUser != null && adminUser.Role != "Admin")
                 {
                     adminUser.Role = "Admin";
@@ -205,77 +215,18 @@ internal class Program
 
                 logger.LogInformation("✅ Database hazır!");
 
-                // ============================================================
-                // SEED DATA — Cavit (Ana Admin) ve Enes
-                var hasCavit = context.Users.Any(u => u.Email == "cavit@vireon.com");
-                if (!hasCavit)
+                var configuration = services.GetRequiredService<IConfiguration>();
+                if (configuration.GetValue<bool>("SharedDatabase:ResetDemoIdsOnStartup"))
                 {
-                    logger.LogInformation("🧹 Eski test verileri ve ilişkili tüm kayıtlar temizleniyor...");
-                    context.Database.ExecuteSqlRaw("DELETE FROM LedgerEntries;");
-                    context.Database.ExecuteSqlRaw("DELETE FROM FraudLogs;");
-                    context.Database.ExecuteSqlRaw("DELETE FROM Transactions;");
-                    context.Database.ExecuteSqlRaw("DELETE FROM DailyLimits;");
-                    context.Database.ExecuteSqlRaw("DELETE FROM Accounts;");
-                    context.Database.ExecuteSqlRaw("DELETE FROM Users;");
-
-                    logger.LogInformation("🌱 Asıl Admin (Cavit) ve Enes ekleniyor...");
-
-                    var seedUsers = new[]
-                    {
-                        new { Name = "Cavit Batu", Surname = "Soylu", Email = "cavit@vireon.com", Password = "admin123", AccountNo = "VR-99999", Balance = 1000000m, Role = "Admin" },
-                        new { Name = "Enes", Surname = "Kaya", Email = "enes@vireon.com", Password = "enes123", AccountNo = "VR-88888", Balance = 50000m, Role = "User" }
-                    };
-
-                    foreach (var s in seedUsers)
-                    {
-                        var user = new User
-                        {
-                            Name = s.Name,
-                            Surname = s.Surname,
-                            Email = s.Email,
-                            Password = BCrypt.Net.BCrypt.HashPassword(s.Password),
-                            AccountNumber = s.AccountNo,
-                            CreatedAt = DateTime.Now,
-                            Role = s.Role
-                        };
-                        context.Users.Add(user);
-                        context.SaveChanges();
-
-                        var account = new Account
-                        {
-                            UserId = user.Id,
-                            AccountNumber = s.AccountNo,
-                            Balance = s.Balance,
-                            Currency = "TRY"
-                        };
-                        context.Accounts.Add(account);
-                        context.SaveChanges();
-
-                        context.DailyLimits.Add(new DailyLimit
-                        {
-                            UserId = user.Id,
-                            MaxDailyLimit = 100000m,
-                            UsedLimit = 0m,
-                            LastResetDate = DateTime.Now.Date
-                        });
-                        context.SaveChanges();
-
-                        context.LedgerEntries.Add(new LedgerEntry
-                        {
-                            AccountId = account.Id,
-                            Amount = s.Balance,
-                            PreviousBalance = 0m,
-                            NewBalance = s.Balance,
-                            Description = "Hesap oluşturma - Seed data",
-                            CreatedAt = DateTime.Now
-                        });
-                        context.SaveChanges();
-
-                        logger.LogInformation("  → {Name} ({Email}) → {Account} ({Balance:N2} TRY)", s.Name, s.Email, s.AccountNo, s.Balance);
-                    }
-
-                    logger.LogInformation("✅ Sistem sadece Ana Admin (Cavit) ve Enes ile hazırlandı!");
+                    ResetDemoDatabaseToSequentialIds(context, logger);
                 }
+
+                // ============================================================
+                // DEMO HESAPLARI — Her uygulama açılışında senkronize edilir
+                // (şifre, rol, hesap no, limit; mevcut işlem geçmişi silinmez)
+                // ============================================================
+                EnsureDemoAccounts(context, logger);
+                dbGitSync.SchedulePush();
 
                 // ============================================================
                 // TEST KULLANICISINI KALDIR (testuser@example.com)
@@ -296,54 +247,6 @@ internal class Program
                     context.Users.Remove(testUser);
                     context.SaveChanges();
                     logger.LogInformation("🗑️ Test kullanıcısı silindi: testuser@example.com");
-                }
-
-                // ============================================================
-                // KEREM DEMO HESABI (yoksa oluştur)
-                // ============================================================
-                if (!context.Users.Any(u => u.Email == "kerem@vireon.com"))
-                {
-                    var keremUser = new User
-                    {
-                        Name = "Kerem",
-                        Surname = "Arslan",
-                        Email = "kerem@vireon.com",
-                        Password = BCrypt.Net.BCrypt.HashPassword("kerem123"),
-                        AccountNumber = "VR-77777",
-                        CreatedAt = DateTime.Now,
-                        Role = "User"
-                    };
-                    context.Users.Add(keremUser);
-                    context.SaveChanges();
-
-                    var keremAccount = new Account
-                    {
-                        UserId = keremUser.Id,
-                        AccountNumber = "VR-77777",
-                        Balance = 50000m,
-                        Currency = "TRY"
-                    };
-                    context.Accounts.Add(keremAccount);
-                    context.SaveChanges();
-
-                    context.DailyLimits.Add(new DailyLimit
-                    {
-                        UserId = keremUser.Id,
-                        MaxDailyLimit = 100000m,
-                        UsedLimit = 0m,
-                        LastResetDate = DateTime.Now.Date
-                    });
-                    context.LedgerEntries.Add(new LedgerEntry
-                    {
-                        AccountId = keremAccount.Id,
-                        Amount = 50000m,
-                        PreviousBalance = 0m,
-                        NewBalance = 50000m,
-                        Description = "Hesap oluşturma - Seed data",
-                        CreatedAt = DateTime.Now
-                    });
-                    context.SaveChanges();
-                    logger.LogInformation("🌱 Kerem hesabı eklendi: kerem@vireon.com (VR-77777)");
                 }
             }
             catch (Exception ex)
@@ -465,5 +368,167 @@ internal class Program
         var fallbackDir = Path.GetDirectoryName(fallback);
         if (!string.IsNullOrEmpty(fallbackDir)) Directory.CreateDirectory(fallbackDir);
         return fallback;
+    }
+
+    private sealed record DemoAccountSpec(
+        string Name,
+        string Surname,
+        string Email,
+        string Password,
+        string AccountNo,
+        decimal InitialBalance,
+        decimal MaxDailyLimit,
+        string Role);
+
+    private static readonly DemoAccountSpec[] DemoAccounts =
+    {
+        new("Cavit Batu", "Soylu", "cavit@vireon.com", "admin123", "VR-99999", 1_000_000m, 100_000m, "Admin"),
+        new("Enes", "Kaya", "enes@vireon.com", "enes123", "VR-88888", 50_000m, 100_000m, "User"),
+        new("Kerem", "Arslan", "kerem@vireon.com", "kerem123", "VR-77777", 50_000m, 100_000m, "User"),
+    };
+
+    private static void ResetDemoDatabaseToSequentialIds(VireonContext context, Microsoft.Extensions.Logging.ILogger logger)
+    {
+        logger.LogWarning("🧹 Veritabanı sıfırlanıyor — demo hesaplar ID 1, 2, 3... olacak; eski kayıtlar siliniyor.");
+
+        context.Database.ExecuteSqlRaw("DELETE FROM LedgerEntries;");
+        context.Database.ExecuteSqlRaw("DELETE FROM FraudLogs;");
+        context.Database.ExecuteSqlRaw("DELETE FROM Transactions;");
+        context.Database.ExecuteSqlRaw("DELETE FROM DailyLimits;");
+        context.Database.ExecuteSqlRaw("DELETE FROM Accounts;");
+        context.Database.ExecuteSqlRaw("DELETE FROM Users;");
+        context.Database.ExecuteSqlRaw(
+            "DELETE FROM sqlite_sequence WHERE name IN ('Users','Accounts','Transactions','LedgerEntries','FraudLogs','DailyLimits');");
+
+        logger.LogInformation("✅ Eski kullanıcı/işlem kayıtları temizlendi; demo hesaplar yeniden oluşturulacak.");
+    }
+
+    /// <summary>
+    /// Demo hesaplarını her uygulama başlangıcında oluşturur veya günceller.
+    /// Şifre, rol ve hesap numarası sabit demo spec ile uyumlu kalır; işlem geçmişi korunur.
+    /// </summary>
+    private static void EnsureDemoAccounts(VireonContext context, Microsoft.Extensions.Logging.ILogger logger)
+    {
+        logger.LogInformation("🔄 Demo hesapları senkronize ediliyor...");
+
+        foreach (var spec in DemoAccounts)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Email == spec.Email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Name = spec.Name,
+                    Surname = spec.Surname,
+                    Email = spec.Email,
+                    Password = BCrypt.Net.BCrypt.HashPassword(spec.Password),
+                    PlainPassword = spec.Password,
+                    AccountNumber = spec.AccountNo,
+                    CreatedAt = DateTime.Now,
+                    Role = spec.Role
+                };
+                context.Users.Add(user);
+                context.SaveChanges();
+
+                var account = new Account
+                {
+                    UserId = user.Id,
+                    AccountNumber = spec.AccountNo,
+                    Balance = spec.InitialBalance,
+                    Currency = "TRY"
+                };
+                context.Accounts.Add(account);
+                context.SaveChanges();
+
+                context.DailyLimits.Add(new DailyLimit
+                {
+                    UserId = user.Id,
+                    MaxDailyLimit = spec.MaxDailyLimit,
+                    UsedLimit = 0m,
+                    LastResetDate = DateTime.Now.Date
+                });
+
+                context.LedgerEntries.Add(new LedgerEntry
+                {
+                    AccountId = account.Id,
+                    Amount = spec.InitialBalance,
+                    PreviousBalance = 0m,
+                    NewBalance = spec.InitialBalance,
+                    Description = "Hesap oluşturma - Demo seed",
+                    CreatedAt = DateTime.Now
+                });
+
+                context.SaveChanges();
+                logger.LogInformation("  ➕ {Email} → {AccountNo} ({Balance:N2} TRY)", spec.Email, spec.AccountNo, spec.InitialBalance);
+                continue;
+            }
+
+            user.Name = spec.Name;
+            user.Surname = spec.Surname;
+            user.Role = spec.Role;
+            user.AccountNumber = spec.AccountNo;
+            EnsureDemoPassword(user, spec.Password);
+
+            var existingAccount = context.Accounts.FirstOrDefault(a => a.UserId == user.Id);
+            if (existingAccount == null)
+            {
+                existingAccount = new Account
+                {
+                    UserId = user.Id,
+                    AccountNumber = spec.AccountNo,
+                    Balance = spec.InitialBalance,
+                    Currency = "TRY"
+                };
+                context.Accounts.Add(existingAccount);
+                context.SaveChanges();
+
+                context.LedgerEntries.Add(new LedgerEntry
+                {
+                    AccountId = existingAccount.Id,
+                    Amount = spec.InitialBalance,
+                    PreviousBalance = 0m,
+                    NewBalance = spec.InitialBalance,
+                    Description = "Hesap oluşturma - Demo seed",
+                    CreatedAt = DateTime.Now
+                });
+            }
+            else
+            {
+                existingAccount.AccountNumber = spec.AccountNo;
+            }
+
+            var limit = context.DailyLimits.FirstOrDefault(d => d.UserId == user.Id);
+            if (limit == null)
+            {
+                context.DailyLimits.Add(new DailyLimit
+                {
+                    UserId = user.Id,
+                    MaxDailyLimit = spec.MaxDailyLimit,
+                    UsedLimit = 0m,
+                    LastResetDate = DateTime.Now.Date
+                });
+            }
+            else
+            {
+                limit.MaxDailyLimit = spec.MaxDailyLimit;
+            }
+
+            logger.LogInformation("  ✓ {Email} güncellendi ({AccountNo})", spec.Email, spec.AccountNo);
+        }
+
+        context.SaveChanges();
+        logger.LogInformation("✅ Demo hesapları hazır.");
+    }
+
+    private static void EnsureDemoPassword(User user, string plainPassword)
+    {
+        if (string.IsNullOrEmpty(user.Password) ||
+            !user.Password.StartsWith("$2", StringComparison.Ordinal) ||
+            !BCrypt.Net.BCrypt.Verify(plainPassword, user.Password))
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+        }
+
+        user.PlainPassword = plainPassword;
     }
 }

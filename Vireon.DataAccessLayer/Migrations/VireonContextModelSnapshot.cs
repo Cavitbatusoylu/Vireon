@@ -206,6 +206,9 @@ namespace Vireon.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PlainPassword")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("TEXT");

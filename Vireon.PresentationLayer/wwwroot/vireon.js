@@ -182,6 +182,7 @@ function initFormValidation() {
     const loginEmail = getEl('loginEmail');
     const loginPassword = getEl('loginPassword');
     const regName = getEl('registerName');
+    const regSurname = getEl('registerSurname');
     const regEmail = getEl('registerEmail');
     const regPassword = getEl('registerPassword');
     const regConfirm = getEl('registerConfirmPassword');
@@ -221,7 +222,7 @@ function initFormValidation() {
         });
         regConfirm.addEventListener('input', () => clearFieldError(regConfirm));
     }
-    [regName, regEmail, regPassword, regConfirm].forEach(el => {
+    [regName, regSurname, regEmail, regPassword, regConfirm].forEach(el => {
         if (el) el.addEventListener('input', () => clearFieldError(el));
     });
 }
@@ -357,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
        initInteractions();
        initPasswordToggles();
        initFormValidation();
+       initDeleteAccountGuard();
        restoreLoginFormFromRemember();
        loadAiChatHistoryFromStorage();
        renderAiHistoryPanel();
@@ -413,6 +415,8 @@ function scrollToSection(id, options = {}) {
     if (id === 'section-introduction') {
         applyIntroPanelState(options.introPanel || 'explore', { scrollPanel: false });
     }
+
+    syncNavbarContext();
 }
 
 function applyIntroPanelState(mode, options = {}) {
@@ -754,10 +758,47 @@ function openLoginModalFromForgot(e) {
 function handleForgotPassword(e) {
     e.preventDefault();
     const lang = window.currentLang || 'en';
-    showToast(lang === 'tr'
-       ? 'Şifre sıfırlama bu sürümde mevcut değildir.'
-       : 'Password reset is not available in this version.', 'info');
-    closeForgotPasswordModal();
+    const email = getEl('forgotPasswordEmail')?.value?.trim();
+    const accountNumber = getEl('forgotPasswordAccountNo')?.value?.trim()?.toUpperCase();
+    const newPassword = getEl('forgotPasswordNew')?.value;
+    const confirmPassword = getEl('forgotPasswordConfirm')?.value;
+    submitForgotPassword({ email, accountNumber, newPassword, confirmPassword, lang, onSuccess: () => {
+        closeForgotPasswordModal();
+        openLoginModal();
+    }});
+}
+
+async function submitForgotPassword({ email, accountNumber, newPassword, confirmPassword, lang, onSuccess }) {
+    if (!email || !accountNumber || !newPassword) {
+        showToast(lang === 'tr' ? 'Tüm alanları doldurun.' : 'Fill in all fields.', 'warning');
+        return;
+    }
+    if (newPassword.length < 6) {
+        showToast(lang === 'tr' ? 'Şifre en az 6 karakter olmalı.' : 'Password must be at least 6 characters.', 'warning');
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        showToast(lang === 'tr' ? 'Yeni şifreler eşleşmiyor.' : 'New passwords do not match.', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/users/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, accountNumber, newPassword, confirmPassword })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+            showToast(data.message || (lang === 'tr' ? 'Şifre güncellendi.' : 'Password updated.'), 'success');
+            if (typeof onSuccess === 'function') onSuccess();
+        } else {
+            showToast(data.message || (lang === 'tr' ? 'İşlem başarısız.' : 'Operation failed.'), 'error');
+        }
+    } catch (err) {
+        console.error('Forgot password error:', err);
+        showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
+    }
 }
 
 // ========== AUTHENTICATION ==========
@@ -842,12 +883,13 @@ async function handleRegister(event) {
     event.preventDefault();
     const lang = window.currentLang || 'en';
     
-    const fullName = getEl('registerName')?.value?.trim();
+    const name = getEl('registerName')?.value?.trim();
+    const surname = getEl('registerSurname')?.value?.trim();
     const email = getEl('registerEmail')?.value?.trim();
     const password = getEl('registerPassword')?.value;
     const confirmPassword = getEl('registerConfirmPassword')?.value;
     
-    if (!fullName || !email || !password || !confirmPassword) {
+    if (!name || !surname || !email || !password || !confirmPassword) {
         showToast(lang === 'tr' ? 'Lütfen tüm alanları doldurun.' : 'Please fill all fields.', 'warning');
         return;
     }
@@ -861,10 +903,6 @@ async function handleRegister(event) {
         showToast(lang === 'tr' ? 'Şifre en az 6 karakter olmalı.' : 'Password must be at least 6 characters.', 'warning');
         return;
     }
-    
-    const nameParts = fullName.split(/\s+/).filter(Boolean);
-    const name = nameParts[0] || 'User';
-    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : name;
     
     const btn = event.target.querySelector('button[type="submit"]');
     const originalText = btn ? btn.innerHTML : '';
@@ -944,8 +982,12 @@ async function handleRegister(event) {
 function syncNavbarContext() {
     const onDashboard = document.body.classList.contains('dashboard-active');
     const backBtn = getEl('backToHomeBtn');
+    const dashBtn = getEl('dashboardNavBtn');
     if (backBtn) {
         backBtn.style.display = (currentUser && onDashboard) ? 'inline-flex' : 'none';
+    }
+    if (dashBtn) {
+        dashBtn.style.display = (currentUser && !onDashboard) ? 'inline-flex' : 'none';
     }
     document.body.classList.toggle('nav-landing-mode', !!(currentUser && !onDashboard));
 }
@@ -1120,6 +1162,25 @@ function switchDashSection(targetId) {
    if (targetId === 'dash-history' && currentUser) fetchDashboardData();
    if (targetId === 'dash-ai-coach') renderAiHistoryPanel();
    if (targetId === 'dash-limits' && currentUser) fetchDashboardData();
+   if (targetId === 'dash-profile' && currentUser) populateProfileSettingsFields();
+}
+
+function populateProfileSettingsFields() {
+   if (!currentUser) return;
+   const pn = getEl('profileName');
+   const ps = getEl('profileSurname');
+   const pe = getEl('profileEmail');
+   if (pn) pn.value = currentUser.name || '';
+   if (ps) ps.value = currentUser.surname || '';
+   if (pe) pe.value = currentUser.email || '';
+
+   const resetEmail = getEl('profileResetEmail');
+   const resetAcc = getEl('profileResetAccountNo');
+   if (resetEmail) resetEmail.value = currentUser.email || '';
+   if (resetAcc) resetAcc.value = currentUser.accountNumber || getEl('dashAccountNo')?.textContent?.trim() || '';
+
+   const deleteEmailHint = getEl('deleteAccountEmailConfirm');
+   if (deleteEmailHint && !deleteEmailHint.value) deleteEmailHint.placeholder = currentUser.email || '';
 }
 
 // ========== DASHBOARD DATA ==========
@@ -1188,6 +1249,7 @@ async function fetchDashboardData() {
         if (pn) pn.value = currentUser.name || '';
         if (ps) ps.value = currentUser.surname || '';
         if (pe) pe.value = currentUser.email || '';
+        populateProfileSettingsFields();
 
     } catch (err) { 
         console.error('Dashboard Sync Error:', err);
@@ -1387,7 +1449,7 @@ function renderAiHistoryPanel() {
          const role = entry.role === 'user'
             ? (lang === 'tr' ? 'Siz' : 'You')
             : 'Neon';
-         const preview = escapeHtml(String(entry.content || '').slice(0, 80));
+         const preview = escapeHtml(String(entry.content || ''));
          return `<li><span class="ai-history-role">${role}</span><span class="ai-history-text">${preview}</span></li>`;
       }).join('')
       : `<li class="ai-history-empty">${empty}</li>`;
@@ -1683,6 +1745,86 @@ async function handlePasswordChange() {
       }
    } catch (e) {
       showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
+   }
+}
+
+async function handleProfileForgotPassword() {
+   const lang = window.currentLang || 'en';
+   submitForgotPassword({
+      email: getEl('profileResetEmail')?.value?.trim(),
+      accountNumber: getEl('profileResetAccountNo')?.value?.trim()?.toUpperCase(),
+      newPassword: getEl('profileResetNewPwd')?.value,
+      confirmPassword: getEl('profileResetConfirmPwd')?.value,
+      lang,
+      onSuccess: () => {
+         const fields = ['profileResetNewPwd', 'profileResetConfirmPwd'];
+         fields.forEach(id => { const el = getEl(id); if (el) el.value = ''; });
+      }
+   });
+}
+
+function initDeleteAccountGuard() {
+   const ack = getEl('deleteAccountAck');
+   const btn = getEl('deleteAccountBtn');
+   if (!ack || !btn) return;
+   ack.addEventListener('change', () => {
+      btn.disabled = !ack.checked;
+   });
+}
+
+async function handleDeleteAccount() {
+   if (!currentUser) return;
+   const lang = window.currentLang || 'en';
+   const password = getEl('deleteAccountPassword')?.value;
+   const confirmEmail = getEl('deleteAccountEmailConfirm')?.value?.trim();
+   const confirmPhrase = getEl('deleteAccountPhrase')?.value?.trim();
+   const ack = getEl('deleteAccountAck')?.checked;
+
+   if (!password || !confirmEmail || !confirmPhrase) {
+      showToast(lang === 'tr' ? 'Tüm alanları doldurun.' : 'Fill in all fields.', 'warning');
+      return;
+   }
+   if (!ack) {
+      showToast(lang === 'tr' ? 'Onay kutusunu işaretleyin.' : 'Check the confirmation box.', 'warning');
+      return;
+   }
+
+   const expectedTr = 'HESABIMI SIL';
+   const expectedEn = 'DELETE MY ACCOUNT';
+   const phraseUpper = confirmPhrase.toUpperCase();
+   if (phraseUpper !== expectedTr && phraseUpper !== expectedEn) {
+      showToast(lang === 'tr' ? 'Onay metni hatalı. HESABIMI SIL yazın.' : 'Wrong phrase. Type DELETE MY ACCOUNT.', 'error');
+      return;
+   }
+
+   const msgTr = `"${currentUser.email}" hesabını kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`;
+   const msgEn = `Permanently delete "${currentUser.email}"? This cannot be undone.`;
+   if (!window.confirm(lang === 'tr' ? msgTr : msgEn)) return;
+
+   const btn = getEl('deleteAccountBtn');
+   if (btn) btn.disabled = true;
+
+   try {
+      const res = await fetch(`/api/users/${currentUser.id}/delete-account`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ password, confirmEmail, confirmPhrase })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+         showToast(data.message || (lang === 'tr' ? 'Hesap silindi.' : 'Account deleted.'), 'success');
+         currentUser = null;
+         clearSession();
+         updateNavbarForLoggedOutUser();
+         backToMenu();
+      } else {
+         showToast(data.message || (lang === 'tr' ? 'Silme başarısız.' : 'Delete failed.'), 'error');
+         if (btn && ack) btn.disabled = !ack.checked;
+      }
+   } catch (e) {
+      console.error('Delete account error:', e);
+      showToast(lang === 'tr' ? 'Sunucu hatası.' : 'Server error.', 'error');
+      if (btn && ack) btn.disabled = !ack.checked;
    }
 }
 // ========== TRANSFERS ==========
