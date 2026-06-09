@@ -79,8 +79,8 @@ internal class Program
         // Sisteme diyoruz ki: Vezne senden ITransactionService isterse, ona TransactionManager'ı ver.
         builder.Services.AddScoped<ITransactionService, TransactionManager>();                                                               //Enes
 
-        builder.Services.Configure<NeonAIOptions>(builder.Configuration.GetSection("NeonAI"));
-        builder.Services.AddHttpClient<NeonAIService>();
+        builder.Services.Configure<NeonAIOptions>(builder.Configuration.GetSection("NeonAI"));                                              //Cavit
+        builder.Services.AddHttpClient<NeonAIService>();                                                                                     //Cavit
 
         builder.Services.AddSingleton<Vireon.BusinessLayer.Concrete.FraudModelService>();
 
@@ -226,6 +226,7 @@ internal class Program
                 // (şifre, rol, hesap no, limit; mevcut işlem geçmişi silinmez)
                 // ============================================================
                 EnsureDemoAccounts(context, logger);
+                ReportMissingPlainPasswords(context, logger);
                 dbGitSync.SchedulePush();
 
                 // ============================================================
@@ -530,5 +531,21 @@ internal class Program
         }
 
         user.PlainPassword = plainPassword;
+    }
+
+    /// <summary>PlainPassword boş kalan (eski) hesapları loglar; bir kez giriş yapılınca dolar.</summary>
+    private static void ReportMissingPlainPasswords(VireonContext context, Microsoft.Extensions.Logging.ILogger logger)
+    {
+        var missing = context.Users
+            .Where(u => u.PlainPassword == null || u.PlainPassword == "")
+            .Select(u => u.Email)
+            .ToList();
+
+        if (missing.Count == 0) return;
+
+        logger.LogInformation(
+            "ℹ️ PlainPassword boş {Count} hesap — bir kez giriş veya şifre sıfırlama sonrası DB'ye yazılır: {Emails}",
+            missing.Count,
+            string.Join(", ", missing));
     }
 }
