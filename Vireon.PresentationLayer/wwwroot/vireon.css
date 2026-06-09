@@ -3230,8 +3230,8 @@ body.dashboard-active .container {
 	bottom: 100px;
 	right: 28px;
 	z-index: 9999;
-	width: min(380px, calc(100vw - 32px));
-	max-height: min(520px, calc(100vh - 120px));
+	width: min(440px, calc(100vw - 32px));
+	max-height: min(620px, calc(100vh - 120px));
 	display: flex;
 	flex-direction: column;
 	background: var(--dark-2);
@@ -3553,8 +3553,8 @@ body.dashboard-active .container {
 	flex: 1;
 	overflow-y: auto;
 	padding: 16px;
-	min-height: 220px;
-	max-height: 340px;
+	min-height: 260px;
+	max-height: 400px;
 	scrollbar-width: thin;
 	scrollbar-color: rgba(0, 180, 216, 0.35) transparent;
 }
@@ -3683,7 +3683,7 @@ body.dashboard-active .container {
 		left: 16px;
 		width: auto;
 		bottom: 88px;
-		max-height: min(480px, calc(100vh - 100px));
+		max-height: min(540px, calc(100vh - 100px));
 	}
 }
 /* Desktop Showcase Styles */
@@ -5326,7 +5326,7 @@ body.admin-mode #adminMenuItem {
     border-top: 1px solid var(--glass-border);
     background: rgba(0, 0, 0, 0.12);
     padding: 10px 14px 12px;
-    max-height: 240px;
+    max-height: 280px;
     overflow: hidden;
 }
 
@@ -5357,7 +5357,7 @@ body.admin-mode #adminMenuItem {
     list-style: none;
     margin: 0;
     padding: 0;
-    max-height: 190px;
+    max-height: 220px;
     overflow-y: auto;
 }
 
@@ -5394,7 +5394,7 @@ body.admin-mode #adminMenuItem {
 .ai-chat-window {
     display: flex;
     flex-direction: column;
-    max-height: min(560px, calc(100vh - 120px));
+    max-height: min(620px, calc(100vh - 120px));
 }
 
 .ai-chat-window .ai-chat-body { flex: 1; min-height: 0; max-height: none; }
