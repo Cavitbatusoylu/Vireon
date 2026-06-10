@@ -4,8 +4,8 @@ const fs = require('fs');
 
 let mainWindow;
 
-const ROOT = __dirname;
-const ELECTRON_ICON_DIR = path.join(ROOT, 'electron');
+const ROOT = path.resolve(__dirname, '..', '..');
+const ELECTRON_ICON_DIR = path.join(ROOT, 'tools', 'electron');
 const WWW_IMAGES = path.join(ROOT, 'Vireon.PresentationLayer', 'wwwroot', 'images');
 
 const ICON_CANDIDATES = [

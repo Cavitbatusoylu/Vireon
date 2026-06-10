@@ -2,9 +2,9 @@
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
-$root = Split-Path -Parent $PSScriptRoot
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $srcPath = Join-Path $root 'Vireon.PresentationLayer\wwwroot\images\vireon-logo-transparent-new.png'
-$outDir = Join-Path $root 'electron'
+$outDir = Join-Path $root 'tools\electron'
 $pngOut = Join-Path $outDir 'icon.png'
 $icoOut = Join-Path $outDir 'icon.ico'
 

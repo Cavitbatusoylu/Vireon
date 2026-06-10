@@ -23,8 +23,8 @@ Vireon; para transferi, hesap yönetimi, günlük limit, fraud loglama ve immuta
 | Katman | Proje | Sorumluluk |
 |--------|-------|------------|
 | **Entity** | `Vireon.EntityLayer` | `User`, `Account`, `Transaction`, `LedgerEntry`, `DailyLimit`, `FraudLogs` |
-| **Data Access** | `Vireon.DataAccessLayer` | `VireonContext`, EF Core migration, repository erişimi |
-| **Business** | `Vireon.BusinessLayer` | `TransactionManager` (ACID, kur dönüşümü), `FraudModelService`, `NeonAIService` |
+| **Data Access** | `Vireon.DataAccessLayer` | `VireonContext`, EF Core migration, `DatabaseSeeder`, `DatabaseSchemaAlignment` |
+| **Business** | `Vireon.BusinessLayer` | `TransactionManager`, `UserService`, `FraudModelService`, `NeonAIService` |
 | **DTO** | `Vireon.DtoLayer` | API istek/yanıt modelleri (`LoginDto`, `TransferRequestDto`, …) |
 | **Presentation** | `Vireon.PresentationLayer` | MVC Controller + View + ViewModel, REST API Controller, static assets |
 
@@ -97,7 +97,7 @@ flowchart TB
 
 ## 5. Ekran Görüntüleri
 
-> Uygulamayı çalıştırıp (`dotnet run`) aşağıdaki sayfalardan ekran görüntüsü alın. Örnek diyagramlar `docs/screenshots/` altındadır.
+> Uygulamayı çalıştırıp (`dotnet run`) aşağıdaki sayfalardan ekran görüntüsü alın. Örnek diyagramlar `tools/docs/screenshots/` altındadır.
 
 | # | Ekran | Dosya |
 |---|-------|-------|

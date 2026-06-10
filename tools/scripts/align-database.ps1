@@ -1,6 +1,6 @@
 # Entity modelleri ile SQLite tablolarini esitler (C# — migration + dogrulama + veri hizalama)
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $db = Join-Path $root 'Database\vireon_local.db'
 $proj = Join-Path $root 'Vireon.PresentationLayer\Vireon.PresentationLayer.csproj'
 

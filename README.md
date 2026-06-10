@@ -47,7 +47,7 @@ Tarayıcı: **http://localhost:5202**
 | Kullanıcı | enes@vireon.com | enes123 | VR-88888 |
 | Kullanıcı | kerem@vireon.com | kerem123 | VR-77777 |
 
-Demo hesaplar her uygulama açılışında `Program.cs` içindeki seed ile senkronize edilir. Yeni kayıtlar ayrı kullanıcı olarak eklenir.
+Demo hesaplar her uygulama açılışında `DataAccessLayer/Seeding/DatabaseSeeder` ile senkronize edilir. Yeni kayıtlar ayrı kullanıcı olarak eklenir.
 
 ### Neon AI (opsiyonel)
 
@@ -82,20 +82,25 @@ Diğer bilgisayarda: `git pull` → `dotnet run`
 | `/Account/Login` | Giriş |
 | `/Dashboard/Overview` … `/Dashboard/Admin` | Bankacılık modülleri |
 
-Rapor ve sunum akışı: [`docs/PROJE-RAPORU.md`](docs/PROJE-RAPORU.md), [`docs/SUNUM-AKISI.md`](docs/SUNUM-AKISI.md)
+Rapor ve sunum akışı: [`tools/docs/PROJE-RAPORU.md`](tools/docs/PROJE-RAPORU.md), [`tools/docs/SUNUM-AKISI.md`](tools/docs/SUNUM-AKISI.md)
 
 ## Proje yapısı
 
 ```
 Vireon/
 ├── Vireon.EntityLayer/          # Entity modelleri
-├── Vireon.DataAccessLayer/      # EF Core, migrations
+├── Vireon.DataAccessLayer/      # EF Core, migrations, seed
 ├── Vireon.DtoLayer/             # API DTO'ları
 ├── Vireon.BusinessLayer/        # TransactionManager, Fraud, Neon AI
-├── Vireon.PresentationLayer/    # Web API + wwwroot (UI)
-│   └── Services/                # SharedDatabaseGitSync
+├── Vireon.PresentationLayer/    # Web API + MVC + wwwroot
 ├── Database/vireon_local.db     # Paylaşımlı SQLite
-└── scripts/                     # sync-database, ikon scriptleri
+└── tools/                       # Script, dokümantasyon, Electron, log
+    ├── scripts/                 # align-database, sync-db, ikonlar
+    ├── docs/                    # Proje raporu, sunum akışı
+    ├── desktop/                 # Electron main.js
+    ├── electron/                # Masaüstü ikonları
+    ├── docker/                  # Dockerfile
+    └── logs/                    # Uygulama logları (gitignore)
 ```
 
 Katmanlı mimari: Sunum → İş → Veri → Entity.
@@ -134,7 +139,7 @@ ASP.NET Core 8 · C# · EF Core · SQLite · BCrypt · FluentValidation · AutoM
 
 ### Kerem Arslan
 - Entity modeller, `VireonContext`, EF Core migration'lar
-- Demo seed (`Program.cs`), `DailyLimit` şeması, veritabanı bütünlüğü
+- Demo seed (`DatabaseSeeder`), `DailyLimit` şeması, veritabanı bütünlüğü
 
 ## Notlar
 

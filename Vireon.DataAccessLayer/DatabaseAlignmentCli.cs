@@ -1,15 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Vireon.DataAccessLayer;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 
-namespace Vireon.PresentationLayer;
+namespace Vireon.DataAccessLayer;
 
 /// <summary>
 /// Komut satırı: dotnet run -- --align-database
 /// </summary>
-internal static class DatabaseAlignmentCli
+public static class DatabaseAlignmentCli
 {
     public static int Run(string contentRootPath)
     {
@@ -25,9 +24,7 @@ internal static class DatabaseAlignmentCli
         var rawConnection = configuration.GetConnectionString("VireonDB") ?? "Data Source=../Database/vireon_local.db";
         var csb = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(rawConnection);
         if (!string.IsNullOrWhiteSpace(csb.DataSource) && !Path.IsPathRooted(csb.DataSource))
-        {
-            csb.DataSource = Program.ResolveSharedDbPath(contentRootPath, csb.DataSource);
-        }
+            csb.DataSource = SqlitePathResolver.ResolveSharedDbPath(contentRootPath, csb.DataSource);
 
         logger.LogInformation("Hedef veritabanı: {DbPath}", csb.DataSource);
 

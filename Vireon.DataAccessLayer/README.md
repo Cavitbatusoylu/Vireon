@@ -18,18 +18,37 @@ Vireon.DataAccessLayer/Migrations/
 └── MigrationCatalog.cs                 — Migration grupları açıklaması
 ```
 
+## Seed ve yardımcılar
+
+```
+Vireon.DataAccessLayer/
+├── SqlitePathResolver.cs       — Paylaşımlı DB dosya yolu
+├── DatabaseAlignmentCli.cs     — dotnet run -- --align-database
+├── DatabaseSchemaAlignment.cs  — Migration + şema eşitleme
+└── Seeding/DatabaseSeeder.cs   — Demo hesaplar, şifre hash, test kullanıcı temizliği
+```
+
+## Migration vs Alignment
+
+| Mekanizma | Amaç |
+|-----------|------|
+| **EF Core Migration** (`Migrations/`) | Resmi şema evrimi — hocanın görmek istediği yapı |
+| **DatabaseSchemaAlignment** | `Migrate()` sonrası demo/ekip senkronu için güvenlik ağı (eksik sütun, ilişki hizası) |
+| **DatabaseSeeder** | Demo hesaplar, şifre hash, başlangıç verisi |
+
+Migration kalıcı ve versiyonlanmış kayıttır; alignment yalnızca çalışma zamanında tutarlılığı garanti eder.
+
 ## Çalıştırma
 
-Uygulama açılışında `DatabaseSchemaAlignment.EnsureAligned()` çalışır:
+`PresentationLayer/Program.cs` yalnızca şunları çağırır:
 
-1. `Database.Migrate()` — 4 migration grubunu uygular
-2. Eksik sütunları tamamlar (`Role`, `PlainPassword`, `RowVersion`)
-3. `Users` ↔ `Accounts` ↔ `DailyLimits` veri bütünlüğünü hizalar
+1. `DatabaseSchemaAlignment.EnsureAligned()` — migrate + şema
+2. `DatabaseSeeder.Seed()` — demo kullanıcılar ve veri senkronu
 
 Manuel eşitleme (ekip / CI, yalnızca C#):
 
 ```powershell
-.\scripts\align-database.ps1
+.\tools\scripts\align-database.ps1
 ```
 
 veya:

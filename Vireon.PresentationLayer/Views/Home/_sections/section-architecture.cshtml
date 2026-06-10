@@ -30,7 +30,7 @@
                                 <div class="layer-icon">⚙️</div>
                                 <div class="layer-info">
                                     <h4 data-tr="İş Katmanı" data-en="Business Layer">Business Layer</h4>
-                                    <p data-tr="TransactionManager, FraudModelService, NeonAIService" data-en="TransactionManager, FraudModelService, NeonAIService">TransactionManager, FraudModelService, NeonAIService</p>
+                                    <p data-tr="TransactionManager, UserService, FraudModelService, NeonAIService" data-en="TransactionManager, UserService, FraudModelService, NeonAIService">TransactionManager, UserService, FraudModelService, NeonAIService</p>
                                 </div>
                             </div>
                             <div class="arch-arrow">↓</div>
@@ -38,7 +38,7 @@
                                 <div class="layer-icon">💾</div>
                                 <div class="layer-info">
                                     <h4 data-tr="Veri Erişim Katmanı" data-en="Data Access Layer">Data Access Layer</h4>
-                                    <p data-tr="Entity Framework Core + VireonContext" data-en="Entity Framework Core + VireonContext">Entity Framework Core + VireonContext</p>
+                                    <p data-tr="EF Core, Migrations, DatabaseSeeder, SchemaAlignment" data-en="EF Core, Migrations, DatabaseSeeder, SchemaAlignment">EF Core, Migrations, DatabaseSeeder, SchemaAlignment</p>
                                 </div>
                             </div>
                             <div class="arch-arrow">↓</div>
@@ -122,7 +122,17 @@
                                     <li><code>PageViewModel.cs</code></li>
                                     <li><code>SectionPageViewModel</code></li>
                                     <li><code>DashboardPageViewModel</code></li>
-                                    <li><code>LoginViewModel</code></li>
+                                </ul>
+                            </div>
+                            <div class="arch-code-block arch-code-block--relaxed" data-arch-block>
+                                <span class="arch-code-block__icon" aria-hidden="true">🛠️</span>
+                                <h4 data-tr="Araçlar & Seed" data-en="Tools & Seed">Tools & Seed</h4>
+                                <code class="arch-code-path">tools/ · DataAccessLayer/</code>
+                                <ul class="arch-file-list">
+                                    <li><code>Seeding/DatabaseSeeder.cs</code></li>
+                                    <li><code>SqlitePathResolver.cs</code></li>
+                                    <li><code>DatabaseSchemaAlignment.cs</code></li>
+                                    <li><code>tools/scripts/align-database.ps1</code></li>
                                 </ul>
                             </div>
                         </div>
