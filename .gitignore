@@ -45,6 +45,11 @@ build_errors.txt
 # HTTP test files
 *.http
 
+# Generated docs / temp office files
+Vireon-Proje-Raporu.docx
+Vireon-Gorev-Dagilimi.pdf
+~$*.docx
+
 # SQLite temporary files
 *.db-shm
 *.db-wal

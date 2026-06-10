@@ -1,0 +1,169 @@
+﻿<div class="landing-content-section" id="section-introduction">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img">
+                    </div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+
+                <!-- Hero Banner -->
+                <div class="intro-hero">
+                    <div class="intro-hero-content">
+                        <span class="intro-badge">Est. 2026</span>
+                        <h1 class="intro-headline" data-tr="Güvenli Dijital<br><span>Bankacılık</span> Altyapısı"
+                            data-en="Secure Digital<br><span>Banking</span> Infrastructure">
+                            Secure
+                            Digital<br><span>Banking</span> Infrastructure
+                        </h1>
+                        <p class="intro-subtext"
+                           data-tr="Finansal işlemlerin güvenli, tutarlı ve izlenebilir biçimde yönetilmesini sağlayan, veritabanı merkezli dijital banka çekirdek sistemi simülasyonu."
+                           data-en="Database-centric digital bank core system simulation ensuring secure, consistent, and traceable financial transaction management.">
+                            Database-centric digital bank core system simulation ensuring secure, consistent, and
+                            traceable financial transaction management.
+                        </p>
+                        <div class="intro-cta-group">
+                            <button class="intro-cta-primary is-active" type="button" data-tr="Sistemi Keşfet" data-en="Explore System">
+                                Explore
+                                System
+                            </button>
+                            <button class="intro-cta-secondary" type="button" data-tr="Dokümantasyon"
+                                    data-en="Documentation">
+                                Documentation
+                            </button>
+                        </div>
+                        <div class="intro-doc-panel glass-card intro-panel intro-panel-doc" id="intro-documentation" hidden>
+                            <h3 class="intro-doc-title" data-tr="Proje Dokümantasyonu" data-en="Project Documentation">Project Documentation</h3>
+                            <p class="intro-doc-lead" data-tr="Vireon; katmanlı mimari ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur."
+                                data-en="Vireon is a digital bank core simulation built with layered architecture.">
+                                Vireon is a digital bank core simulation built with layered architecture.
+                            </p>
+                            <ul class="intro-doc-list">
+                                <li data-tr="Sunum Katmanı: ASP.NET Core Web API + web arayüzü (PWA)" data-en="Presentation: ASP.NET Core Web API + web UI (PWA)">Presentation: ASP.NET Core Web API + web UI (PWA)</li>
+                                <li data-tr="İş Katmanı: TransactionManager, FraudModelService, NeonAIService" data-en="Business: TransactionManager, FraudModelService, NeonAIService">Business: TransactionManager, FraudModelService, NeonAIService</li>
+                                <li data-tr="Veri Katmanı: Entity Framework Core + VireonContext" data-en="Data access: Entity Framework Core + VireonContext">Data access: Entity Framework Core + VireonContext</li>
+                                <li data-tr="Veritabanı: SQLite — paylaşımlı vireon_local.db" data-en="Database: SQLite — shared vireon_local.db">Database: SQLite — shared vireon_local.db</li>
+                                <li data-tr="Demo hesapları uygulama açılışında otomatik senkronize edilir" data-en="Demo accounts are auto-synced on startup">Demo accounts are auto-synced on startup</li>
+                                <li data-tr="Şema ve seed: 4 gruplu EF Core migration + Program.cs" data-en="Schema and seed: 4 grouped EF Core migrations + Program.cs">Schema and seed: 4 grouped EF Core migrations + Program.cs</li>
+                                <li data-tr="Migration grupları: InitialCreate → AddRowVersion → AddUserRole → AddPlainPassword" data-en="Migration groups: InitialCreate → AddRowVersion → AddUserRole → AddPlainPassword">Migration groups: InitialCreate → AddRowVersion → AddUserRole → AddPlainPassword</li>
+                            </ul>
+                            <p class="intro-doc-note" data-tr="Yerel çalıştırma: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202"
+                                data-en="Local run: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202">
+                                Local run: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202
+                            </p>
+                        </div>
+                    </div>
+                    <div class="intro-hero-visual">
+                        <img src="/images/coding-screen.jpg" alt="Vireon System" class="hero-image">
+                        <div class="intro-floating-card card-1">
+                            <span class="card-icon">🔒</span>
+                            <span class="card-text" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+                        </div>
+                        <div class="intro-floating-card card-2">
+                            <span class="card-icon">🛡️</span>
+                            <span class="card-text" data-tr="Fraud Tespiti" data-en="Fraud Detection">
+                                Fraud
+                                Detection
+                            </span>
+                        </div>
+                        <div class="intro-floating-card card-3">
+                            <span class="card-icon">📊</span>
+                            <span class="card-text" data-tr="Değişmez Defter" data-en="Immutable Ledger">
+                                Immutable Ledger
+                            </span>
+                        </div>
+                        <div class="intro-orb"></div>
+                    </div>
+                </div>
+
+                <!-- Sistemi Keşfet: metrikler + katman kartları -->
+                <div class="intro-panel intro-panel-explore is-active" id="intro-explore">
+                <!-- Metrics Strip -->
+                <div class="intro-metrics">
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="10000">0</span>
+                        <span class="metric-label" data-tr="Güvenli İşlem" data-en="Secure Transactions">
+                            Secure
+                            Transactions
+                        </span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="98">0</span>
+                        <span class="metric-suffix">%</span>
+                        <span class="metric-label" data-tr="Veri Bütünlüğü" data-en="Data Integrity">
+                            Data
+                            Integrity
+                        </span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="6">0</span>
+                        <span class="metric-label" data-tr="Veritabanı Tablosu" data-en="DB Tables">DB Tables</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value">24/7</span>
+                        <span class="metric-label" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+                    </div>
+                </div>
+
+                <!-- Core Values (katmanlı mimariye uygun) -->
+                <div class="intro-values">
+                    <div class="value-card">
+                        <img src="/images/process-optimized.jpg" alt="Presentation Layer" class="value-card-img" data-tr-alt="Sunum Katmanı" data-en-alt="Presentation Layer">
+                        <div class="value-number">01</div>
+                        <h3 data-tr="Sunum Katmanı" data-en="Presentation Layer">Presentation Layer</h3>
+                        <p data-tr="ASP.NET Core Web API ve modern web arayüzü. Kullanıcı istekleri bu katmandan sisteme girer."
+                           data-en="ASP.NET Core Web API and modern web UI. User requests enter the system through this layer.">
+                            ASP.NET Core Web API and modern web UI. User requests enter the system through this layer.
+                        </p>
+                    </div>
+                    <div class="value-card">
+                        <img src="/images/tech-audit.jpg" alt="Business Layer" class="value-card-img" data-tr-alt="İş Katmanı" data-en-alt="Business Layer">
+                        <div class="value-number">02</div>
+                        <h3 data-tr="İş Katmanı" data-en="Business Layer">Business Layer</h3>
+                        <p data-tr="TransactionManager ile güvenli transferler, FraudModelService ile şüpheli işlem tespiti ve NeonAIService ile akıllı asistan."
+                           data-en="Secure transfers via TransactionManager, suspicious activity detection via FraudModelService, and NeonAIService assistant.">
+                            Secure transfers via TransactionManager, suspicious activity detection via FraudModelService, and NeonAIService assistant.
+                        </p>
+                    </div>
+                    <div class="value-card">
+                        <img src="/images/digital-strategy.jpg" alt="Data Layer" class="value-card-img" data-tr-alt="Veri Katmanı" data-en-alt="Data Layer">
+                        <div class="value-number">03</div>
+                        <h3 data-tr="Veri ve Veritabanı" data-en="Data & Database">Data & Database</h3>
+                        <p data-tr="Entity Framework Core ile veri erişimi; paylaşımlı SQLite (vireon_local.db) üzerinde değiştirilemez muhasebe defteri."
+                           data-en="Data access via Entity Framework Core; immutable ledger on shared SQLite (vireon_local.db).">
+                            Data access via Entity Framework Core; immutable ledger on shared SQLite (vireon_local.db).
+                        </p>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Tech Stack Preview -->
+                <div class="intro-tech">
+                    <p class="tech-label" data-tr="Kullanılan Teknolojiler" data-en="Technologies Used">
+                        Technologies
+                        Used
+                    </p>
+                    <div class="tech-marquee">
+                        <div class="tech-track">
+                            <span class="tech-item">ASP.NET Core</span>
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">SQLite</span>
+                            <span class="tech-item">EF Core</span>
+                            <span class="tech-item">PWA</span>
+                            <span class="tech-item">FluentValidation</span>
+                            <span class="tech-item">Web API</span>
+                            <span class="tech-item">AutoMapper</span>
+                            <span class="tech-item">ASP.NET Core</span>
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">SQLite</span>
+                            <span class="tech-item">Chart.js</span>
+                        </div>
+                    </div>
+                </div>
+            </div>

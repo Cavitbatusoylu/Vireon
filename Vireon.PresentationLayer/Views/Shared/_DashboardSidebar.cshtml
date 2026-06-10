@@ -1,0 +1,54 @@
+﻿@model DashboardPageViewModel
+<aside class="dash-sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="sidebar-logo-img">
+            <span>VIREON</span>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <ul class="sidebar-menu">
+            <li class="@(Model.ActiveSection == "dash-overview" ? "active" : "")" data-dash="dash-overview">
+                <a asp-controller="Dashboard" asp-action="Overview"><span class="sidebar-icon">📊</span><span data-tr="Genel Bakış" data-en="Overview">Overview</span></a>
+            </li>
+            <li class="sidebar-group-label"><span data-tr="Finans" data-en="Finance">Finance</span></li>
+            <li class="@(Model.ActiveSection == "dash-transfers" ? "active" : "")" data-dash="dash-transfers">
+                <a asp-controller="Dashboard" asp-action="Transfer"><span class="sidebar-icon">💸</span><span data-tr="Para Gönder" data-en="Send Money">Send Money</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-deposit" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Deposit"><span class="sidebar-icon">💰</span><span data-tr="Para Yatır" data-en="Deposit">Deposit</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-qr" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Qr"><span class="sidebar-icon">📱</span><span data-tr="QR Ödeme" data-en="QR Payment">QR Payment</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-history" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="History"><span class="sidebar-icon">📜</span><span data-tr="İşlem Geçmişi" data-en="History">History</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-limits" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Limits"><span class="sidebar-icon">⚡</span><span data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-db-explorer" ? "active" : "")" data-dash="dash-db-explorer">
+                <a asp-controller="Dashboard" asp-action="DbExplorer"><span class="sidebar-icon">🗄️</span><span data-tr="Veritabanı İzleyici" data-en="DB Explorer">DB Explorer</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-account-info" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="AccountInfo"><span class="sidebar-icon">📋</span><span data-tr="Hesap Bilgileri" data-en="Account Info">Account Info</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-ai-coach" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="AiCoach"><span class="sidebar-icon">🤖</span><span data-tr="Neon Yapay Zeka" data-en="Neon AI Coach">Neon AI Coach</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-profile" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Profile"><span class="sidebar-icon">👤</span><span data-tr="Profil Ayarları" data-en="Profile">Profile</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-password" ? "active" : "")">
+                <a asp-controller="Dashboard" asp-action="Password"><span class="sidebar-icon">🔐</span><span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span></a>
+            </li>
+            <li class="@(Model.ActiveSection == "dash-admin" ? "active" : "")" id="adminMenuItem" style="display:none;">
+                <a asp-controller="Dashboard" asp-action="Admin"><span class="sidebar-icon">🛡️</span><span data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</span></a>
+            </li>
+        </ul>
+    </nav>
+    <div class="sidebar-footer">
+        <button type="button" class="logout-btn" onclick="handleLogout()" data-tr="Çıkış" data-en="Logout">Logout</button>
+    </div>
+</aside>
+

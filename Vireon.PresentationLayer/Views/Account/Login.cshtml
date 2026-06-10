@@ -1,0 +1,38 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["PageKey"] = "login";
+}
+
+<div class="page-shell">
+    <div class="auth-panel">
+        <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="auth-panel__logo">
+        <h2 data-tr="Vireon'a Giriş Yap" data-en="Sign In to Vireon">Sign In to Vireon</h2>
+        <p class="modal-subtitle" data-tr="Dijital banka çekirdek sisteminize erişin"
+           data-en="Access your digital bank core system">Access your digital bank core system</p>
+        <form class="login-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                <input type="email" id="loginEmail" class="neon-input" placeholder="ornek@vireon.com" required>
+            </div>
+            <div class="form-group">
+                <label data-tr="Şifre" data-en="Password">Password</label>
+                <input type="password" id="loginPassword" class="neon-input" placeholder="••••••••" required>
+            </div>
+            <div class="form-row">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="rememberMe">
+                    <span data-tr="Beni Hatırla" data-en="Remember Me">Remember Me</span>
+                </label>
+                <a asp-controller="Account" asp-action="ForgotPassword" class="forgot-link"
+                   data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot Password?</a>
+            </div>
+            <button type="submit" class="login-submit-btn" data-tr="Giriş Yap" data-en="Sign In">Sign In</button>
+        </form>
+        <p class="modal-footer-text">
+            <span data-tr="Hesabınız yok mu?" data-en="Don't have an account?">Don't have an account?</span>
+            <a asp-controller="Account" asp-action="Register" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</a>
+        </p>
+        <p class="auth-back"><a asp-controller="Home" asp-action="Index" data-tr="← Ana menü" data-en="← Home">← Home</a></p>
+    </div>
+</div>

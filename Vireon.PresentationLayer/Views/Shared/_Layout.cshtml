@@ -1,0 +1,107 @@
+﻿@{
+    var title = ViewData["Title"] as string ?? "Vireon";
+    var pageKey = ViewData["PageKey"] as string ?? "home";
+    var bodyClass = pageKey switch
+    {
+        "home" => "vireon-page--home",
+        "home-section" => "vireon-page--section",
+        "login" or "register" or "forgot-password" => "vireon-page--auth",
+        _ when pageKey.StartsWith("dashboard-") => "vireon-page--dashboard",
+        _ => "vireon-page"
+    };
+}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@title</title>
+    <meta name="description" content="Vireon - Database-centric digital bank core system simulation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/vireon.css?v=20260610-47">
+    <link rel="stylesheet" href="/vireon-mvc.css?v=20260610-56">
+    <link rel="stylesheet" href="/vireon-animations.css?v=20260610-55">
+    <link rel="stylesheet" href="/vireon-home.css?v=20260610-56">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/pwa/icon-192.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00b4d8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-vireon-page="@pageKey" class="vireon-page @bodyClass">
+    <div class="loading-screen" id="loadingScreen">
+        <img src="/images/vireon-logo-transparent-new.png" alt="Vireon Logo" class="loading-logo">
+        <div class="loader-ring"></div>
+        <div class="loading-text" data-tr="Vireon Yükleniyor..." data-en="Loading Vireon...">Loading Vireon...</div>
+    </div>
+    <script>
+        (function () {
+            try {
+                var booted = sessionStorage.getItem('vireon-booted') === '1';
+                var ls = document.getElementById('loadingScreen');
+                if (booted) {
+                    if (ls) { ls.className = 'loading-screen hidden'; ls.style.display = 'none'; }
+                    document.documentElement.classList.add('vireon-return-visit');
+                } else if (ls) {
+                    ls.classList.add('show');
+                }
+            } catch (e) { }
+        })();
+    </script>
+
+    <div class="page-transition" id="pageTransition" aria-hidden="true">
+        <div class="page-transition__sweep"></div>
+        <div class="page-transition__glow"></div>
+    </div>
+
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="grid-overlay"></div>
+
+    <nav class="top-navbar" id="topNavbar">
+        <div class="navbar-left">
+            <a asp-controller="Home" asp-action="Index" class="navbar-brand-link">
+                <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="navbar-logo" id="navLogo">
+                <span class="navbar-brand">VIREON</span>
+            </a>
+        </div>
+        <div class="navbar-right">
+            <div class="lang-switcher">
+                <button class="lang-btn" id="langTR" onclick="switchLang('tr')">TR</button>
+                <button class="lang-btn active" id="langEN" onclick="switchLang('en')">EN</button>
+            </div>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle theme">
+                <span class="theme-icon-dark">🌙</span>
+                <span class="theme-icon-light">☀️</span>
+            </button>
+            <div class="navbar-actions" id="navbarActions">
+                <a class="login-btn" id="backToHomeBtn" asp-controller="Home" asp-action="Index" style="display:none;">
+                    <span class="login-icon">🏠</span><span data-tr="Ana Menü" data-en="Home">Home</span>
+                </a>
+                <a class="login-btn" id="dashboardNavBtn" asp-controller="Dashboard" asp-action="Overview" style="display:none;">
+                    <span class="login-icon">📊</span><span data-tr="Dashboardım" data-en="My Dashboard">My Dashboard</span>
+                </a>
+                <button type="button" class="login-btn install-app-btn" id="installBtn" hidden>
+                    <span class="login-icon">📱</span><span data-tr="Yükle" data-en="Install">Install</span>
+                </button>
+                <a class="login-btn" id="loginBtn" asp-controller="Account" asp-action="Login">
+                    <span class="login-icon">🔐</span><span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
+                </a>
+                <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display:none;">
+                    <span class="login-icon">🚪</span><span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+    <partial name="_SiteScripts" />
+    <script src="/vireon.js?v=20260610-56" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

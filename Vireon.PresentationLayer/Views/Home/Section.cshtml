@@ -1,0 +1,24 @@
+﻿@model SectionPageViewModel
+@{
+    ViewData["Title"] = $"{Model.Title} — Vireon";
+    ViewData["PageKey"] = Model.PageKey;
+}
+
+<div class="page-shell">
+    <header class="page-shell__topbar">
+        <a asp-controller="Home" asp-action="Index" class="page-shell__back"
+           data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</a>
+        <div class="page-shell__meta">
+            <p class="page-shell__breadcrumb">Vireon / @Model.MenuBadge</p>
+            <h1 class="page-shell__title" data-tr="@Model.TitleTr" data-en="@Model.TitleEn">@Model.TitleEn</h1>
+        </div>
+    </header>
+
+    <main class="page-shell__body">
+        <partial name="@Model.SectionPartial" />
+    </main>
+
+    <footer class="page-footer">
+        <p>© 2026 Vireon</p>
+    </footer>
+</div>

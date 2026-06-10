@@ -1,0 +1,12 @@
+﻿<div class="dash-sub-section active" id="dash-qr">
+                                <h2 class="sub-section-title" data-tr="QR ile Ödeme" data-en="QR Payment">QR Payment</h2>
+                                <div class="glass-card qr-card">
+                                    <p class="qr-desc" data-tr="Hesabınıza yönlendiren statik QR. Gerçek uygulamada EFT/Havale bilgisi encode edilir." data-en="Static QR for your account. Production apps encode EFT/wire metadata.">Static QR for your account.</p>
+                                    <div class="qr-wrap">
+                                        <img id="qrPaymentImg" src="" alt="QR" class="qr-image" width="200" height="200">
+                                    </div>
+                                    <p class="qr-meta"><span data-tr="Hesap:" data-en="Account:">Account:</span> <span id="qrAccountLabel">-</span></p>
+                                    <button type="button" class="login-submit-btn" onclick="refreshQrCode()" data-tr="QR yenile" data-en="Refresh QR">Refresh QR</button>
+                                </div>
+                            </div>
+

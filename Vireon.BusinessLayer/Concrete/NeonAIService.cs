@@ -9,7 +9,7 @@ namespace Vireon.BusinessLayer.Concrete
 {
     public class NeonAIOptions
     {
-        public string ApiToken { get; set; }
+        public string ApiToken { get; set; } = string.Empty;
         public string ModelId { get; set; } = "llama-3.1-8b-instant";
     }
 
@@ -18,7 +18,7 @@ namespace Vireon.BusinessLayer.Concrete
         private readonly HttpClient _httpClient;
         private readonly IOptions<NeonAIOptions> _options;
 
-        // Bankacılık konuşma veritabanı (Offline fallback)
+        // İnternet yoksa dönülecek standart cevaplar
         private static readonly Dictionary<string, string[]> _offlineResponses = new(StringComparer.OrdinalIgnoreCase)
         {
             { "merhaba", new[] {

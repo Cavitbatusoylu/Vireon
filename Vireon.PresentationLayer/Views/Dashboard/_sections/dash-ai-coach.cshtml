@@ -1,0 +1,23 @@
+﻿<div class="dash-sub-section active" id="dash-ai-coach">
+                                <h2 class="sub-section-title" data-tr="Neon Yapay Zeka" data-en="Neon AI Coach">Neon AI Coach</h2>
+                                <div class="ai-chat-shell glass-card">
+                                    <div class="ai-chat-body" id="aiChatContent">
+                                        <div class="bot-bubble">
+                                            <div class="bubble-icon">🤖</div>
+                                            <div class="bubble-text" data-tr="Merhaba! Ben Neon. Senin bankacılık işlemlerini analiz ediyorum. Sana nasıl yardımcı olabilirim?" data-en="Hi! I'm Neon. I analyze your banking activity. How can I help you?">Hi! I'm Neon. I analyze your banking activity. How can I help you?</div>
+                                        </div>
+                                    </div>
+                                    <div class="ai-chat-footer">
+                                        <input type="text" id="aiInput" placeholder="Ask Neon..." data-tr-placeholder="Neon'a sor..." data-en-placeholder="Ask Neon..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+                                        <button class="ai-send-btn" onclick="sendAiMessage()" aria-label="Send message">➤</button>
+                                    </div>
+                                    <div class="ai-chat-history-panel">
+                                        <div class="ai-history-header">
+                                            <span data-tr="Sohbet Geçmişi" data-en="Chat History">Chat History</span>
+                                            <button type="button" class="ai-history-clear" onclick="clearAiChatHistory()" data-tr="Temizle" data-en="Clear">Clear</button>
+                                        </div>
+                                        <ul class="ai-history-list" id="aiChatHistoryList"></ul>
+                                    </div>
+                                </div>
+                            </div>
+

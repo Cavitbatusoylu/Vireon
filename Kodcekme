@@ -1,3 +1,0 @@
-git fetch origin
-git checkout Cavit-login
-git pull origin Cavit-login

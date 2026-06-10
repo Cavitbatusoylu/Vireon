@@ -48,10 +48,11 @@ internal class Program
             options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
         });
 
-        builder.Services.AddControllers().AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-        });
+        builder.Services.AddControllersWithViews()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+            });
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
@@ -68,7 +69,7 @@ internal class Program
             if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
         });
 
-        builder.Services.AddAutoMapper(config =>                                                                                            //Enes
+        builder.Services.AddAutoMapper(config =>
         {
             config.AddProfile<Vireon.PresentationLayer.Mappings.VireonMappingProfile>();
         });
@@ -76,24 +77,15 @@ internal class Program
         // Güvenlik kurallarını (Validator'ları) bulup sisteme dahil ediyoruz
         builder.Services.AddValidatorsFromAssemblyContaining<Vireon.PresentationLayer.Validators.TransferRequestDtoValidator>();
 
-        // Sisteme diyoruz ki: Vezne senden ITransactionService isterse, ona TransactionManager'ı ver.
-        builder.Services.AddScoped<ITransactionService, TransactionManager>();                                                               //Enes
+        builder.Services.AddScoped<ITransactionService, TransactionManager>();
 
-        builder.Services.Configure<NeonAIOptions>(builder.Configuration.GetSection("NeonAI"));                                              //Cavit
-        builder.Services.AddHttpClient<NeonAIService>();                                                                                     //Cavit
+        builder.Services.Configure<NeonAIOptions>(builder.Configuration.GetSection("NeonAI"));
+        builder.Services.AddHttpClient<NeonAIService>();
 
         builder.Services.AddSingleton<Vireon.BusinessLayer.Concrete.FraudModelService>();
 
-        builder.Services.Configure<SharedDatabaseGitSyncOptions>(builder.Configuration.GetSection("SharedDatabase"));
-        builder.Services.AddSingleton<SharedDatabaseGitSync>();
-        builder.Services.AddHostedService(sp => sp.GetRequiredService<SharedDatabaseGitSync>());
-
         var app = builder.Build();
         var isDevelopment = app.Environment.IsDevelopment();
-        var dbGitSync = app.Services.GetRequiredService<SharedDatabaseGitSync>();
-
-        // Önce GitHub'daki güncel DB'yi çek (ekip senkronu)
-        dbGitSync.PullOnStartupIfEnabled();
 
         // ============================================================
         // OTOMATIK DATABASE MIGRATION VE SEED DATA
@@ -227,7 +219,6 @@ internal class Program
                 // ============================================================
                 EnsureDemoAccounts(context, logger);
                 ReportMissingPlainPasswords(context, logger);
-                dbGitSync.SchedulePush();
 
                 // ============================================================
                 // TEST KULLANICISINI KALDIR (testuser@example.com)
@@ -314,11 +305,26 @@ internal class Program
 
         app.UseCors("AllowAll");
 
-        app.UseDefaultFiles();
+        app.UseRouting();
+
+        app.Use(async (context, next) =>
+        {
+            await next();
+            var ct = context.Response.ContentType;
+            if (ct != null && ct.StartsWith("text/html", StringComparison.OrdinalIgnoreCase)
+                && !ct.Contains("charset", StringComparison.OrdinalIgnoreCase))
+            {
+                context.Response.ContentType = "text/html; charset=utf-8";
+            }
+        });
+
         app.UseStaticFiles();
 
         app.UseAuthorization();
 
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}");
         app.MapControllers();
 
         // ============================================================

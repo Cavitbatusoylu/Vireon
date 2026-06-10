@@ -1,0 +1,27 @@
+﻿<div class="dash-sub-section active" id="dash-deposit">
+                                <h2 class="sub-section-title" data-tr="Para Yatır" data-en="Deposit Funds">Deposit Funds</h2>
+                                <div class="glass-card transfer-card">
+                                    <div class="transfer-form">
+                                        <div class="form-group">
+                                            <label data-tr="Para Birimi" data-en="Currency">Currency</label>
+                                            <select id="depositCurrency" class="neon-input" onchange="updateDepositFxPreview()">
+                                                <option value="TRY">₺ TRY</option>
+                                                <option value="USD">$ USD</option>
+                                                <option value="EUR">€ EUR</option>
+                                                <option value="GBP">£ GBP</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label id="depositAmountLabel" data-tr="Yatırılacak Tutar (₺)" data-en="Amount (₺)">Amount (₺)</label>
+                                            <input type="number" id="depositAmount" class="neon-input" placeholder="0.00" min="0" step="0.01" oninput="updateDepositFxPreview()">
+                                        </div>
+                                        <div id="depositFxPreview" class="transfer-fx-preview"></div>
+                                        <div class="form-group">
+                                            <label data-tr="Not (isteğe bağlı)" data-en="Note (optional)">Note (optional)</label>
+                                            <input type="text" id="depositNote" class="neon-input" placeholder="">
+                                        </div>
+                                        <button type="button" class="login-submit-btn" onclick="handleDepositRequest()" data-tr="Yatırım talebi oluştur" data-en="Submit deposit request">Submit deposit request</button>
+                                        <p class="dash-hint" data-tr="Bu işlem demo modundadır; gerçek ödeme altyapısı bağlı değildir. Yabancı para yatırımları simülasyon kuru ile TRY bakiyesine eklenir." data-en="Demo only — no real payment rail. Foreign currency deposits are converted to TRY balance at simulated rates.">Demo only — no real payment rail. Foreign currency deposits are converted to TRY balance at simulated rates.</p>
+                                    </div>
+                                </div>
+                            </div>

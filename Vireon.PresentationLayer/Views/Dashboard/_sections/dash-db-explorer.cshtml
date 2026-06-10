@@ -1,0 +1,21 @@
+﻿<div class="dash-sub-section active" id="dash-db-explorer">
+                                <h2 class="sub-section-title" data-tr="Veritabanı İzleyici" data-en="Database Explorer">Database Explorer</h2>
+                                <div class="db-stats-grid" id="dbStatsContainer">
+                                    <!-- JS ile dolacak -->
+                                </div>
+                                <div class="glass-card db-preview-card">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="Banka Verileri (Live)" data-en="Bank Data (Live)">Bank Data (Live)</h4>
+                                        <button class="refresh-btn-mini" onclick="fetchDatabaseStats()" aria-label="Refresh database stats">↻</button>
+                                    </div>
+                                    <div class="vireon-table-scroll">
+                                        <table id="dbUsersTable" class="vireon-table-modern">
+                                            <thead>
+                                                <tr><th>ID</th><th data-tr="Müşteri" data-en="Customer">Customer</th><th data-tr="Hesap No" data-en="Account No">Account No</th><th data-tr="Bakiye" data-en="Balance">Balance</th></tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+

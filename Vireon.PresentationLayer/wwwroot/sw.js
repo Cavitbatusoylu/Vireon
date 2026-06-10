@@ -17,7 +17,6 @@ const STATIC_ASSETS = [
 // Bu dosyalar her zaman ağdan çekilir (cache-first KULLANILMAZ)
 const NETWORK_FIRST = [
   '/',
-  '/index.html',
   '/vireon.css',
   '/vireon.js'
 ];

@@ -1,0 +1,36 @@
+﻿<div class="dash-sub-section active" id="dash-overview">
+                                <h2 class="sub-section-title" data-tr="Hesap Özeti" data-en="Account Overview">Account Overview</h2>
+                                <div class="dashboard-grid-modern">
+                                    <div class="glass-card balance-hero">
+                                        <div class="hero-label" data-tr="Kullanılabilir Bakiye" data-en="Available Balance">Available Balance</div>
+                                        <div class="hero-amount"><span id="dashBalanceSymbol">₺</span><span id="dashBalance">0.00</span></div>
+                                        <div class="hero-details">
+                                            <span id="dashAccountNo">**** ****</span> | <span id="dashCurrency">TRY</span>
+                                        </div>
+                                        <div class="balance-fx-breakdown" id="dashFxBreakdown" aria-live="polite"></div>
+                                    </div>
+                                    
+                                    <div class="charts-row-modern">
+                                        <div class="glass-card chart-card">
+                                            <h4 data-tr="Bakiye Akışı" data-en="Balance Flow">Balance Flow</h4>
+                                            <div class="chart-container-modern">
+                                                <canvas id="balanceLineChart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="glass-card chart-card">
+                                            <h4 data-tr="İşlem Dağılımı" data-en="Transaction Mix">Transaction Mix</h4>
+                                            <div class="chart-container-modern">
+                                                <canvas id="expensePieChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card recent-tx-modern">
+                                        <h4 data-tr="Son İşlemler" data-en="Recent Transactions">Recent Transactions</h4>
+                                        <div id="overviewTransactions" class="tx-list-modern">
+                                            <p data-tr="Yükleniyor..." data-en="Loading...">Loading...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+

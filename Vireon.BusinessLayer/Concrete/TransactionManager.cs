@@ -142,7 +142,7 @@ namespace Vireon.BusinessLayer.Concrete
                     CreatedAt = DateTime.Now
                 });
 
-                // Fraud (şüpheli işlem) kayıtları — engellemeden loglanır, admin panelinden görüntülenir.
+                // Sahtekarlık (Fraud) denetimleri
                 if (amountInSenderCurrency > 10000)
                 {
                     _context.FraudLogs.Add(new FraudLog
@@ -189,18 +189,11 @@ namespace Vireon.BusinessLayer.Concrete
                 _logger.LogInformation("✅ Transfer başarılı: {Amount}, {Sender} -> {Receiver} (Status: {Status})",
                     logCurrency, senderAccount.AccountNumber, receiverAccount.AccountNumber, transaction.Status);
             }
-            // BURAYI EKLİYORUZ: Eşzamanlılık (Concurrency) Çakışması Yakalama
-            catch (DbUpdateConcurrencyException ex) 
-            {
-                dbTransaction.Rollback();
-                _logger.LogError(ex, "❌ Eşzamanlılık çakışması (Concurrency): Aynı hesaba aynı anda işlem yapıldı.");
-                throw new InvalidOperationException("İşleminiz sırasında bir çakışma oldu (aynı anda başka bir işlem yapılmış olabilir). Lütfen tekrar deneyin.");
-            }
             catch (Exception ex)
             {
                 dbTransaction.Rollback();
                 _logger.LogError(ex, "❌ Transfer başarısız: {Message}", ex.Message);
-                throw;
+                throw new InvalidOperationException("Transfer işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.", ex);
             }
         }
 

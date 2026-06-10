@@ -40,21 +40,98 @@ function createToastContainer() {
     return container;
 }
 
-// ABSOLUTE SAFETY: This runs globally at the very start
-(function() {
-    const clearLoader = () => {
-        const ls = document.getElementById('loadingScreen');
-        if (ls) {
-            ls.classList.remove('show');
-            ls.classList.add('hidden');
-            ls.style.opacity = '0';
-            ls.style.pointerEvents = 'none';
-            ls.style.visibility = 'hidden';
-            setTimeout(() => ls.style.display = 'none', 800);
+const VIREON_BOOT_KEY = 'vireon-booted';
+const VIREON_TRANSITION_KEY = 'vireon-nav-transition';
+
+function isReturnVisit() {
+    try { return sessionStorage.getItem(VIREON_BOOT_KEY) === '1'; } catch { return false; }
+}
+
+function hideLoadingScreen() {
+    const ls = document.getElementById('loadingScreen');
+    if (!ls) return;
+    ls.classList.remove('show');
+    ls.classList.add('hidden');
+    ls.style.opacity = '0';
+    ls.style.pointerEvents = 'none';
+    ls.style.visibility = 'hidden';
+    setTimeout(() => { ls.style.display = 'none'; }, 400);
+}
+
+function finishInitialBoot() {
+    try { sessionStorage.setItem(VIREON_BOOT_KEY, '1'); } catch { /* ignore */ }
+    hideLoadingScreen();
+}
+
+function navigateWithTransition(url) {
+    try { sessionStorage.setItem(VIREON_TRANSITION_KEY, '1'); } catch { /* ignore */ }
+    const overlay = document.getElementById('pageTransition');
+    if (!overlay) {
+        window.location.href = url;
+        return;
+    }
+    overlay.classList.remove('is-entering');
+    overlay.classList.add('is-exiting');
+    setTimeout(() => { window.location.href = url; }, 480);
+}
+
+function isInternalNavLink(anchor) {
+    if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download')) return false;
+    if (anchor.dataset.noTransition != null) return false;
+    const href = anchor.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) return false;
+    try {
+        const url = new URL(href, window.location.origin);
+        if (url.origin !== window.location.origin) return false;
+        if (url.pathname === window.location.pathname && url.search === window.location.search && !url.hash) return false;
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function initPageTransitions() {
+    const overlay = document.getElementById('pageTransition');
+    const cameFromNav = (() => {
+        try { return sessionStorage.getItem(VIREON_TRANSITION_KEY) === '1'; } catch { return false; }
+    })();
+
+    if (cameFromNav) {
+        try { sessionStorage.removeItem(VIREON_TRANSITION_KEY); } catch { /* ignore */ }
+        if (overlay) {
+            overlay.classList.add('is-entering');
+            setTimeout(() => overlay.classList.remove('is-entering'), 700);
         }
-    };
-    setTimeout(clearLoader, 1500);
-    setTimeout(clearLoader, 3500);
+    }
+
+    if (isReturnVisit() || cameFromNav) {
+        document.documentElement.classList.add('vireon-page-enter');
+        setTimeout(() => document.documentElement.classList.remove('vireon-page-enter'), 880);
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (!isReturnVisit()) return;
+        const anchor = e.target.closest('a[href]');
+        if (!isInternalNavLink(anchor)) return;
+        e.preventDefault();
+        navigateWithTransition(anchor.href);
+    });
+}
+
+// İlk ziyaret: tam yükleme ekranı; sonraki sayfalar: hızlı geçiş animasyonu
+(function() {
+    if (isReturnVisit()) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hideLoadingScreen);
+        } else {
+            hideLoadingScreen();
+        }
+        return;
+    }
+    const clearLoader = () => finishInitialBoot();
+    setTimeout(clearLoader, 1200);
+    setTimeout(clearLoader, 2800);
 })();
 
 // Service Worker: localhost/electron'da devre dışı, prod ortamda aktif.
@@ -326,6 +403,18 @@ function updateBalanceCurrencyDisplay(currencyCode) {
    renderExchangeRatesPanel();
 }
 
+function renderBalanceFxBreakdown(tryBalance) {
+   const panel = getEl('dashFxBreakdown');
+   if (!panel) return;
+   const base = Number(tryBalance) || 0;
+   const chips = FX_CURRENCIES.map(code => {
+      const converted = convertCurrencyClient(base, 'TRY', code);
+      if (converted == null) return '';
+      return `<span class="fx-balance-chip" title="${code}"><span class="fx-balance-symbol">${currencySymbol(code)}</span><span class="fx-balance-value">${formatNumber(converted, 2, 2)}</span><span class="fx-balance-code">${code}</span></span>`;
+   }).join('');
+   panel.innerHTML = chips;
+}
+
 function renderExchangeRatesPanel() {
    const panel = getEl('fxRatesPanel');
    if (!panel) return;
@@ -472,43 +561,223 @@ function txSenderId(tx) { return pickField(tx, 'senderAccountId', 'SenderAccount
 function txReceiverId(tx) { return pickField(tx, 'receiverAccountId', 'ReceiverAccountId'); }
 function currentUserId() { return pickField(currentUser, 'id', 'Id'); }
 
+function getVireonPage() {
+   return document.body?.dataset?.vireonPage || '';
+}
+
+function isDashboardPage() {
+   return getVireonPage().startsWith('dashboard-');
+}
+
+const DASHBOARD_ROUTES = {
+   'dash-overview': '/Dashboard/Overview',
+   'dash-transfers': '/Dashboard/Transfer',
+   'dash-deposit': '/Dashboard/Deposit',
+   'dash-qr': '/Dashboard/Qr',
+   'dash-history': '/Dashboard/History',
+   'dash-limits': '/Dashboard/Limits',
+   'dash-db-explorer': '/Dashboard/DbExplorer',
+   'dash-account-info': '/Dashboard/AccountInfo',
+   'dash-ai-coach': '/Dashboard/AiCoach',
+   'dash-profile': '/Dashboard/Profile',
+   'dash-password': '/Dashboard/Password',
+   'dash-admin': '/Dashboard/Admin'
+};
+
+function goToDashboard(sectionId) {
+   const url = DASHBOARD_ROUTES[sectionId] || '/Dashboard/Overview';
+   window.location.href = url;
+}
+
+async function initDashboardPage() {
+   const savedUser = loadSession();
+   if (savedUser) {
+      try { currentUser = JSON.parse(savedUser); } catch { clearSession(); }
+   }
+   if (!currentUser) {
+      window.location.href = '/Account/Login';
+      return;
+   }
+   document.body.classList.add('dashboard-active');
+   updateNavbarForLoggedInUser();
+   resetSessionTimer();
+   await fetchDashboardData();
+
+   const sectionId = getVireonPage().replace('dashboard-', '');
+   if (sectionId === 'dash-qr') refreshQrCode();
+   if (sectionId === 'dash-transfers') {
+      initTransferFxUi();
+      renderExchangeRatesPanel();
+      updateTransferFxPreview();
+   }
+   if (sectionId === 'dash-deposit') {
+      initDepositFxUi();
+      updateDepositFxPreview();
+   }
+   if (sectionId === 'dash-db-explorer') fetchDatabaseStats();
+   if (sectionId === 'dash-account-info') loadAccountInfo();
+   if (sectionId === 'dash-admin') loadAdminPanel();
+   if (sectionId === 'dash-ai-coach') renderAiHistoryPanel();
+   if (sectionId === 'dash-profile') populateProfileSettingsFields();
+   syncNavbarContext();
+}
+
+// ========== PAGE REFRESH BOOTSTRAP ==========
+function normalizeAppPath(pathname) {
+   const p = (pathname || '/').replace(/\/+$/, '').toLowerCase();
+   return p || '/';
+}
+
+function isHomePath(path) {
+   return path === '/' || path === '/home' || path === '/home/index';
+}
+
+function isDashboardPath(path) {
+   return path === '/dashboard' || path.startsWith('/dashboard/');
+}
+
+function isPageReload() {
+   try {
+      if (sessionStorage.getItem('vireon-refresh') === '1') {
+         sessionStorage.removeItem('vireon-refresh');
+         return true;
+      }
+   } catch (_) { /* ignore */ }
+   const nav = performance.getEntriesByType?.('navigation')?.[0];
+   if (nav) return nav.type === 'reload' || nav.type === 'back_forward';
+   return !!(performance.navigation && performance.navigation.type === 1);
+}
+
+window.addEventListener('keydown', (e) => {
+   if (e.key === 'F5' || (e.key === 'r' && (e.ctrlKey || e.metaKey))) {
+      try { sessionStorage.setItem('vireon-refresh', '1'); } catch (_) { /* ignore */ }
+   }
+}, true);
+
+function resetHomePageOnRefresh() {
+   window.scrollTo(0, 0);
+   if (document.getElementById('section-introduction')) {
+      applyIntroPanelState('explore', { scrollPanel: false });
+   }
+   hasAnimatedStats = false;
+   getEls('.metric-value[data-target]').forEach(el => {
+      el.textContent = '0';
+      el.classList.remove('count-done');
+   });
+   setTimeout(() => animateStats(), 400);
+   if (typeof animateHomeMetricChips === 'function') animateHomeMetricChips();
+}
+
+/**
+ * F5 davranışı:
+ * - Ana menü (/) → normal ana sayfa, en üste sıfırla (girişli olsa bile dashboard'a gitme)
+ * - Girişli + dashboard içi (Overview hariç) → Genel Bakış
+ * - Girişli + Tanıtım/Mimari vb. → olduğu sayfada kal
+ * - Girişsiz + alt sayfa → ana menüye dön
+ */
+function handlePageRefreshBootstrap() {
+   const path = normalizeAppPath(window.location.pathname);
+   const page = document.body?.dataset?.vireonPage || '';
+   const reloading = isPageReload();
+
+   // Ana menü: her zaman normal landing; F5 ile en üste sıfırla
+   if (isHomePath(path) || page === 'home') {
+      if (reloading) {
+         requestAnimationFrame(() => resetHomePageOnRefresh());
+      }
+      return false;
+   }
+
+   if (!reloading) return false;
+
+   const savedUser = loadSession();
+   if (savedUser) {
+      try { currentUser = JSON.parse(savedUser); } catch { clearSession(); currentUser = null; }
+   }
+
+   if (page === 'login' || page === 'register' || page === 'forgot-password') {
+      return false;
+   }
+
+   // Yalnızca hesap (dashboard) içindeyken Genel Bakış'a al
+   if (currentUser && isDashboardPath(path) && path !== '/dashboard/overview') {
+      window.location.replace('/Dashboard/Overview');
+      return true;
+   }
+
+   // Girişli kullanıcı proje sayfalarında (Tanıtım, Mimari…) → sayfada kal
+   if (currentUser) return false;
+
+   window.location.replace('/');
+   return true;
+}
+
+window.addEventListener('pageshow', (event) => {
+   const path = normalizeAppPath(window.location.pathname);
+   const page = document.body?.dataset?.vireonPage || '';
+   if (event.persisted && (isHomePath(path) || page === 'home')) {
+      resetHomePageOnRefresh();
+   }
+});
+
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
    try {
-       // Restore user from session (localStorage = remembered, sessionStorage = this tab only)
+       try {
+           if (sessionStorage.getItem(VIREON_BOOT_KEY) !== '1') {
+               sessionStorage.setItem(VIREON_BOOT_KEY, '1');
+           }
+       } catch { /* ignore */ }
+
+       if (handlePageRefreshBootstrap()) return;
+
+       const page = getVireonPage();
        const savedUser = loadSession();
        if (savedUser) {
            try {
                currentUser = JSON.parse(savedUser);
                updateNavbarForLoggedInUser();
                resetSessionTimer();
-
-               // Restore to dashboard overview with a clean slate
-               showSection('dashboard');
            } catch (e) {
                clearSession();
            }
        }
 
-       initNavigation();
+       if (isDashboardPage()) {
+           initDashboardPage().catch(e => console.error('Dashboard init error:', e));
+       } else if (page === 'login' || page === 'register' || page === 'forgot-password') {
+           if (currentUser) window.location.href = '/Dashboard/Overview';
+           updateNavbarForLoggedOutUser();
+           const loginBtn = getEl('loginBtn');
+           if (loginBtn) loginBtn.style.display = 'none';
+       } else {
+           if (currentUser) syncNavbarContext();
+           else updateNavbarForLoggedOutUser();
+       }
+
+       initPageTransitions();
        initInteractions();
        initPasswordToggles();
        initFormValidation();
        initDeleteAccountGuard();
-       initTransferFxUi();
 
-       if (window.location.hash === '#section-introduction') {
-           applyIntroPanelState('explore', { scrollPanel: false });
+       if (document.getElementById('section-introduction')) {
+           const explore = document.getElementById('intro-explore');
+           if (explore && !explore.hidden) {
+               setTimeout(() => animateStats(), 500);
+           }
+       }
+
+       initMvcAnimations();
+       initArchCodeBlocks();
+       balanceSectionCardTypography();
+
+       if (getVireonPage() === 'home') {
+           initHomePageEffects();
        }
    } catch (e) {
        console.error("NEON AI: Init Error", e);
    }
-});
-
-// Tarayıcı geri/ileri veya bfcache ile dönüldüğünde de temiz başlangıç
-window.addEventListener('pageshow', (event) => {
-   if (!event.persisted || !currentUser) return;
-   showSection('dashboard');
 });
 
 function initNavigation() {
@@ -621,11 +890,9 @@ function initInteractions() {
    const loginBtn = getEl('loginBtn');
    if (loginBtn) {
       loginBtn.addEventListener('click', (e) => {
-         e.preventDefault();
          if (currentUser) {
-            showSection('dashboard');
-         } else {
-            openLoginModal(e);
+            e.preventDefault();
+            navigateWithTransition('/Dashboard/Overview');
          }
       });
    }
@@ -693,72 +960,20 @@ function initInteractions() {
 }
 
 function showSection(sectionId) {
-   document.querySelectorAll('.content-section, .landing-content-section').forEach(sec => {
-      sec.classList.remove('active');
-      sec.style.display = 'none';
-      sec.style.visibility = 'hidden';
-   });
-
-   const menuGrid = getEl('menuGrid');
-   const mainHeader = getEl('mainHeader');
-   const mainFooter = getEl('mainFooter');
-   const contentArea = getEl('contentArea');
-
-   if (menuGrid) { menuGrid.style.display = 'none'; menuGrid.style.visibility = 'hidden'; }
-   if (mainHeader) { mainHeader.style.display = 'none'; mainHeader.style.visibility = 'hidden'; }
-   if (mainFooter) { mainFooter.style.display = 'none'; mainFooter.style.visibility = 'hidden'; }
-   if (contentArea) contentArea.style.display = 'block';
-
-   const section = getEl(sectionId);
-   if (section) {
-      section.classList.add('active');
-      section.style.display = 'block';
-      section.style.opacity = '1';
-      section.style.visibility = 'visible';
-   } else {
-      backToMenu();
+   if (sectionId === 'dashboard') {
+      if (!currentUser) {
+         window.location.href = '/Account/Login';
+         return;
+      }
+      goToDashboard('dash-overview');
       return;
    }
-
-   if (sectionId === 'dashboard') {
-      document.body.classList.add('dashboard-active');
-      
-      document.querySelectorAll('.landing-content-section').forEach(sec => {
-         sec.style.display = 'none';
-         sec.style.visibility = 'hidden';
-      });
-      
-      const wrapper = document.querySelector('#dashboard .dashboard-wrapper');
-      if (wrapper) wrapper.style.display = 'flex';
-      
-      if (!currentUser) {
-         document.body.classList.remove('dashboard-active');
-         backToMenu();
-      } else {
-         resetDashboardState();
-         fetchDashboardData();
-      }
-      syncNavbarContext();
-   } else {
-      document.body.classList.remove('dashboard-active');
-      syncNavbarContext();
-   }
-
+   backToMenu();
 }
 
 function backToMenu() {
-   document.querySelectorAll('.content-section').forEach(sec => {
-      sec.classList.remove('active');
-      sec.style.display = 'none';
-      sec.style.visibility = 'hidden';
-   });
-   
-   document.querySelectorAll('.landing-content-section').forEach(sec => {
-      sec.classList.add('active');
-      sec.style.display = 'block';
-      sec.style.visibility = 'visible';
-      sec.style.opacity = '1';
-   });
+   window.location.href = '/';
+   return;
 
    const menuGrid = getEl('menuGrid');
    const mainHeader = getEl('mainHeader');
@@ -778,6 +993,270 @@ function backToMenu() {
    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ========== HOME PAGE — Premium effects ==========
+let homeStatusInterval = null;
+
+function animateHomeMetricChips() {
+   getEls('.home-metric-chip__val[data-count]').forEach((el, i) => {
+      const target = parseInt(el.dataset.count, 10);
+      if (Number.isNaN(target)) return;
+      let current = 0;
+      const step = Math.max(1, Math.ceil(target / 30));
+      el.textContent = '0';
+      setTimeout(() => {
+         const timer = setInterval(() => {
+            current += step;
+            if (current >= target) { current = target; clearInterval(timer); }
+            el.textContent = String(current);
+         }, 35);
+      }, 200 + i * 120);
+   });
+}
+
+function initHomeCardTilt() {
+   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+   getEls('.home-nav-card[data-tilt]').forEach(card => {
+      const accent = card.dataset.accent;
+      if (accent) card.style.setProperty('--card-accent', accent);
+
+      card.addEventListener('mousemove', (e) => {
+         const rect = card.getBoundingClientRect();
+         const x = e.clientX - rect.left;
+         const y = e.clientY - rect.top;
+         const cx = rect.width / 2;
+         const cy = rect.height / 2;
+         const rotateX = ((y - cy) / cy) * -9;
+         const rotateY = ((x - cx) / cx) * 9;
+         card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px) scale(1.02)`;
+         card.classList.add('is-tilted');
+         const glow = card.querySelector('.home-nav-card__glow');
+         if (glow) {
+            glow.style.setProperty('--mx', `${(x / rect.width) * 100}%`);
+            glow.style.setProperty('--my', `${(y / rect.height) * 100}%`);
+         }
+      });
+
+      card.addEventListener('mouseleave', () => {
+         card.style.transform = '';
+         card.classList.remove('is-tilted');
+      });
+   });
+}
+
+function initHomeStatusRotator() {
+   const el = getEl('homeStatusText');
+   if (!el) return;
+   if (homeStatusInterval) clearInterval(homeStatusInterval);
+
+   const messages = lang() === 'tr'
+      ? [
+         'Sistem hazır — modüllere erişmek için kartları seçin',
+         'ACID uyumlu işlem motoru aktif',
+         'Neon AI asistanı bankacılık panelinde',
+         'EF Core migration şeması yüklü',
+         'Fraud tespiti gerçek zamanlı izleniyor'
+      ]
+      : [
+         'System ready — select a card to access modules',
+         'ACID-compliant transaction engine active',
+         'Neon AI assistant available in dashboard',
+         'EF Core migration schema loaded',
+         'Fraud detection monitoring in real time'
+      ];
+
+   let idx = 0;
+   homeStatusInterval = setInterval(() => {
+      idx = (idx + 1) % messages.length;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(6px)';
+      setTimeout(() => {
+         el.textContent = messages[idx];
+         el.style.opacity = '1';
+         el.style.transform = 'translateY(0)';
+      }, 280);
+   }, 4200);
+
+   el.style.transition = 'opacity 0.28s ease, transform 0.28s ease';
+}
+
+/** Girişliyken ana menü normal kalsın; Giriş kartını gizle, panele navbar'dan git. */
+function syncHomeAuthCard() {
+   const card = getEl('homeAuthCard');
+   if (!card) return;
+
+   if (currentUser) {
+      card.style.display = 'none';
+      card.setAttribute('aria-hidden', 'true');
+   } else {
+      card.style.display = '';
+      card.removeAttribute('aria-hidden');
+      card.href = '/Account/Login';
+      card.classList.add('home-nav-card--cta');
+      card.classList.remove('home-nav-card--dashboard');
+   }
+}
+
+function applyCardDensityClass(el, compactClass, spaciousClass, textEl, options = {}) {
+   if (!el || !textEl) return;
+   el.classList.remove(compactClass, spaciousClass);
+
+   const hint = el.dataset.density;
+   if (hint === 'compact') { el.classList.add(compactClass); return; }
+   if (hint === 'spacious') { el.classList.add(spaciousClass); return; }
+   if (hint === 'normal') return;
+
+   const text = (textEl.textContent || '').trim();
+   const style = window.getComputedStyle(textEl);
+   const lineHeight = parseFloat(style.lineHeight) || 18;
+   const lines = textEl.scrollHeight / lineHeight;
+   const longThreshold = options.longChars ?? 58;
+   const shortThreshold = options.shortChars ?? 36;
+
+   if (lines > 2.15 || text.length > longThreshold) {
+      el.classList.add(compactClass);
+   } else if (lines < 1.55 && text.length < shortThreshold) {
+      el.classList.add(spaciousClass);
+   }
+}
+
+function balanceHomeNavCardTypography() {
+   getEls('.home-nav-card').forEach(card => {
+      if (card.classList.contains('home-nav-card--cta')) return;
+      applyCardDensityClass(
+         card,
+         'home-nav-card--compact',
+         'home-nav-card--spacious',
+         card.querySelector('.home-nav-card__desc'),
+         { longChars: 50, shortChars: 34 }
+      );
+   });
+}
+
+function balanceArchCodeBlockTypography() {
+   getEls('[data-arch-block]').forEach(block => {
+      if (block.classList.contains('arch-code-block--dense') || block.classList.contains('arch-code-block--relaxed')) return;
+      const count = block.querySelectorAll('.arch-file-list li').length;
+      block.classList.remove('arch-code-block--dense', 'arch-code-block--relaxed');
+      if (count >= 6) block.classList.add('arch-code-block--dense');
+      else if (count <= 4) block.classList.add('arch-code-block--relaxed');
+   });
+}
+
+function balanceSectionCardTypography() {
+   getEls('.value-card').forEach(card => {
+      applyCardDensityClass(card, 'value-card--compact', 'value-card--spacious', card.querySelector('p'));
+   });
+   getEls('.arch-feature-card').forEach(card => {
+      applyCardDensityClass(card, 'arch-feature-card--compact', 'arch-feature-card--spacious', card.querySelector('p'));
+   });
+   getEls('.team-card').forEach(card => {
+      const desc = card.querySelector('.team-info p:not(.team-role)');
+      applyCardDensityClass(card, 'team-card--compact', 'team-card--spacious', desc, { longChars: 42, shortChars: 28 });
+   });
+}
+
+function balanceCardTypography() {
+   balanceHomeNavCardTypography();
+   balanceArchCodeBlockTypography();
+   balanceSectionCardTypography();
+}
+
+function initHomePageEffects() {
+   syncHomeAuthCard();
+   animateHomeMetricChips();
+   initHomeStatusRotator();
+   balanceHomeNavCardTypography();
+}
+
+// ========== ARCH CODE BLOCKS — yumuşak giriş, tıklamada zıplama yok ==========
+function initArchCodeBlocks() {
+   const blocks = getEls('[data-arch-block]');
+   if (!blocks.length) return;
+
+   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      blocks.forEach(b => b.classList.add('is-arch-in'));
+      return;
+   }
+
+   const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+         if (!entry.isIntersecting) return;
+         const el = entry.target;
+         const idx = Number(el.dataset.archIndex || 0);
+         el.style.setProperty('--arch-delay', `${idx * 0.15}s`);
+         el.classList.add('is-arch-in');
+         observer.unobserve(el);
+      });
+   }, { threshold: 0.2, rootMargin: '0px 0px -20px 0px' });
+
+   blocks.forEach((block, i) => {
+      block.dataset.archIndex = String(i);
+      const rect = block.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.9) {
+         block.style.setProperty('--arch-delay', `${i * 0.15}s`);
+         block.classList.add('is-arch-in');
+      } else {
+         observer.observe(block);
+      }
+   });
+}
+
+// ========== MVC SCROLL & MICRO ANIMATIONS ==========
+function initMvcAnimations() {
+   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+   const revealSelectors = [
+      '.glass-card:not(.balance-hero)',
+      '.transfer-card',
+      '.intro-hero',
+      '.intro-tech',
+      '.section-header',
+      '.arch-diagram:not(.arch-code-map)',
+      '.contact-form',
+      '.gallery-item',
+      '.testimonial-card',
+      '.feature-card',
+      '.component-card',
+      '.desktop-feature',
+      '.about-stat-card'
+   ];
+
+   const seen = new WeakSet();
+   let revealIndex = 0;
+
+   revealSelectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+         if (seen.has(el)) return;
+         seen.add(el);
+         const variant = el.classList.contains('intro-hero') ? 'animate-reveal-scale'
+            : el.classList.contains('section-header') ? 'animate-reveal-left'
+            : 'animate-reveal';
+         el.classList.add(variant);
+         el.style.setProperty('--reveal-delay', `${Math.min(revealIndex * 0.07, 0.55)}s`);
+         revealIndex++;
+      });
+   });
+
+   const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+         if (!entry.isIntersecting) return;
+         entry.target.classList.add('is-revealed');
+         observer.unobserve(entry.target);
+      });
+   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+   document.querySelectorAll('.animate-reveal, .animate-reveal-left, .animate-reveal-scale').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.92) {
+         requestAnimationFrame(() => el.classList.add('is-revealed'));
+      } else {
+         observer.observe(el);
+      }
+   });
+
+}
+
 // Animate Stats
 function animateStats() {
    if (hasAnimatedStats) return;
@@ -795,7 +1274,12 @@ function animateStats() {
          const increment = target / 40;
          const timer = setInterval(() => {
             current += increment;
-            if (current >= target) { current = target; clearInterval(timer); }
+            if (current >= target) {
+               current = target;
+               clearInterval(timer);
+               el.classList.add('count-done');
+               setTimeout(() => el.classList.remove('count-done'), 500);
+            }
             el.textContent = Math.floor(current);
          }, 30);
       }, index * 200);
@@ -1000,10 +1484,9 @@ async function handleLogin(event) {
             resetSessionTimer();
 
             showToast(lang === 'tr' ? `Hoş geldin ${user.name}!` : `Welcome ${user.name}!`, 'success');
-            closeLoginModal();
+            if (typeof closeLoginModal === 'function') closeLoginModal();
             updateNavbarForLoggedInUser();
-            
-            setTimeout(() => showSection('dashboard'), 300);
+            setTimeout(() => { window.location.href = '/Dashboard/Overview'; }, 300);
         } else {
             const error = await response.json().catch(() => ({}));
             showToast(error.message || (lang === 'tr' ? 'E-posta veya şifre hatalı.' : 'Invalid email or password.'), 'error');
@@ -1084,7 +1567,7 @@ async function handleRegister(event) {
                         resetSessionTimer();
                         updateNavbarForLoggedInUser();
                         showToast(lang === 'tr' ? `Hoş geldin ${currentUser.name}!` : `Welcome ${currentUser.name}!`, 'success');
-                        setTimeout(() => showSection('dashboard'), 300);
+                        setTimeout(() => { window.location.href = '/Dashboard/Overview'; }, 300);
                         return;
                     }
                 } catch (e) {
@@ -1092,13 +1575,7 @@ async function handleRegister(event) {
                 }
             }
 
-            setTimeout(() => {
-                const loginEmail = getEl('loginEmail');
-                const loginPassword = getEl('loginPassword');
-                if (loginEmail) loginEmail.value = email;
-                if (loginPassword) loginPassword.value = password;
-                openLoginModal();
-            }, 800);
+            setTimeout(() => { window.location.href = '/Account/Login'; }, 800);
         } else {
             const error = await response.json().catch(() => ({}));
             showToast(error.message || (lang === 'tr' ? 'Kayıt başarısız.' : 'Registration failed.'), 'error');
@@ -1114,16 +1591,24 @@ async function handleRegister(event) {
 // ========== NAVBAR MANAGEMENT ==========
 /** Dashboard: Ana Menü görünür. Ana sayfa (giriş sonrası): buton sırası ters, Ana Menü gizli. */
 function syncNavbarContext() {
-    const onDashboard = document.body.classList.contains('dashboard-active');
+    const page = getVireonPage();
+    const isHome = page === 'home';
+    const onDashboard = document.body.classList.contains('dashboard-active') || page.startsWith('dashboard-');
     const backBtn = getEl('backToHomeBtn');
     const dashBtn = getEl('dashboardNavBtn');
     if (backBtn) {
-        backBtn.style.display = (currentUser && onDashboard) ? 'inline-flex' : 'none';
+        if (!isHome) {
+            backBtn.style.display = 'inline-flex';
+        } else {
+            backBtn.style.display = (currentUser && onDashboard) ? 'inline-flex' : 'none';
+        }
     }
     if (dashBtn) {
         dashBtn.style.display = (currentUser && !onDashboard) ? 'inline-flex' : 'none';
     }
-    document.body.classList.toggle('nav-landing-mode', !!(currentUser && !onDashboard));
+    document.body.classList.toggle('nav-landing-mode', !!(currentUser && !onDashboard && isHome));
+    document.body.classList.toggle('vireon-logged-in', !!currentUser);
+    syncHomeAuthCard();
 }
 
 function updateNavbarForLoggedInUser() {
@@ -1143,7 +1628,8 @@ function updateNavbarForLoggedInUser() {
     }
 
     // DB Explorer yalnızca admin kullanıcılarda görünür.
-    const dbExplorerMenu = document.querySelector('.sidebar-menu li[data-dash="dash-db-explorer"]');
+    const dbExplorerMenu = document.querySelector('.sidebar-menu li a[href*="DbExplorer"]')?.closest('li')
+        || document.querySelector('.sidebar-menu li[data-dash="dash-db-explorer"]');
     if (dbExplorerMenu) dbExplorerMenu.style.display = isAdmin ? 'flex' : 'none';
 
     // Admin kırmızı tema
@@ -1187,7 +1673,7 @@ function handleLogout() {
 
     showToast(lang === 'tr' ? 'Çıkış yapıldı.' : 'Logged out successfully.', 'info');
     updateNavbarForLoggedOutUser();
-    backToMenu();
+    window.location.href = '/Account/Login';
 }
 
 function escapeHtml(s) {
@@ -1303,6 +1789,14 @@ window.onLanguageChange = function () {
         if (transferTarget && transferTarget.value.trim()) lookupReceiverName();
         updateBalanceCurrencyDisplay(currentAccountCurrency);
         updateTransferFxPreview();
+        updateDepositFxPreview();
+        if (getVireonPage() === 'home') {
+            initHomeStatusRotator();
+            syncHomeAuthCard();
+            balanceHomeNavCardTypography();
+        }
+        balanceSectionCardTypography();
+        balanceArchCodeBlockTypography();
         if (currentUser) {
             fetchDashboardData();
             if (currentUser.role === 'Admin') loadAdminPanel();
@@ -1457,8 +1951,6 @@ function resetAllApplicationUi() {
     if (expensePieChart) { expensePieChart.destroy(); expensePieChart = null; }
     if (overviewChartInstance) { overviewChartInstance.destroy(); overviewChartInstance = null; }
 
-    switchDashSection('dash-overview');
-
     clearAllFormInputs();
     clearLimitsDisplay();
     clearAccountInfoDisplay();
@@ -1502,9 +1994,9 @@ function resetAllApplicationUi() {
     const historyBtn = getEl('floatingAiHistoryBtn');
     if (historyBtn) historyBtn.setAttribute('aria-expanded', 'false');
 
-    closeLoginModal();
-    closeRegisterModal();
-    closeForgotPasswordModal();
+    if (getEl('loginModal')) closeLoginModal();
+    if (getEl('registerModal')) closeRegisterModal();
+    if (getEl('forgotPasswordModal')) closeForgotPasswordModal();
     document.body.style.overflow = '';
 
     window.scrollTo(0, 0);
@@ -1516,27 +2008,14 @@ function resetDashboardState() {
 
 // ========== DASHBOARD NAVIGATION ==========
 function switchDashSection(targetId) {
-   document.querySelectorAll('.sidebar-menu li').forEach(li => {
-      const dash = li.getAttribute('data-dash');
-      li.classList.toggle('active', dash === targetId);
-   });
-
+   const url = DASHBOARD_ROUTES[targetId];
+   if (url) {
+      window.location.href = url;
+      return;
+   }
    document.querySelectorAll('.dash-sub-section').forEach(sec => sec.classList.remove('active'));
    const target = getEl(targetId);
    if (target) target.classList.add('active');
-
-   if (targetId === 'dash-qr') refreshQrCode();
-   if (targetId === 'dash-transfers') {
-      renderExchangeRatesPanel();
-      updateTransferFxPreview();
-   }
-   if (targetId === 'dash-db-explorer') fetchDatabaseStats();
-   if (targetId === 'dash-account-info') loadAccountInfo();
-   if (targetId === 'dash-admin') loadAdminPanel();
-   if (targetId === 'dash-history' && currentUser) fetchDashboardData();
-   if (targetId === 'dash-ai-coach') renderAiHistoryPanel();
-   if (targetId === 'dash-limits' && currentUser) fetchDashboardData();
-   if (targetId === 'dash-profile' && currentUser) populateProfileSettingsFields();
 }
 
 function populateProfileSettingsFields() {
@@ -1599,6 +2078,7 @@ async function fetchDashboardData() {
             if (balEl) balEl.textContent = formatNumber(displayBalance, 2, 2);
             if (accEl) accEl.textContent = userAccount.accountNumber ?? userAccount.AccountNumber;
             updateBalanceCurrencyDisplay(userCurrency);
+            renderBalanceFxBreakdown(displayBalance);
 
             // Fetch transactions
             const transactions = await fetchJsonOrThrow('/api/transactions');
@@ -1987,7 +2467,10 @@ function appendMessage(sender, text, id = null) {
 // ========== QR CODE ==========
 function refreshQrCode() {
    const accEl = getEl('dashAccountNo');
-   const accNo = accEl ? accEl.textContent.trim() : '';
+   let accNo = accEl ? accEl.textContent.trim() : '';
+   if (!accNo || accNo === '**** ****' || accNo === '-') {
+      accNo = currentUser?.accountNumber ?? currentUser?.AccountNumber ?? '';
+   }
    const payload = encodeURIComponent(`VIREON|PAY|TRY|IBAN|${accNo}|vireon.bank`);
    const img = getEl('qrPaymentImg');
    const lbl = getEl('qrAccountLabel');
@@ -1996,6 +2479,58 @@ function refreshQrCode() {
       img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=10&data=${payload}`;
       img.alt = 'QR Code';
    }
+}
+
+function initDepositFxUi() {
+   const curEl = getEl('depositCurrency');
+   if (curEl && !curEl.dataset.fxReady) {
+      curEl.dataset.fxReady = '1';
+      curEl.addEventListener('change', updateDepositFxPreview);
+   }
+   const amtEl = getEl('depositAmount');
+   if (amtEl && !amtEl.dataset.fxReady) {
+      amtEl.dataset.fxReady = '1';
+      amtEl.addEventListener('input', updateDepositFxPreview);
+   }
+}
+
+function updateDepositFxPreview() {
+   const preview = getEl('depositFxPreview');
+   const label = getEl('depositAmountLabel');
+   const curEl = getEl('depositCurrency');
+   const amtEl = getEl('depositAmount');
+   if (!preview || !curEl) return;
+
+   const depositCur = String(curEl.value || 'TRY').toUpperCase();
+   if (label) {
+      label.textContent = t(
+         `Yatırılacak Tutar (${currencySymbol(depositCur)}${depositCur})`,
+         `Amount (${currencySymbol(depositCur)}${depositCur})`
+      );
+   }
+
+   const amount = parseFloat(amtEl?.value);
+   if (!amount || amount <= 0) {
+      preview.innerHTML = `<span class="fx-preview-muted">${t('Tutar girince TRY karşılığı burada görünür.', 'Enter an amount to see TRY equivalent.')}</span>`;
+      preview.className = 'transfer-fx-preview';
+      return;
+   }
+
+   if (depositCur === 'TRY') {
+      preview.innerHTML = `<span class="fx-preview-same">${t('TRY hesabına doğrudan yatırım.', 'Direct deposit to TRY account.')}</span> <strong>${formatMoney(amount, 'TRY')}</strong>`;
+      preview.className = 'transfer-fx-preview is-same';
+      return;
+   }
+
+   const tryAmount = convertCurrencyClient(amount, depositCur, 'TRY');
+   if (tryAmount == null) {
+      preview.innerHTML = `<span class="fx-preview-muted">${t('Desteklenmeyen para birimi.', 'Unsupported currency.')}</span>`;
+      preview.className = 'transfer-fx-preview';
+      return;
+   }
+
+   preview.innerHTML = `<span>${formatMoney(amount, depositCur)}</span> → <strong>${formatMoney(tryAmount, 'TRY')}</strong> <span class="fx-preview-muted">(${t('simülasyon kuru', 'simulated rate')})</span>`;
+   preview.className = 'transfer-fx-preview';
 }
 
 // ========== DEPOSIT ==========
@@ -2010,8 +2545,18 @@ async function handleDepositRequest() {
       showToast(lang === 'tr' ? 'Geçerli tutar girin.' : 'Enter a valid amount.', 'warning');
       return;
    }
+   const depositCur = String(getEl('depositCurrency')?.value || 'TRY').toUpperCase();
+   const tryAmount = depositCur === 'TRY' ? amt : convertCurrencyClient(amt, depositCur, 'TRY');
+   if (tryAmount == null || tryAmount <= 0) {
+      showToast(lang === 'tr' ? 'Kur dönüşümü yapılamadı.' : 'Could not convert currency.', 'error');
+      return;
+   }
    const noteField = getEl('depositNote');
-   const note = noteField ? noteField.value : '';
+   const baseNote = noteField ? noteField.value : '';
+   const fxNote = depositCur !== 'TRY'
+      ? (lang === 'tr' ? ` (${formatMoney(amt, depositCur)} → TRY)` : ` (${formatMoney(amt, depositCur)} → TRY)`)
+      : '';
+   const note = (baseNote || (lang === 'tr' ? 'Para Yatırma' : 'Deposit')) + fxNote;
    
    const btn = document.querySelector('#dash-deposit .login-submit-btn');
    if (btn) btn.disabled = true;
@@ -2029,8 +2574,8 @@ async function handleDepositRequest() {
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify({
                accountNumber: accountNumber,
-               amount: amt,
-               description: note || (lang === 'tr' ? 'Para Yatırma' : 'Deposit')
+               amount: tryAmount,
+               description: note
            })
        });
 

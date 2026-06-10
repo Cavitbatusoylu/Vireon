@@ -73,6 +73,17 @@ npm run sync-db
 
 Diğer bilgisayarda: `git pull` → `dotnet run`
 
+## Arayüz (MVC sayfaları)
+
+| URL | Sayfa |
+|-----|-------|
+| `/` | Ana menü |
+| `/Home/Introduction` … `/Home/Contact` | Tanıtım alt sayfaları |
+| `/Account/Login` | Giriş |
+| `/Dashboard/Overview` … `/Dashboard/Admin` | Bankacılık modülleri |
+
+Rapor ve sunum akışı: [`docs/PROJE-RAPORU.md`](docs/PROJE-RAPORU.md), [`docs/SUNUM-AKISI.md`](docs/SUNUM-AKISI.md)
+
 ## Proje yapısı
 
 ```

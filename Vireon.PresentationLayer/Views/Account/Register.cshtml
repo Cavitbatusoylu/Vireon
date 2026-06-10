@@ -1,0 +1,41 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["PageKey"] = "register";
+}
+
+<div class="page-shell">
+    <div class="auth-panel">
+        <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="auth-panel__logo">
+        <h2 data-tr="Vireon'a Kayıt Ol" data-en="Sign Up to Vireon">Sign Up to Vireon</h2>
+        <form class="login-form" onsubmit="handleRegister(event)">
+            <div class="register-name-row">
+                <div class="form-group">
+                    <label data-tr="Ad" data-en="First Name">First Name</label>
+                    <input type="text" id="registerName" class="neon-input" placeholder="Ad" autocomplete="given-name" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Soyad" data-en="Last Name">Last Name</label>
+                    <input type="text" id="registerSurname" class="neon-input" placeholder="Soyad" autocomplete="family-name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label data-tr="E-posta" data-en="Email">Email</label>
+                <input type="email" id="registerEmail" class="neon-input" placeholder="ornek@vireon.com" required>
+            </div>
+            <div class="form-group">
+                <label data-tr="Şifre" data-en="Password">Password</label>
+                <input type="password" id="registerPassword" class="neon-input" required>
+            </div>
+            <div class="form-group">
+                <label data-tr="Şifre Tekrar" data-en="Confirm Password">Confirm Password</label>
+                <input type="password" id="registerConfirmPassword" class="neon-input" required>
+            </div>
+            <button type="submit" class="login-submit-btn" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</button>
+        </form>
+        <p class="modal-footer-text">
+            <a asp-controller="Account" asp-action="Login" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+        </p>
+        <p class="auth-back"><a asp-controller="Home" asp-action="Index" data-tr="← Ana menü" data-en="← Home">← Home</a></p>
+    </div>
+</div>

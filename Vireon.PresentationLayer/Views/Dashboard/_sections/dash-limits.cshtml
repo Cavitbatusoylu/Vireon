@@ -1,0 +1,50 @@
+﻿<div class="dash-sub-section active" id="dash-limits">
+                                <h2 class="sub-section-title" data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</h2>
+                                <div class="limits-dashboard-grid">
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Maksimum Limit" data-en="Max Daily Limit">Max Daily Limit</span>
+                                        <div class="limit-value">₺<span id="maxLimit">0</span></div>
+                                        <button type="button" class="edit-limit-btn" onclick="toggleLimitEdit()" data-tr="Düzenle" data-en="Edit">Edit</button>
+                                    </div>
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Kullanılan Limit" data-en="Used Limit">Used Limit</span>
+                                        <div class="limit-value limit-value-used">₺<span id="usedLimit">0</span></div>
+                                        <span class="limit-card-hint" id="limitUsagePct">0%</span>
+                                    </div>
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Kalan Limit" data-en="Remaining Limit">Remaining Limit</span>
+                                        <div class="limit-value limit-value-remaining">₺<span id="remainingLimit">0</span></div>
+                                        <span class="limit-card-hint" id="limitResetHint" data-tr="Bugün geçerli" data-en="Valid today">Valid today</span>
+                                    </div>
+                                </div>
+                                <div class="glass-card limit-progress-card">
+                                    <div class="limit-progress-header">
+                                        <span data-tr="Limit Kullanımı" data-en="Limit Usage">Limit Usage</span>
+                                        <span id="limitProgressLabel">0 / 0 TL</span>
+                                    </div>
+                                    <div class="limit-progress-track">
+                                        <div class="limit-progress-fill" id="limitProgressFill" style="width: 0%"></div>
+                                    </div>
+                                    <p class="limit-meta-row">
+                                        <span data-tr="Son sıfırlama:" data-en="Last reset:">Last reset:</span>
+                                        <strong id="lastResetDate">—</strong>
+                                    </p>
+                                    <p class="limit-meta-row limit-meta-muted" data-tr="Günlük transfer limitiniz her gece 00:00'da sıfırlanır. Para yatırma işlemleri bu limite dahil değildir."
+                                        data-en="Your daily transfer limit resets at midnight. Deposits are not counted toward this limit.">
+                                        Your daily transfer limit resets at midnight. Deposits are not counted toward this limit.
+                                    </p>
+                                </div>
+                                
+                                <!-- Edit Limit Form (Hidden by default) -->
+                                <div id="limitEditForm" class="glass-card transfer-card" style="display: none; margin-top: 20px;">
+                                    <div class="transfer-form">
+                                        <h3 data-tr="Limit Düzenle" data-en="Edit Limit">Edit Limit</h3>
+                                        <div class="form-group">
+                                            <label data-tr="Yeni Günlük Limit (₺)" data-en="New Daily Limit (₺)">New Daily Limit (₺)</label>
+                                            <input type="number" id="newMaxLimit" class="neon-input" placeholder="50000">
+                                        </div>
+                                        <button type="button" class="login-submit-btn" onclick="handleUpdateLimit()" data-tr="Güncelle" data-en="Update">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+

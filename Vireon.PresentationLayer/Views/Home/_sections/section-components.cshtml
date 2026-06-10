@@ -1,0 +1,270 @@
+﻿<div class="landing-content-section" id="section-components">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img">
+                    </div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Sistem Bileşenleri" data-en="System Components">System Components</h2>
+                    <p class="section-subtitle" data-tr="Vireon çekirdek bankacılık sistemi modülleri"
+                        data-en="Vireon core banking system modules">Vireon core banking system modules</p>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="switchTab(this, 'backend')" data-tr="Sunucu" data-en="Backend">Backend</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'database')" data-tr="Veritabanı" data-en="Database">Database</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'security')" data-tr="Güvenlik" data-en="Security">Security</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'desktop')" data-tr="Masaüstü" data-en="Desktop">Desktop</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="backend">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">💸</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Para Transfer Sistemi" data-en="Transfer System">Transfer System</h4>
+                                        <p data-tr="ACID uyumlu para transferi mekanizması. Bakiye kontrolü, limit kontrolü, fraud analizi ve ledger kaydı tek bir transaction içinde yürütülür."
+                                            data-en="ACID-compliant money transfer mechanism. Balance check, limit check, fraud analysis, and ledger entry all run within a single transaction.">
+                                            ACID-compliant money transfer mechanism.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">👤</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hesap Yönetimi" data-en="Account Management">Account Management</h4>
+                                        <p data-tr="Kullanıcı hesaplarının oluşturulması, bakiye takibi, hesap durumu yönetimi."
+                                            data-en="User account creation, balance tracking, and account status management.">
+                                            User account creation and balance tracking.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">⚡</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Günlük Limit Motoru" data-en="Daily Limit Engine">Daily Limit Engine</h4>
+                                        <p data-tr="Kullanıcı bazlı günlük transfer limiti izlenir, gün sonunda otomatik sıfırlanır ve limit aşımı girişimleri loglanır."
+                                            data-en="User-based daily transfer limits are tracked, auto-reset daily, and over-limit attempts are logged.">
+                                            User-based daily transfer limits are tracked, auto-reset daily, and over-limit attempts are logged.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📒</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Muhasebe Defteri Servisi" data-en="Ledger Service">Ledger Service</h4>
+                                        <p data-tr="Her transfer/deposit işleminde önceki ve yeni bakiyeyi kaydeden immutable ledger kayıtları oluşturulur."
+                                            data-en="Immutable ledger entries are generated for every transfer/deposit with previous and new balance values.">
+                                            Immutable ledger entries are generated for every transfer/deposit with previous and new balance values.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🤖</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Neon AI Entegrasyonu" data-en="Neon AI Integration">Neon AI Integration</h4>
+                                        <p data-tr="Neon AI sohbet endpoint'i ile kullanıcıya finansal akışlar hakkında rehberlik sağlanır. Neon AI modülü."
+                                            data-en="The Neon AI chat endpoint provides guidance on financial workflows. Neon AI module.">
+                                            The Neon AI chat endpoint provides guidance on financial workflows. Neon AI module.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="database">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🗄️</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Tablo Tasarımı" data-en="Table Design">Table Design</h4>
+                                        <p data-tr="Users, Accounts, Transactions ve LedgerEntries tabloları."
+                                            data-en="Highly optimized schema for financial consistency.">
+                                            Highly optimized schema for financial consistency.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔗</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="İlişkiler ve Kısıtlar" data-en="Relations & Constraints">Relations & Constraints</h4>
+                                        <p data-tr="Users-Accounts-DailyLimits-Transactions arasında foreign key, unique ve check constraint yapıları ile veri bütünlüğü korunur."
+                                            data-en="Data integrity is enforced with foreign keys, unique constraints, and check constraints across core tables.">
+                                            Data integrity is enforced with foreign keys, unique constraints, and check constraints across core tables.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🧬</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Migration Yönetimi" data-en="Migration Management">Migration Management</h4>
+                                        <p data-tr="Şema evrimi dört gruplu EF Core migration ile yönetilir; her adım tek bir sorumluluk alanını kapsar."
+                                            data-en="Schema evolution uses four grouped EF Core migrations, each covering a single responsibility.">
+                                            Schema evolution uses four grouped EF Core migrations, each covering a single responsibility.
+                                        </p>
+                                        <div class="migration-catalog-table-wrap">
+                                            <table class="vireon-table-modern migration-catalog-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-tr="Migration" data-en="Migration">Migration</th>
+                                                        <th data-tr="İçerik" data-en="Scope">Scope</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><code>InitialCreate</code></td>
+                                                        <td data-tr="Temel 6 tablo (Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries)" data-en="Core 6 tables (Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries)">Core 6 tables (Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>AddRowVersion</code></td>
+                                                        <td data-tr="Account concurrency token" data-en="Account concurrency token">Account concurrency token</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>AddUserRole</code></td>
+                                                        <td data-tr="Admin/User rolü" data-en="Admin/User role">Admin/User role</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>AddPlainPassword</code></td>
+                                                        <td data-tr="Demo okunabilir şifre sütunu" data-en="Demo readable password column">Demo readable password column</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📈</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Raporlama Sorguları" data-en="Reporting Queries">Reporting Queries</h4>
+                                        <p data-tr="Dashboard, admin panel ve hesap bilgi ekranları için optimize edilmiş okuma sorguları kullanılır."
+                                            data-en="Optimized read queries power dashboard, admin panel, and account information screens.">
+                                            Optimized read queries power dashboard, admin panel, and account information screens.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="security">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔒</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="ACID & Güvenlik" data-en="ACID & Security">ACID & Security</h4>
+                                        <p data-tr="İşlemlerin tutarlılığı ve veri güvenliği."
+                                            data-en="Ensuring transaction atomicity and data integrity.">
+                                            Ensuring transaction atomicity and data integrity.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔐</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Şifre Güvenliği" data-en="Password Security">Password Security</h4>
+                                        <p data-tr="Kullanıcı şifreleri BCrypt ile hashlenerek saklanır; düz metin parola veritabanında tutulmaz."
+                                            data-en="User passwords are stored with BCrypt hashing; plaintext passwords are never persisted.">
+                                            User passwords are stored with BCrypt hashing; plaintext passwords are never persisted.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🚨</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Fraud ve Anomali Kayıtları" data-en="Fraud & Anomaly Logging">Fraud & Anomaly Logging</h4>
+                                        <p data-tr="Yüksek tutar, gece transferi ve yüksek frekans gibi risk desenleri FraudLogs tablosuna kayıt edilir."
+                                            data-en="Risk patterns like high amount, night transfer, and high frequency are logged to FraudLogs.">
+                                            Risk patterns like high amount, night transfer, and high frequency are logged to FraudLogs.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🧱</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hata Dayanıklılığı" data-en="Error Resilience">Error Resilience</h4>
+                                        <p data-tr="Global middleware ile API hataları standartlaştırılır; frontend tarafında güvenli fallback ve toast geri bildirimi uygulanır."
+                                            data-en="API errors are standardized via global middleware, while frontend applies safe fallbacks and toast feedback.">
+                                            API errors are standardized via global middleware, while frontend applies safe fallbacks and toast feedback.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="desktop">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">💻</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Electron Masaüstü" data-en="Electron Desktop">Electron Desktop</h4>
+                                        <p data-tr="Kesintisiz masaüstü deneyimi ve yerel bildirimler."
+                                            data-en="Seamless desktop experience with native windowing and icons.">
+                                            Seamless desktop experience with native windowing and icons.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📦</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Paketleme ve Dağıtım" data-en="Packaging & Distribution">Packaging & Distribution</h4>
+                                        <p data-tr="Electron tabanlı build akışı ile Windows kurulum çıktıları alınır ve kurum içi dağıtım senaryoları desteklenir."
+                                            data-en="Electron-based build flow produces Windows installers and supports internal distribution scenarios.">
+                                            Electron-based build flow produces Windows installers and supports internal distribution scenarios.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔄</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Web ile Senkron Çalışma" data-en="Web-Desktop Sync">Web-Desktop Sync</h4>
+                                        <p data-tr="Masaüstü sürüm, aynı API altyapısını kullanarak web istemcisiyle eş zamanlı veri akışı ve tutarlı deneyim sunar."
+                                            data-en="The desktop app uses the same API backbone as web, ensuring synchronized data flow and consistent UX.">
+                                            The desktop app uses the same API backbone as web, ensuring synchronized data flow and consistent UX.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+

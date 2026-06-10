@@ -1,0 +1,57 @@
+﻿<script>
+    if (typeof window.currentLang === 'undefined') {
+        window.currentLang = localStorage.getItem('vireon-lang') || 'en';
+    }
+
+    function switchLang(lang) {
+        window.currentLang = lang;
+        document.documentElement.lang = lang === 'tr' ? 'tr' : 'en';
+        document.getElementById('langTR').classList.toggle('active', lang === 'tr');
+        document.getElementById('langEN').classList.toggle('active', lang === 'en');
+
+        document.querySelectorAll('[data-tr][data-en]').forEach(el => {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'OPTION') return;
+            const text = el.getAttribute('data-' + lang);
+            if (text == null) return;
+            if (text.includes('<')) el.innerHTML = text;
+            else el.textContent = text;
+        });
+
+        document.querySelectorAll('[data-tr-placeholder][data-en-placeholder]').forEach(el => {
+            el.placeholder = el.getAttribute('data-' + lang + '-placeholder') || '';
+        });
+
+        document.querySelectorAll('[data-tr-title][data-en-title]').forEach(el => {
+            el.title = el.getAttribute('data-' + lang + '-title') || '';
+        });
+
+        document.querySelectorAll('[data-tr-aria-label][data-en-aria-label]').forEach(el => {
+            el.setAttribute('aria-label', el.getAttribute('data-' + lang + '-aria-label') || '');
+        });
+
+        localStorage.setItem('vireon-lang', lang);
+        if (typeof window.onLanguageChange === 'function') window.onLanguageChange();
+    }
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('vireon-theme', next);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('vireon-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        switchLang(window.currentLang);
+        const booted = sessionStorage.getItem('vireon-booted') === '1';
+        const ls = document.getElementById('loadingScreen');
+        if (booted && ls) {
+            ls.classList.remove('show');
+            ls.classList.add('hidden');
+        } else if (ls) {
+            setTimeout(() => ls.classList.remove('show'), 600);
+        }
+    });
+</script>
+

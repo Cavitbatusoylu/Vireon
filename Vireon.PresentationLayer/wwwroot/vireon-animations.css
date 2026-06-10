@@ -1,0 +1,729 @@
+/* ========== VIREON — Extended UI Animations ========== */
+
+/* ----- Keyframes ----- */
+@keyframes mvcFadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mvcFadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mvcSlideLeft {
+    from { opacity: 0; transform: translateX(-32px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes mvcSlideRight {
+    from { opacity: 0; transform: translateX(32px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes mvcScaleIn {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes mvcBounceIn {
+    0%   { opacity: 0; transform: scale(0.7); }
+    60%  { opacity: 1; transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+
+@keyframes mvcPopIn {
+    0%   { opacity: 0; transform: scale(0.5); }
+    70%  { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes mvcGlowPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(0, 180, 216, 0); }
+    50%      { box-shadow: 0 0 28px rgba(0, 180, 216, 0.35); }
+}
+
+@keyframes mvcLogoFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33%      { transform: translateY(-8px) rotate(-2deg); }
+    66%      { transform: translateY(-4px) rotate(2deg); }
+}
+
+@keyframes mvcShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes mvcBorderGlow {
+    0%, 100% { border-color: var(--glass-border); }
+    50%      { border-color: rgba(0, 180, 216, 0.55); }
+}
+
+@keyframes mvcCountPop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.15); color: var(--primary); }
+    100% { transform: scale(1); }
+}
+
+@keyframes mvcRipple {
+    0%   { transform: scale(0); opacity: 0.6; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+@keyframes mvcNavbarDrop {
+    from { opacity: 0; transform: translateY(-100%); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mvcHeroTitle {
+    from { opacity: 0; letter-spacing: 0.2em; transform: translateY(16px); }
+    to   { opacity: 1; letter-spacing: 0.06em; transform: translateY(0); }
+}
+
+@keyframes mvcCardShine {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+}
+
+@keyframes mvcBalanceGlow {
+    0%, 100% { text-shadow: 0 0 0 transparent; }
+    50%      { text-shadow: 0 0 24px rgba(0, 180, 216, 0.45); }
+}
+
+@keyframes mvcQrPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.02); }
+}
+
+@keyframes mvcOrbDrift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(12px, -8px) scale(1.05); }
+}
+
+/* ----- Page entrance ----- */
+.vireon-page {
+    animation: mvcFadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.top-navbar {
+    animation: mvcNavbarDrop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ----- Home hero ----- */
+.home-hero__logo {
+    animation: mvcLogoFloat 5s ease-in-out infinite, mvcScaleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.home-hero__title {
+    animation: mvcHeroTitle 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.home-hero__subtitle {
+    animation: mvcFadeUp 0.7s ease-out 0.3s both;
+}
+
+/* ----- Home nav cards — stagger ----- */
+.home-nav-card {
+    opacity: 0;
+    animation: mvcBounceIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.home-nav-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    pointer-events: none;
+}
+
+.home-nav-card:hover::after {
+    animation: mvcCardShine 0.95s ease-out;
+}
+
+.home-nav-card:nth-child(1) { animation-delay: 0.2s; }
+.home-nav-card:nth-child(2) { animation-delay: 0.34s; }
+.home-nav-card:nth-child(3) { animation-delay: 0.48s; }
+.home-nav-card:nth-child(4) { animation-delay: 0.62s; }
+.home-nav-card:nth-child(5) { animation-delay: 0.76s; }
+.home-nav-card:nth-child(6) { animation-delay: 0.9s; }
+.home-nav-card:nth-child(7) { animation-delay: 1.04s; }
+.home-nav-card:nth-child(8) { animation-delay: 1.18s; }
+
+.home-nav-card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s;
+}
+
+.home-nav-card--cta {
+    animation-name: mvcBounceIn, mvcBorderGlow;
+    animation-duration: 0.9s, 4s;
+    animation-delay: 0.7s, 1.6s;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: forwards, none;
+}
+
+.home-nav-card__badge {
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: homeBadgePulse 5.5s ease-in-out infinite;
+}
+
+.home-nav-card:nth-child(1) .home-nav-card__badge { animation-delay: 0s; }
+.home-nav-card:nth-child(2) .home-nav-card__badge { animation-delay: 0.75s; }
+.home-nav-card:nth-child(3) .home-nav-card__badge { animation-delay: 1.5s; }
+.home-nav-card:nth-child(4) .home-nav-card__badge { animation-delay: 2.25s; }
+.home-nav-card:nth-child(5) .home-nav-card__badge { animation-delay: 3s; }
+.home-nav-card:nth-child(6) .home-nav-card__badge { animation-delay: 3.75s; }
+.home-nav-card:nth-child(7) .home-nav-card__badge { animation-delay: 4.5s; }
+.home-nav-card:nth-child(8) .home-nav-card__badge { animation-delay: 5.25s; }
+
+@keyframes homeBadgePulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(0, 180, 216, 0); }
+    50%      { box-shadow: 0 0 14px rgba(0, 180, 216, 0.35); }
+}
+
+.home-nav-card:hover .home-nav-card__badge {
+    transform: none;
+}
+
+/* ----- Section page shell ----- */
+.page-shell__back {
+    animation: mvcSlideLeft 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+    transition: transform 0.32s ease, border-color 0.28s, background 0.28s, color 0.28s;
+}
+
+.page-shell__back:hover {
+    transform: translateX(-4px);
+}
+
+.page-shell__breadcrumb {
+    animation: mvcFadeDown 0.68s ease-out 0.2s both;
+}
+
+.page-shell__title {
+    animation: mvcFadeUp 0.78s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+
+.page-shell__body {
+    animation: mvcFadeUp 0.85s ease-out 0.42s both;
+}
+
+.page-footer {
+    animation: mvcFadeUp 0.68s ease-out 0.65s both;
+}
+
+/* ----- Auth panel ----- */
+.auth-panel {
+    animation: mvcBounceIn 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.auth-panel__logo {
+    animation: mvcLogoFloat 4s ease-in-out infinite;
+}
+
+.auth-panel .form-group {
+    opacity: 0;
+    animation: mvcFadeUp 0.5s ease-out forwards;
+}
+
+.auth-panel .form-group:nth-child(1) { animation-delay: 0.35s; }
+.auth-panel .form-group:nth-child(2) { animation-delay: 0.42s; }
+.auth-panel .form-group:nth-child(3) { animation-delay: 0.49s; }
+.auth-panel .form-group:nth-child(4) { animation-delay: 0.56s; }
+.auth-panel .form-group:nth-child(5) { animation-delay: 0.63s; }
+
+.login-submit-btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.3s ease, filter 0.25s;
+}
+
+.login-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 180, 216, 0.35);
+}
+
+.login-submit-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+/* ----- Dashboard ----- */
+.vireon-page--dashboard .dashboard-topbar {
+    animation: mvcSlideLeft 0.5s ease-out both;
+}
+
+.vireon-page--dashboard .dash-sidebar {
+    animation: mvcSlideLeft 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.vireon-page--dashboard .dash-content {
+    animation: mvcFadeUp 0.65s ease-out 0.2s both;
+}
+
+.sidebar-menu li {
+    opacity: 0;
+    animation: mvcSlideLeft 0.45s ease-out forwards;
+}
+
+.sidebar-menu li:nth-child(1)  { animation-delay: 0.12s; }
+.sidebar-menu li:nth-child(2)  { animation-delay: 0.16s; }
+.sidebar-menu li:nth-child(3)  { animation-delay: 0.20s; }
+.sidebar-menu li:nth-child(4)  { animation-delay: 0.24s; }
+.sidebar-menu li:nth-child(5)  { animation-delay: 0.28s; }
+.sidebar-menu li:nth-child(6)  { animation-delay: 0.32s; }
+.sidebar-menu li:nth-child(7)  { animation-delay: 0.36s; }
+.sidebar-menu li:nth-child(8)  { animation-delay: 0.40s; }
+.sidebar-menu li:nth-child(9)  { animation-delay: 0.44s; }
+.sidebar-menu li:nth-child(10) { animation-delay: 0.48s; }
+.sidebar-menu li:nth-child(11) { animation-delay: 0.52s; }
+.sidebar-menu li:nth-child(12) { animation-delay: 0.56s; }
+.sidebar-menu li:nth-child(13) { animation-delay: 0.60s; }
+.sidebar-menu li:nth-child(14) { animation-delay: 0.64s; }
+.sidebar-menu li:nth-child(15) { animation-delay: 0.68s; }
+
+.sidebar-menu li a {
+    transition: transform 0.25s ease, padding-left 0.25s ease, background 0.25s;
+}
+
+.sidebar-menu li a:hover {
+    transform: translateX(4px);
+}
+
+.balance-hero {
+    animation: mvcScaleIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both, mvcGlowPulse 4s ease-in-out 1s infinite;
+}
+
+.hero-amount {
+    animation: mvcBalanceGlow 3s ease-in-out 1.5s infinite;
+}
+
+.fx-balance-chip {
+    opacity: 0;
+    animation: mvcPopIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.fx-balance-chip:nth-child(1) { animation-delay: 0.6s; }
+.fx-balance-chip:nth-child(2) { animation-delay: 0.72s; }
+.fx-balance-chip:nth-child(3) { animation-delay: 0.84s; }
+.fx-balance-chip:nth-child(4) { animation-delay: 0.96s; }
+
+.chart-card {
+    animation: mvcFadeUp 0.6s ease-out both;
+}
+
+.charts-row-modern .chart-card:nth-child(1) { animation-delay: 0.25s; }
+.charts-row-modern .chart-card:nth-child(2) { animation-delay: 0.38s; }
+
+.recent-tx-modern {
+    animation: mvcFadeUp 0.6s ease-out 0.45s both;
+}
+
+.sub-section-title {
+    animation: mvcSlideRight 0.55s ease-out both;
+}
+
+/* ----- Section headings ----- */
+.section-title {
+    animation: mvcFadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.section-subtitle {
+    animation: mvcFadeUp 0.55s ease-out 0.18s both;
+}
+
+.intro-headline {
+    animation: mvcHeroTitle 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.intro-badge {
+    animation: mvcPopIn 0.5s ease-out 0.05s both;
+}
+
+.intro-cta-primary,
+.intro-cta-secondary {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.intro-cta-primary:hover,
+.intro-cta-secondary:hover {
+    transform: translateY(-3px) scale(1.03);
+}
+
+.tab-btn,
+.filter-btn {
+    transition: transform 0.25s ease, background 0.25s, color 0.25s;
+}
+
+.tab-btn:hover,
+.filter-btn:hover {
+    transform: translateY(-2px);
+}
+
+.tab-btn.active {
+    animation: mvcPopIn 0.35s ease-out;
+}
+
+.navbar-brand-link {
+    transition: transform 0.3s ease, filter 0.3s;
+}
+
+.navbar-brand-link:hover {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 12px rgba(0, 180, 216, 0.4));
+}
+
+.navbar-logo {
+    transition: transform 0.4s ease;
+}
+
+.navbar-brand-link:hover .navbar-logo {
+    transform: rotate(-8deg) scale(1.08);
+}
+
+/* ----- Section content cards ----- */
+.team-card {
+    opacity: 0;
+    animation: mvcBounceIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.3s;
+}
+
+.team-card:nth-child(1) { animation-delay: 0.15s; }
+.team-card:nth-child(2) { animation-delay: 0.28s; }
+.team-card:nth-child(3) { animation-delay: 0.41s; }
+
+.team-card:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+.team-avatar {
+    animation: mvcGlowPulse 3s ease-in-out infinite;
+    transition: transform 0.4s ease;
+}
+
+.team-card:hover .team-avatar {
+    transform: scale(1.1) rotate(6deg);
+}
+
+.value-card {
+    opacity: 0;
+    animation: mvcFadeUp 0.6s ease-out forwards;
+    transition: transform 0.35s ease, box-shadow 0.35s;
+}
+
+.value-card:nth-child(1) { animation-delay: 0.1s; }
+.value-card:nth-child(2) { animation-delay: 0.22s; }
+.value-card:nth-child(3) { animation-delay: 0.34s; }
+
+.value-card:hover {
+    transform: translateY(-6px);
+}
+
+.intro-metrics .metric-item {
+    opacity: 0;
+    animation: mvcScaleIn 0.55s ease-out forwards;
+}
+
+.intro-metrics .metric-item:nth-child(1) { animation-delay: 0.2s; }
+.intro-metrics .metric-item:nth-child(3) { animation-delay: 0.32s; }
+.intro-metrics .metric-item:nth-child(5) { animation-delay: 0.44s; }
+.intro-metrics .metric-item:nth-child(7) { animation-delay: 0.56s; }
+
+.metric-value.count-done {
+    animation: mvcCountPop 0.45s ease-out;
+}
+
+.intro-floating-card {
+    animation-duration: 5s, 0.7s;
+}
+
+.intro-hero-visual .card-1 { animation-delay: 0s, 0.4s; }
+.intro-hero-visual .card-2 { animation-delay: 1.5s, 0.55s; }
+.intro-hero-visual .card-3 { animation-delay: 3s, 0.7s; }
+
+.arch-feature-card {
+    opacity: 0;
+    animation: mvcFadeUp 0.55s ease-out forwards;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.arch-features .arch-feature-card:nth-child(1) { animation-delay: 0.1s; }
+.arch-features .arch-feature-card:nth-child(2) { animation-delay: 0.2s; }
+.arch-features .arch-feature-card:nth-child(3) { animation-delay: 0.3s; }
+
+.arch-feature-card:hover {
+    transform: translateY(-4px);
+}
+
+.arch-code-map.animate-reveal,
+.arch-code-map.glass-card {
+    transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.4s ease;
+}
+
+.arch-code-map.glass-card:hover {
+    transform: none !important;
+    box-shadow: none;
+}
+
+/* ----- Scroll reveal (JS adds .is-revealed) ----- */
+.animate-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0s);
+}
+
+.animate-reveal.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.animate-reveal-left {
+    opacity: 0;
+    transform: translateX(-28px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transition-delay: var(--reveal-delay, 0s);
+}
+
+.animate-reveal-left.is-revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.animate-reveal-scale {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0s);
+}
+
+.animate-reveal-scale.is-revealed {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ----- Glass cards global ----- */
+.glass-card {
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.35s ease,
+                border-color 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* ----- Navbar buttons ----- */
+.login-btn,
+.lang-btn,
+.theme-toggle {
+    transition: transform 0.25s ease, background 0.25s, box-shadow 0.25s;
+}
+
+.login-btn:hover,
+.lang-btn:hover,
+.theme-toggle:hover {
+    transform: translateY(-2px) scale(1.04);
+}
+
+.lang-btn.active {
+    animation: mvcPopIn 0.35s ease-out;
+}
+
+/* ----- AI launcher ----- */
+.ai-chat-launcher {
+    animation: mvcGlowPulse 2.5s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+.ai-chat-launcher:hover {
+    transform: scale(1.12);
+}
+
+/* ----- QR ----- */
+#qrPaymentImg {
+    animation: mvcQrPulse 3s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+#qrPaymentImg:hover {
+    transform: scale(1.05);
+}
+
+/* ----- Toast ----- */
+.toast {
+    animation: mvcSlideRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toast.show {
+    animation: mvcBounceIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ----- Ambient orbs extra motion ----- */
+.orb {
+    animation: float 20s ease-in-out infinite, mvcOrbDrift 8s ease-in-out infinite;
+}
+
+.orb-2 { animation-delay: -4s, -2s; }
+.orb-3 { animation-delay: -8s, -5s; }
+
+/* ----- Click ripple ----- */
+.click-ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+    animation: mvcRipple 0.6s ease-out forwards;
+    z-index: 2;
+}
+
+.home-nav-card,
+.login-submit-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ----- Transaction list items (JS-rendered) ----- */
+.tx-list-modern .tx-item {
+    animation: mvcFadeUp 0.45s ease-out both;
+}
+
+.tx-list-modern .tx-item:nth-child(1) { animation-delay: 0.05s; }
+.tx-list-modern .tx-item:nth-child(2) { animation-delay: 0.10s; }
+.tx-list-modern .tx-item:nth-child(3) { animation-delay: 0.15s; }
+.tx-list-modern .tx-item:nth-child(4) { animation-delay: 0.20s; }
+.tx-list-modern .tx-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* ----- Page transition (internal navigation) ----- */
+.page-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.page-transition.is-exiting,
+.page-transition.is-entering {
+    opacity: 1;
+}
+
+.page-transition.is-exiting {
+    pointer-events: auto;
+}
+
+.page-transition__sweep {
+    position: absolute;
+    inset: 0;
+    background: var(--dark-1, #0a0e17);
+    transform: scaleX(0);
+    transform-origin: left center;
+}
+
+.page-transition__glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, var(--primary, #00b4d8), transparent);
+    box-shadow: 0 0 28px var(--primary, #00b4d8);
+    opacity: 0;
+}
+
+.page-transition.is-exiting .page-transition__sweep {
+    animation: pageSweepOut 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.page-transition.is-exiting .page-transition__glow {
+    animation: pageGlowTravel 0.48s ease forwards;
+}
+
+.page-transition.is-entering .page-transition__sweep {
+    transform: scaleX(1);
+    transform-origin: right center;
+    animation: pageSweepIn 0.62s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes pageSweepOut {
+    to { transform: scaleX(1); }
+}
+
+@keyframes pageSweepIn {
+    to { transform: scaleX(0); }
+}
+
+@keyframes pageGlowTravel {
+    0%   { left: 0; opacity: 1; }
+    100% { left: 100%; opacity: 0.6; }
+}
+
+html.vireon-page-enter .container,
+html.vireon-page-enter .page-shell,
+html.vireon-page-enter .auth-shell {
+    animation: pageContentReveal 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageContentReveal {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+html.vireon-return-visit .loading-screen {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* ----- Loading screen ----- */
+.loading-logo {
+    animation: mvcLogoFloat 2s ease-in-out infinite, mvcScaleIn 0.6s ease-out both;
+}
+
+.loader-ring {
+    animation: spin 1s linear infinite, mvcGlowPulse 2s ease-in-out infinite;
+}
+
+.loading-text {
+    animation: mvcFadeUp 0.5s ease-out 0.3s both;
+}
+
+/* ----- Reduced motion ----- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .animate-reveal,
+    .animate-reveal-left,
+    .animate-reveal-scale {
+        opacity: 1;
+        transform: none;
+    }
+
+    .page-transition {
+        display: none !important;
+    }
+
+    html.vireon-page-enter .container,
+    html.vireon-page-enter .page-shell,
+    html.vireon-page-enter .auth-shell {
+        opacity: 1;
+        transform: none;
+    }
+}

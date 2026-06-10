@@ -1,0 +1,118 @@
+﻿<div class="dash-sub-section active" id="dash-admin">
+                                <div class="card-header-modern admin-panel-header">
+                                    <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel" style="margin:0;">🛡️ Admin Panel</h2>
+                                    <button type="button" class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh admin panel">↻</button>
+                                </div>
+                                <p class="dash-hint admin-last-updated" id="adminLastUpdated" data-tr="Veriler yükleniyor..." data-en="Loading data...">Loading data...</p>
+                                
+                                <!-- System Stats -->
+                                <div class="admin-stats-grid" id="adminStatsGrid">
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">👥</span>
+                                        <span class="admin-stat-value" id="adminTotalUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Kullanıcı" data-en="Total Users">Total Users</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💳</span>
+                                        <span class="admin-stat-value" id="adminTotalAccounts">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Hesap" data-en="Total Accounts">Total Accounts</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">📊</span>
+                                        <span class="admin-stat-value" id="adminTotalTx">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💵</span>
+                                        <span class="admin-stat-value" id="adminTotalDeposits">0</span>
+                                        <span class="admin-stat-label" data-tr="Para Yatırma" data-en="Deposits">Deposits</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">↔️</span>
+                                        <span class="admin-stat-value" id="adminTotalTransfers">0</span>
+                                        <span class="admin-stat-label" data-tr="Transferler" data-en="Transfers">Transfers</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💰</span>
+                                        <span class="admin-stat-value" id="adminTotalBalance">₺0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Bakiye" data-en="Total Balance">Total Balance</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">🚨</span>
+                                        <span class="admin-stat-value" id="adminTotalFraud">0</span>
+                                        <span class="admin-stat-label" data-tr="Fraud Kayıtları" data-en="Fraud Logs">Fraud Logs</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">📝</span>
+                                        <span class="admin-stat-value" id="adminTotalLedger">0</span>
+                                        <span class="admin-stat-label" data-tr="Muhasebe Kayıtları" data-en="Ledger Entries">Ledger Entries</span>
+                                    </div>
+                                </div>
+
+                                <!-- All Users Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Tüm Kullanıcılar" data-en="All Users">All Users</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminUsersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th data-tr="Ad Soyad" data-en="Name">Name</th>
+                                                    <th data-tr="E-posta" data-en="Email">Email</th>
+                                                    <th data-tr="Hesap No" data-en="Account No">Account No</th>
+                                                    <th data-tr="Bakiye" data-en="Balance">Balance</th>
+                                                    <th data-tr="İşlem" data-en="Tx Count">Tx Count</th>
+                                                    <th data-tr="Rol" data-en="Role">Role</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminUsersBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- All Transactions Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Tüm İşlem Kayıtları" data-en="All Transaction Records">All Transaction Records</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminTxTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th data-tr="Tür" data-en="Type">Type</th>
+                                                    <th data-tr="Gönderen" data-en="Sender">Sender</th>
+                                                    <th data-tr="Alıcı" data-en="Receiver">Receiver</th>
+                                                    <th data-tr="Tutar" data-en="Amount">Amount</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                    <th data-tr="Durum" data-en="Status">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminTxBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Suspicious Transactions / Fraud Logs -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="🚨 Şüpheli İşlemler" data-en="🚨 Suspicious Transactions">🚨 Suspicious Transactions</h4>
+                                        <button class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh fraud logs">↻</button>
+                                    </div>
+                                    <p class="dash-hint" data-tr="Yüksek tutarlı, gece (00:00-05:00) veya sık tekrarlayan işlemler otomatik olarak buraya kaydedilir." data-en="High-value, night-time (00:00-05:00) or frequent transactions are automatically logged here.">High-value, night-time or frequent transactions are logged here.</p>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminFraudTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th data-tr="Hesap" data-en="Account">Account</th>
+                                                    <th data-tr="Risk Tipi" data-en="Risk Type">Risk Type</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminFraudBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+

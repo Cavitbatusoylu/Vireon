@@ -21,7 +21,7 @@ namespace Vireon.PresentationLayer.Controllers
         // Yapay Zeka (AI) Servisi
         private readonly FraudModelService _fraudModelService;
 
-        // Vezne açıldığında Çevirmen, Güvenlik, İşlem Müdürü ve artık AI Analist masaya gelir
+        // Dependency Injection
         public TransfersController(IMapper mapper, IValidator<TransferRequestDto> validator,
             ITransactionService transactionService, FraudModelService fraudModelService)
         {
@@ -34,15 +34,14 @@ namespace Vireon.PresentationLayer.Controllers
         [HttpPost("send")]
         public IActionResult SendTransfer([FromBody] TransferRequestDto requestDto)
         {
-            // 1. GÜVENLİK (FluentValidation)
+            // Validasyon kontrolü
             var validationResult = _validator.Validate(requestDto);
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
             }
 
-            // 2. YAPAY ZEKA ANALİZİ - risk skoru kontrolü
-            // İşlemi iş katmanına göndermeden önce AI "Şüpheli mi?" diye kontrol ediyor
+            // Risk skoru kontrolü (Fraud)
             var hour = DateTime.Now.Hour;
             var frequency = _transactionService.GetRecentTransactionCount(requestDto.SenderAccountId, 60);
             var (isFraud, probability) = _fraudModelService.Predict((float)requestDto.Amount, hour, frequency);
@@ -63,10 +62,10 @@ namespace Vireon.PresentationLayer.Controllers
                 });
             }
 
-            // 3. ÇEVİRİ (DTO -> Entity)
+            // DTO -> Entity dönüşümü
             var transactionEntity = _mapper.Map<Transaction>(requestDto);
 
-            // 4. İŞ KATMANINA İLETİM
+            // İşlemi kaydet
             try
             {
                 _transactionService.ProcessTransaction(transactionEntity);

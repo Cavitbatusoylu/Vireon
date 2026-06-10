@@ -1,0 +1,188 @@
+﻿@model PageViewModel
+@{
+    ViewData["Title"] = "Vireon — Ana Menü";
+    ViewData["PageKey"] = Model.PageKey;
+}
+
+<div class="page-shell home-stage">
+    <div class="home-bg-fx" aria-hidden="true">
+        <div class="home-bg-fx__ring home-bg-fx__ring--1"></div>
+        <div class="home-bg-fx__ring home-bg-fx__ring--2"></div>
+        <div class="home-bg-fx__scan"></div>
+        <div class="home-bg-fx__particles">
+            @for (var i = 0; i < 18; i++) { <span class="home-particle" style="--i:@i"></span> }
+        </div>
+    </div>
+
+    <section class="home-hero">
+        <div class="home-hero__logo-wrap">
+            <div class="home-hero__ring"></div>
+            <div class="home-hero__ring home-hero__ring--2"></div>
+            <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="home-hero__logo">
+        </div>
+        <p class="home-hero__eyebrow" data-tr="Immutable Ledger · ACID · EF Core" data-en="Immutable Ledger · ACID · EF Core">Immutable Ledger · ACID · EF Core</p>
+        <h1 class="home-hero__title">
+            <span class="home-hero__title-text">Vireon</span>
+        </h1>
+        <p class="home-hero__subtitle"
+           data-tr="Katmanlı ASP.NET Core MVC ile geliştirilmiş dijital banka çekirdek sistemi simülasyonu."
+           data-en="Digital bank core system simulation built with layered ASP.NET Core MVC.">
+            Digital bank core system simulation built with layered ASP.NET Core MVC.
+        </p>
+        <div class="home-status-bar" id="homeStatusBar">
+            <span class="home-status-bar__dot"></span>
+            <span class="home-status-bar__text" id="homeStatusText" data-tr="Sistem hazır — modüllere erişmek için kartları seçin"
+                  data-en="System ready — select a card to access modules">System ready — select a card to access modules</span>
+        </div>
+    </section>
+
+    <div class="home-section-flow home-section-flow--short" aria-hidden="true">
+        <span class="home-section-flow__dot"></span>
+        <span class="home-section-flow__line"></span>
+        <span class="home-section-flow__dot"></span>
+    </div>
+
+    <div class="home-metrics-ticker" aria-label="System metrics">
+        <div class="home-metric-chip">
+            <span class="home-metric-chip__val" data-count="6">0</span>
+            <span class="home-metric-chip__lbl" data-tr="DB Tablosu" data-en="DB Tables">DB Tables</span>
+        </div>
+        <div class="home-metric-chip">
+            <span class="home-metric-chip__val" data-count="4">0</span>
+            <span class="home-metric-chip__lbl" data-tr="Migration" data-en="Migrations">Migrations</span>
+        </div>
+        <div class="home-metric-chip">
+            <span class="home-metric-chip__val" data-count="15">0</span>
+            <span class="home-metric-chip__lbl" data-tr="Sayfa" data-en="Pages">Pages</span>
+        </div>
+        <div class="home-metric-chip home-metric-chip--live">
+            <span class="home-metric-chip__val home-metric-chip__val--text">24/7</span>
+            <span class="home-metric-chip__lbl" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+        </div>
+    </div>
+
+    <div class="home-section-flow home-section-flow--short" aria-hidden="true">
+        <span class="home-section-flow__dot"></span>
+        <span class="home-section-flow__line"></span>
+        <span class="home-section-flow__dot"></span>
+    </div>
+
+    <div class="home-nav-wrap">
+        <div class="home-nav-connectors" aria-hidden="true">
+            <svg class="home-nav-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
+                <line x1="12.5" y1="12" x2="37.5" y2="12" class="home-flow-line"/>
+                <line x1="37.5" y1="12" x2="62.5" y2="12" class="home-flow-line"/>
+                <line x1="62.5" y1="12" x2="87.5" y2="12" class="home-flow-line"/>
+                <line x1="12.5" y1="38" x2="37.5" y2="38" class="home-flow-line"/>
+                <line x1="37.5" y1="38" x2="62.5" y2="38" class="home-flow-line"/>
+                <line x1="62.5" y1="38" x2="87.5" y2="38" class="home-flow-line"/>
+                <line x1="25" y1="12" x2="25" y2="38" class="home-flow-line home-flow-line--v"/>
+                <line x1="50" y1="12" x2="50" y2="38" class="home-flow-line home-flow-line--v"/>
+                <line x1="75" y1="12" x2="75" y2="38" class="home-flow-line home-flow-line--v"/>
+                <circle r="1.2" class="home-flow-dot"><animateMotion dur="4s" repeatCount="indefinite" path="M12.5,12 L37.5,12"/></circle>
+                <circle r="1.2" class="home-flow-dot"><animateMotion dur="4.5s" repeatCount="indefinite" path="M37.5,12 L62.5,12 L87.5,12"/></circle>
+                <circle r="1.2" class="home-flow-dot"><animateMotion dur="5s" repeatCount="indefinite" path="M25,12 L25,38"/></circle>
+                <circle r="1.2" class="home-flow-dot"><animateMotion dur="5.5s" repeatCount="indefinite" path="M12.5,38 L37.5,38 L62.5,38 L87.5,38"/></circle>
+            </svg>
+            <span class="home-gap-orb home-gap-orb--1"></span>
+            <span class="home-gap-orb home-gap-orb--2"></span>
+            <span class="home-gap-orb home-gap-orb--3"></span>
+            <span class="home-gap-orb home-gap-orb--4"></span>
+            <span class="home-gap-orb home-gap-orb--5"></span>
+            <span class="home-gap-orb home-gap-orb--6"></span>
+        </div>
+        <nav class="home-nav-grid" aria-label="Site sections" id="homeNavGrid">
+        <a class="home-nav-card" asp-controller="Home" asp-action="Introduction" data-accent="#00b4d8" data-density="normal">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">IN</span>
+            <span class="home-nav-card__icon" aria-hidden="true">📘</span>
+            <h2 class="home-nav-card__title" data-tr="Tanıtım" data-en="Introduction">Introduction</h2>
+            <p class="home-nav-card__desc" data-tr="Proje özeti, metrikler ve dokümantasyon" data-en="Project overview, metrics and documentation">Project overview, metrics and documentation</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card" asp-controller="Home" asp-action="Components" data-accent="#0077b6" data-density="compact">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">SV</span>
+            <span class="home-nav-card__icon" aria-hidden="true">⚙️</span>
+            <h2 class="home-nav-card__title" data-tr="Bileşenler" data-en="Components">Components</h2>
+            <p class="home-nav-card__desc" data-tr="API, iş kuralları, fraud ve AI modülleri" data-en="API, business rules, fraud and AI modules">API, business rules, fraud and AI modules</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card" asp-controller="Home" asp-action="Architecture" data-accent="#023e8a" data-density="spacious">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">AR</span>
+            <span class="home-nav-card__icon" aria-hidden="true">🏗️</span>
+            <h2 class="home-nav-card__title" data-tr="Mimari" data-en="Architecture">Architecture</h2>
+            <p class="home-nav-card__desc" data-tr="Katmanlı yapı ve veri akışı" data-en="Layered structure and data flow">Layered structure and data flow</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card" asp-controller="Home" asp-action="Team" data-accent="#48cae4" data-density="normal">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">TM</span>
+            <span class="home-nav-card__icon" aria-hidden="true">👥</span>
+            <h2 class="home-nav-card__title" data-tr="Ekip" data-en="Team">Team</h2>
+            <p class="home-nav-card__desc" data-tr="Rol dağılımı ve sorumluluklar" data-en="Role distribution and responsibilities">Role distribution and responsibilities</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card" asp-controller="Home" asp-action="Desktop" data-accent="#90e0ef" data-density="spacious">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">DT</span>
+            <span class="home-nav-card__icon" aria-hidden="true">🖥️</span>
+            <h2 class="home-nav-card__title" data-tr="Masaüstü" data-en="Desktop">Desktop</h2>
+            <p class="home-nav-card__desc" data-tr="Electron masaüstü sürümü" data-en="Electron desktop edition">Electron desktop edition</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card" asp-controller="Home" asp-action="About" data-accent="#ade8f4" data-density="normal">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">AB</span>
+            <span class="home-nav-card__icon" aria-hidden="true">ℹ️</span>
+            <h2 class="home-nav-card__title" data-tr="Hakkında" data-en="About">About</h2>
+            <p class="home-nav-card__desc" data-tr="Proje kapsamı ve teknik detaylar" data-en="Project scope and technical details">Project scope and technical details</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card" asp-controller="Home" asp-action="Contact" data-accent="#caf0f8" data-density="spacious">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge">CT</span>
+            <span class="home-nav-card__icon" aria-hidden="true">✉️</span>
+            <h2 class="home-nav-card__title" data-tr="İletişim" data-en="Contact">Contact</h2>
+            <p class="home-nav-card__desc" data-tr="İletişim formu ve bilgiler" data-en="Contact form and details">Contact form and details</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        <a class="home-nav-card home-nav-card--cta" id="homeAuthCard" asp-controller="Account" asp-action="Login" data-accent="#00b4d8">
+            <span class="home-nav-card__glow" aria-hidden="true"></span>
+            <span class="home-nav-card__badge" id="homeAuthBadge">LG</span>
+            <span class="home-nav-card__icon" id="homeAuthIcon" aria-hidden="true">🔐</span>
+            <h2 class="home-nav-card__title" id="homeAuthTitle" data-tr="Giriş Yap" data-en="Sign In">Sign In</h2>
+            <p class="home-nav-card__desc" id="homeAuthDesc" data-tr="Bankacılık paneline erişim" data-en="Access the banking dashboard">Access the banking dashboard</p>
+            <span class="home-nav-card__arrow" aria-hidden="true">→</span>
+            <span class="home-nav-card__line" aria-hidden="true"></span>
+        </a>
+        </nav>
+    </div>
+
+    <div class="home-section-flow" aria-hidden="true">
+        <span class="home-section-flow__dot"></span>
+        <span class="home-section-flow__line"></span>
+        <span class="home-section-flow__dot"></span>
+    </div>
+
+    <div class="home-tech-marquee" aria-hidden="true">
+        <div class="home-tech-marquee__track">
+            <span>ASP.NET Core</span><span>EF Core</span><span>SQLite</span><span>Neon AI</span>
+            <span>Fraud Detection</span><span>Immutable Ledger</span><span>PWA</span><span>Chart.js</span>
+            <span>ASP.NET Core</span><span>EF Core</span><span>SQLite</span><span>Neon AI</span>
+            <span>Fraud Detection</span><span>Immutable Ledger</span><span>PWA</span><span>Chart.js</span>
+        </div>
+    </div>
+
+    <footer class="page-footer home-footer">
+        <p>© 2026 Vireon — <span data-tr="Bilgisayar Mühendisliği Final Projesi" data-en="Computer Engineering Final Project">Computer Engineering Final Project</span></p>
+    </footer>
+</div>
