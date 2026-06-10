@@ -1,5 +1,21 @@
 /* ========== VIREON — Premium Home Menu ========== */
 
+/* Ana menü + section: yuvarlak toplar ve dekoratif çizgiler kapalı (kareli grid kalır) */
+.vireon-page--home .ambient-bg,
+.vireon-page--section .ambient-bg,
+.home-bg-fx,
+.section-bg-fx,
+.home-nav-connectors,
+.home-gap-orb,
+.home-section-flow,
+.home-flow-line,
+.home-flow-dot,
+.section-bg-fx__svg,
+.section-bg-fx__orb,
+.section-content-flow {
+    display: none !important;
+}
+
 .vireon-page--home .page-shell.home-stage {
     position: relative;
     overflow: hidden;
@@ -649,30 +665,6 @@ body.vireon-logged-in .home-status-bar__dot {
         grid-template-columns: 1fr;
     }
 
-    .home-nav-connectors {
-        display: none;
-    }
-
-    .home-nav-wrap::before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        transform: translateX(-50%);
-        background: linear-gradient(180deg, transparent, rgba(0, 180, 216, 0.35), transparent);
-        background-size: 100% 200%;
-        animation: homeMobileFlow 4.2s linear infinite;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0.6;
-    }
-
-    @keyframes homeMobileFlow {
-        0%   { background-position: 0 200%; }
-        100% { background-position: 0 -200%; }
-    }
 }
 
 /* ========== Section pages — background FX (home-style) ========== */

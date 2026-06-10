@@ -18,6 +18,9 @@ const STATIC_ASSETS = [
 const NETWORK_FIRST = [
   '/',
   '/vireon.css',
+  '/vireon-mvc.css',
+  '/vireon-animations.css',
+  '/vireon-home.css',
   '/vireon.js'
 ];
 

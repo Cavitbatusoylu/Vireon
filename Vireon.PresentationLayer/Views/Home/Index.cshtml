@@ -5,15 +5,6 @@
 }
 
 <div class="page-shell home-stage">
-    <div class="home-bg-fx" aria-hidden="true">
-        <div class="home-bg-fx__ring home-bg-fx__ring--1"></div>
-        <div class="home-bg-fx__ring home-bg-fx__ring--2"></div>
-        <div class="home-bg-fx__scan"></div>
-        <div class="home-bg-fx__particles">
-            @for (var i = 0; i < 18; i++) { <span class="home-particle" style="--i:@i"></span> }
-        </div>
-    </div>
-
     <section class="home-hero">
         <div class="home-hero__logo-wrap">
             <div class="home-hero__ring"></div>
@@ -36,12 +27,6 @@
         </div>
     </section>
 
-    <div class="home-section-flow home-section-flow--short" aria-hidden="true">
-        <span class="home-section-flow__dot"></span>
-        <span class="home-section-flow__line"></span>
-        <span class="home-section-flow__dot"></span>
-    </div>
-
     <div class="home-metrics-ticker" aria-label="System metrics">
         <div class="home-metric-chip">
             <span class="home-metric-chip__val" data-count="6">0</span>
@@ -61,36 +46,7 @@
         </div>
     </div>
 
-    <div class="home-section-flow home-section-flow--short" aria-hidden="true">
-        <span class="home-section-flow__dot"></span>
-        <span class="home-section-flow__line"></span>
-        <span class="home-section-flow__dot"></span>
-    </div>
-
     <div class="home-nav-wrap">
-        <div class="home-nav-connectors" aria-hidden="true">
-            <svg class="home-nav-svg" viewBox="0 0 100 50" preserveAspectRatio="none">
-                <line x1="12.5" y1="12" x2="37.5" y2="12" class="home-flow-line"/>
-                <line x1="37.5" y1="12" x2="62.5" y2="12" class="home-flow-line"/>
-                <line x1="62.5" y1="12" x2="87.5" y2="12" class="home-flow-line"/>
-                <line x1="12.5" y1="38" x2="37.5" y2="38" class="home-flow-line"/>
-                <line x1="37.5" y1="38" x2="62.5" y2="38" class="home-flow-line"/>
-                <line x1="62.5" y1="38" x2="87.5" y2="38" class="home-flow-line"/>
-                <line x1="25" y1="12" x2="25" y2="38" class="home-flow-line home-flow-line--v"/>
-                <line x1="50" y1="12" x2="50" y2="38" class="home-flow-line home-flow-line--v"/>
-                <line x1="75" y1="12" x2="75" y2="38" class="home-flow-line home-flow-line--v"/>
-                <circle r="1.2" class="home-flow-dot"><animateMotion dur="4s" repeatCount="indefinite" path="M12.5,12 L37.5,12"/></circle>
-                <circle r="1.2" class="home-flow-dot"><animateMotion dur="4.5s" repeatCount="indefinite" path="M37.5,12 L62.5,12 L87.5,12"/></circle>
-                <circle r="1.2" class="home-flow-dot"><animateMotion dur="5s" repeatCount="indefinite" path="M25,12 L25,38"/></circle>
-                <circle r="1.2" class="home-flow-dot"><animateMotion dur="5.5s" repeatCount="indefinite" path="M12.5,38 L37.5,38 L62.5,38 L87.5,38"/></circle>
-            </svg>
-            <span class="home-gap-orb home-gap-orb--1"></span>
-            <span class="home-gap-orb home-gap-orb--2"></span>
-            <span class="home-gap-orb home-gap-orb--3"></span>
-            <span class="home-gap-orb home-gap-orb--4"></span>
-            <span class="home-gap-orb home-gap-orb--5"></span>
-            <span class="home-gap-orb home-gap-orb--6"></span>
-        </div>
         <nav class="home-nav-grid" aria-label="Site sections" id="homeNavGrid">
         <a class="home-nav-card" asp-controller="Home" asp-action="Introduction" data-accent="#00b4d8" data-density="normal">
             <span class="home-nav-card__glow" aria-hidden="true"></span>
@@ -165,12 +121,6 @@
             <span class="home-nav-card__line" aria-hidden="true"></span>
         </a>
         </nav>
-    </div>
-
-    <div class="home-section-flow" aria-hidden="true">
-        <span class="home-section-flow__dot"></span>
-        <span class="home-section-flow__line"></span>
-        <span class="home-section-flow__dot"></span>
     </div>
 
     <div class="home-tech-marquee" aria-hidden="true">

@@ -784,54 +784,6 @@ document.addEventListener('DOMContentLoaded', () => {
    }
 });
 
-function initNavigation() {
-   document.querySelectorAll('.menu-item').forEach(item => {
-      // Kartlarda inline onclick zaten var; çift tetiklenmeyi önle.
-      if (item.hasAttribute('onclick')) return;
-
-      item.addEventListener('click', function() {
-         const onclick = this.getAttribute('onclick');
-         if (onclick) {
-            const match = onclick.match(/scrollToSection\('([^']+)'\)/);
-            if (match && match[1]) {
-               scrollToSection(match[1]);
-            }
-         }
-      });
-   });
-}
-
-function scrollToSection(id, options = {}) {
-    const target = getEl(id);
-    if (!target) return;
-
-    // Landing akışında kartlar sabit kalır, kullanıcı aşağı doğru section'lara iner.
-    const menuGrid = getEl('menuGrid');
-    const mainHeader = getEl('mainHeader');
-    const mainFooter = getEl('mainFooter');
-    if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
-    if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
-    if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
-
-    document.querySelectorAll('.landing-content-section').forEach(sec => {
-        sec.style.display = 'block';
-        sec.style.visibility = 'visible';
-        sec.style.opacity = '1';
-    });
-
-    document.body.classList.remove('dashboard-active');
-
-    // Kart tıklamasında hedef bölüme güvenilir şekilde git.
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.history.replaceState(null, '', `#${id}`);
-
-    if (id === 'section-introduction') {
-        applyIntroPanelState(options.introPanel || 'explore', { scrollPanel: false });
-    }
-
-    syncNavbarContext();
-}
-
 function applyIntroPanelState(mode, options = {}) {
     const scrollPanel = options.scrollPanel === true;
     const doc = getEl('intro-documentation');
@@ -873,16 +825,10 @@ function applyIntroPanelState(mode, options = {}) {
 
 function showIntroPanel(mode, options = {}) {
     const scrollPanel = options.scrollPanel !== false;
-    const onIntro = window.location.hash === '#section-introduction';
-
-    if (!onIntro) {
-        scrollToSection('section-introduction', { introPanel: mode });
-        if (scrollPanel && mode === 'documentation') {
-            window.setTimeout(() => applyIntroPanelState('documentation', { scrollPanel: true }), 450);
-        }
+    if (!getEl('section-introduction')) {
+        window.location.href = '/Home/Introduction';
         return;
     }
-
     applyIntroPanelState(mode, { scrollPanel });
 }
 
@@ -963,38 +909,8 @@ function initInteractions() {
    });
 }
 
-function showSection(sectionId) {
-   if (sectionId === 'dashboard') {
-      if (!currentUser) {
-         window.location.href = '/Account/Login';
-         return;
-      }
-      goToDashboard('dash-overview');
-      return;
-   }
-   backToMenu();
-}
-
 function backToMenu() {
    window.location.href = '/';
-   return;
-
-   const menuGrid = getEl('menuGrid');
-   const mainHeader = getEl('mainHeader');
-   const mainFooter = getEl('mainFooter');
-
-   if (menuGrid) { menuGrid.style.display = 'grid'; menuGrid.style.visibility = 'visible'; }
-   if (mainHeader) { mainHeader.style.display = 'block'; mainHeader.style.visibility = 'visible'; }
-   if (mainFooter) { mainFooter.style.display = 'block'; mainFooter.style.visibility = 'visible'; }
-
-   // Ensure overall layout wrapper is visible
-   const contentArea = getEl('contentArea');
-   if (contentArea) contentArea.style.display = 'block';
-
-   document.body.classList.remove('dashboard-active');
-   syncNavbarContext();
-   
-   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ========== HOME PAGE — Premium effects ==========
@@ -1192,27 +1108,6 @@ function ensureSectionCardsVisible() {
 
 function initSectionPageEffects() {
    if (!document.body.classList.contains('vireon-page--section')) return;
-
-   const root = document.querySelector('.landing-content-section');
-   if (!root) return;
-
-   const children = [...root.children].filter(el => {
-      if (el.classList.contains('section-header-small')) return false;
-      if (el.classList.contains('back-btn')) return false;
-      if (el.classList.contains('section-content-flow')) return false;
-      if (el.hasAttribute('hidden')) return false;
-      return true;
-   });
-
-   children.forEach((el, idx) => {
-      if (idx === 0) return;
-      const flow = document.createElement('div');
-      flow.className = 'home-section-flow home-section-flow--short home-section-flow--inline section-content-flow';
-      flow.setAttribute('aria-hidden', 'true');
-      flow.innerHTML = '<span class="home-section-flow__dot"></span><span class="home-section-flow__line"></span><span class="home-section-flow__dot"></span>';
-      root.insertBefore(flow, el);
-   });
-
    setTimeout(ensureSectionCardsVisible, 1200);
 }
 
