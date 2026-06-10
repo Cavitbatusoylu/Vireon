@@ -64,7 +64,7 @@
 
     <nav class="top-navbar" id="topNavbar">
         <div class="navbar-left">
-            <a asp-controller="Home" asp-action="Index" class="navbar-brand-link">
+            <a href="@Url.Action("Index", "Home")" class="navbar-brand-link">
                 <img src="/images/vireon-logo-transparent-new.png" alt="Vireon" class="navbar-logo" id="navLogo">
                 <span class="navbar-brand">VIREON</span>
             </a>
@@ -79,16 +79,16 @@
                 <span class="theme-icon-light">☀️</span>
             </button>
             <div class="navbar-actions" id="navbarActions">
-                <a class="login-btn" id="backToHomeBtn" asp-controller="Home" asp-action="Index" style="display:none;">
+                <a class="login-btn" id="backToHomeBtn" href="@Url.Action("Index", "Home")" style="display:none;">
                     <span class="login-icon">🏠</span><span data-tr="Ana Menü" data-en="Home">Home</span>
                 </a>
-                <a class="login-btn" id="dashboardNavBtn" asp-controller="Dashboard" asp-action="Overview" style="display:none;">
+                <a class="login-btn" id="dashboardNavBtn" href="@Url.Action("Overview", "Dashboard")" style="display:none;">
                     <span class="login-icon">📊</span><span data-tr="Dashboardım" data-en="My Dashboard">My Dashboard</span>
                 </a>
                 <button type="button" class="login-btn install-app-btn" id="installBtn" hidden>
                     <span class="login-icon">📱</span><span data-tr="Yükle" data-en="Install">Install</span>
                 </button>
-                <a class="login-btn" id="loginBtn" asp-controller="Account" asp-action="Login">
+                <a class="login-btn" id="loginBtn" href="@Url.Action("Login", "Account")">
                     <span class="login-icon">🔐</span><span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
                 </a>
                 <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display:none;">
@@ -100,7 +100,7 @@
 
     @RenderBody()
 
-    <partial name="_SiteScripts" />
+    @await Html.PartialAsync("_SiteScripts")
     <script src="/vireon.js?v=20260610-60" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
