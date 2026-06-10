@@ -80,7 +80,12 @@ namespace Vireon.BusinessLayer.Concrete
                         dailyLimit.LastResetDate = DateTime.Now.Date;
                     }
 
-                    if (dailyLimit.UsedLimit + amountInSenderCurrency > dailyLimit.MaxDailyLimit)
+                    // TRY (TL) cinsinden limit hesabı yapılması için döviz çevirimi
+                    decimal amountInTryForLimit = senderAccount.Currency == "TRY" 
+                        ? amountInSenderCurrency 
+                        : ConvertCurrency(amountInSenderCurrency, senderAccount.Currency, "TRY");
+
+                    if (dailyLimit.UsedLimit + amountInTryForLimit > dailyLimit.MaxDailyLimit)
                     {
                         transaction.Status = TransactionStatus.Failed;
 
@@ -88,15 +93,15 @@ namespace Vireon.BusinessLayer.Concrete
                         {
                             AccountId = senderAccount.Id,
                             RiskType = "LIMIT_EXCEEDED",
-                            Description = $"Günlük limit aşımı denemesi: {amountInSenderCurrency:N2} {senderAccount.Currency} (Kalan limit: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} {senderAccount.Currency})",
+                            Description = $"Günlük limit aşımı denemesi: {amountInSenderCurrency:N2} {senderAccount.Currency} (Karşılığı: {amountInTryForLimit:N2} TRY) - Kalan TL Limiti: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} TRY",
                             LogDate = DateTime.Now
                         });
                         _context.SaveChanges();
 
-                        throw new InvalidOperationException($"Günlük limit aşıldı. Kalan: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} {senderAccount.Currency}");
+                        throw new InvalidOperationException($"Günlük limit aşıldı. TL cinsinden kalan limitiniz: {dailyLimit.MaxDailyLimit - dailyLimit.UsedLimit:N2} TRY");
                     }
 
-                    dailyLimit.UsedLimit += amountInSenderCurrency;
+                    dailyLimit.UsedLimit += amountInTryForLimit;
                 }
 
                 var oldSenderBalance = senderAccount.Balance;
