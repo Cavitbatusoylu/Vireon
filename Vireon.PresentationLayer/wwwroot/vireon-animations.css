@@ -122,10 +122,21 @@
     animation: mvcFadeUp 0.7s ease-out 0.3s both;
 }
 
-/* ----- Home nav cards — stagger ----- */
+/* ----- Home nav cards — stagger (translateY only; scale animasyonu transform:!important ile çakışır) ----- */
+@keyframes mvcHomeCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .home-nav-card {
-    opacity: 0;
-    animation: mvcBounceIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 1;
+    animation: mvcHomeCardIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
     position: relative;
     overflow: hidden;
 }
@@ -160,8 +171,8 @@
 }
 
 .home-nav-card--cta {
-    animation-name: mvcBounceIn, mvcBorderGlow;
-    animation-duration: 0.9s, 4s;
+    animation-name: mvcHomeCardIn, mvcBorderGlow;
+    animation-duration: 0.85s, 4s;
     animation-delay: 0.7s, 1.6s;
     animation-iteration-count: 1, infinite;
     animation-fill-mode: forwards, none;
@@ -384,16 +395,16 @@
     transform: rotate(-8deg) scale(1.08);
 }
 
-/* ----- Section content cards ----- */
+/* ----- Section content cards (translateY only — scale animasyonu opacity’de takılı kalabiliyor) ----- */
 .team-card {
     opacity: 0;
-    animation: mvcBounceIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: mvcFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.3s;
 }
 
-.team-card:nth-child(1) { animation-delay: 0.15s; }
-.team-card:nth-child(2) { animation-delay: 0.28s; }
-.team-card:nth-child(3) { animation-delay: 0.41s; }
+.team-card:nth-child(1) { animation-delay: 0.12s; }
+.team-card:nth-child(2) { animation-delay: 0.24s; }
+.team-card:nth-child(3) { animation-delay: 0.36s; }
 
 .team-card:hover {
     transform: translateY(-8px) scale(1.02);
@@ -725,5 +736,14 @@ html.vireon-return-visit .loading-screen {
     html.vireon-page-enter .auth-shell {
         opacity: 1;
         transform: none;
+    }
+
+    .home-nav-card,
+    .team-card,
+    .value-card,
+    .arch-feature-card {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
     }
 }

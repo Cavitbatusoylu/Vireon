@@ -2,17 +2,24 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Vireon.DataAccessLayer;
 using Vireon.DataAccessLayer.Concrete.EntityFramework;
 using Vireon.BusinessLayer.Abstract;
 using Vireon.BusinessLayer.Concrete;
 using Vireon.EntityLayer.Concrete;
 using Vireon.PresentationLayer.Middleware;
 using Vireon.PresentationLayer.Services;
+using DatabaseAlignmentCli = Vireon.PresentationLayer.DatabaseAlignmentCli;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
+        if (args.Any(a => string.Equals(a, "--align-database", StringComparison.OrdinalIgnoreCase)))
+        {
+            Environment.Exit(DatabaseAlignmentCli.Run(AppContext.BaseDirectory));
+        }
+
         var builder = WebApplication.CreateBuilder(args);
 
         // Serilog yapılandırması
@@ -101,76 +108,11 @@ internal class Program
 
                 logger.LogInformation("Database bağlantısı kontrol ediliyor...");
 
-                // Database yoksa oluştur, migration'ları uygula
-                context.Database.Migrate();
+                // Migration + şema/veri eşitleme (entity modelleri ↔ SQL tabloları)
+                DatabaseSchemaAlignment.EnsureAligned(context, logger);
 
                 var dbPath = context.Database.GetDbConnection().DataSource;
                 logger.LogInformation("📂 Paylaşımlı SQLite: {DbPath}", dbPath);
-
-                // ============================================================
-                // MEVCUT KULLANICILARA HESAP NUMARASI ATA
-                // Migration sonrası AccountNumber'ı boş olan kullanıcıları düzelt
-                // ============================================================
-                var usersWithoutAccountNumber = context.Users
-                    .Where(u => u.AccountNumber == null || u.AccountNumber == "")
-                    .ToList();
-
-                if (usersWithoutAccountNumber.Any())
-                {
-                    logger.LogInformation("⚠️ {Count} kullanıcıya hesap numarası atanıyor...", usersWithoutAccountNumber.Count);
-                    foreach (var user in usersWithoutAccountNumber)
-                    {
-                        string accountNumber;
-                        do
-                        {
-                            var number = Random.Shared.Next(1000, 99999);
-                            accountNumber = $"VR-{number:D5}";
-                        } while (context.Users.Any(u => u.AccountNumber == accountNumber) ||
-                                 context.Accounts.Any(a => a.AccountNumber == accountNumber));
-
-                        user.AccountNumber = accountNumber;
-                        user.CreatedAt = user.CreatedAt == default ? DateTime.Now : user.CreatedAt;
-
-                        // Kullanıcının hesabı yoksa oluştur
-                        var hasAccount = context.Accounts.Any(a => a.UserId == user.Id);
-                        if (!hasAccount)
-                        {
-                            context.Accounts.Add(new Vireon.EntityLayer.Concrete.Account
-                            {
-                                UserId = user.Id,
-                                AccountNumber = accountNumber,
-                                Balance = 0m,
-                                Currency = "TRY"
-                            });
-                        }
-                        else
-                        {
-                            // Mevcut hesabın numarasını güncelle
-                            var account = context.Accounts.FirstOrDefault(a => a.UserId == user.Id);
-                            if (account != null && (string.IsNullOrEmpty(account.AccountNumber) || account.AccountNumber.StartsWith("VR-000")))
-                            {
-                                account.AccountNumber = accountNumber;
-                            }
-                        }
-
-                        // Günlük limiti yoksa oluştur
-                        var hasLimit = context.DailyLimits.Any(d => d.UserId == user.Id);
-                        if (!hasLimit)
-                        {
-                            context.DailyLimits.Add(new Vireon.EntityLayer.Concrete.DailyLimit
-                            {
-                                UserId = user.Id,
-                                MaxDailyLimit = 50000m,
-                                UsedLimit = 0m,
-                                LastResetDate = DateTime.Now.Date
-                            });
-                        }
-
-                        logger.LogInformation("  → {Name} ({Email}) → {AccountNumber}", user.Name, user.Email, accountNumber);
-                    }
-                    context.SaveChanges();
-                    logger.LogInformation("✅ Tüm kullanıcılara hesap numarası atandı!");
-                }
 
                 // ============================================================
                 // MEVCUT DÜZ METİN ŞİFRELERİ HASH'LE (Tek Seferlik Migration)
@@ -354,7 +296,7 @@ internal class Program
     /// böylece "dotnet run", derlenmiş .exe veya farklı çalışma dizinleri fark etmeksizin
     /// her zaman repodaki aynı vireon_local.db dosyası kullanılır.
     /// </summary>
-    private static string ResolveSharedDbPath(string contentRootPath, string relativeDataSource)
+    internal static string ResolveSharedDbPath(string contentRootPath, string relativeDataSource)
     {
         var fileName = Path.GetFileName(relativeDataSource);
         if (string.IsNullOrWhiteSpace(fileName)) fileName = "vireon_local.db";

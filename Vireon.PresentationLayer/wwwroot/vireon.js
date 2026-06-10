@@ -775,6 +775,10 @@ document.addEventListener('DOMContentLoaded', () => {
        if (getVireonPage() === 'home') {
            initHomePageEffects();
        }
+
+       if (document.body.classList.contains('vireon-page--section')) {
+           initSectionPageEffects();
+       }
    } catch (e) {
        console.error("NEON AI: Init Error", e);
    }
@@ -1162,11 +1166,54 @@ function balanceCardTypography() {
    balanceSectionCardTypography();
 }
 
+function ensureHomeNavCardsVisible() {
+   getEls('.home-nav-card').forEach(card => {
+      card.style.opacity = '1';
+      if (!card.matches(':hover')) card.style.transform = 'translateY(0)';
+   });
+}
+
 function initHomePageEffects() {
    syncHomeAuthCard();
    animateHomeMetricChips();
    initHomeStatusRotator();
    balanceHomeNavCardTypography();
+   setTimeout(ensureHomeNavCardsVisible, 1500);
+}
+
+function ensureSectionCardsVisible() {
+   getEls('.team-card, .value-card, .arch-feature-card').forEach(card => {
+      card.style.opacity = '1';
+      if (!card.matches(':hover')) {
+         card.style.transform = 'translateY(0)';
+      }
+   });
+}
+
+function initSectionPageEffects() {
+   if (!document.body.classList.contains('vireon-page--section')) return;
+
+   const root = document.querySelector('.landing-content-section');
+   if (!root) return;
+
+   const children = [...root.children].filter(el => {
+      if (el.classList.contains('section-header-small')) return false;
+      if (el.classList.contains('back-btn')) return false;
+      if (el.classList.contains('section-content-flow')) return false;
+      if (el.hasAttribute('hidden')) return false;
+      return true;
+   });
+
+   children.forEach((el, idx) => {
+      if (idx === 0) return;
+      const flow = document.createElement('div');
+      flow.className = 'home-section-flow home-section-flow--short home-section-flow--inline section-content-flow';
+      flow.setAttribute('aria-hidden', 'true');
+      flow.innerHTML = '<span class="home-section-flow__dot"></span><span class="home-section-flow__line"></span><span class="home-section-flow__dot"></span>';
+      root.insertBefore(flow, el);
+   });
+
+   setTimeout(ensureSectionCardsVisible, 1200);
 }
 
 // ========== ARCH CODE BLOCKS — yumuşak giriş, tıklamada zıplama yok ==========

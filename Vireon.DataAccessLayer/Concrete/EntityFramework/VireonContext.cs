@@ -13,6 +13,9 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
 
         public VireonContext() { }
 
+        public VireonContext(DbContextOptions<VireonContext> options)
+            : base(options) { }
+
         public VireonContext(DbContextOptions<VireonContext> options, IConfiguration configuration) 
             : base(options)
         {
@@ -86,7 +89,15 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 .HasIndex(u => u.AccountNumber)
                 .IsUnique();
 
-            // 7. Transaction -> Status enum conversion (DB'de string olarak sakla)
+            // 7. Tablo adları — entity ile SQL tam uyum (6 çekirdek tablo)
+            modelBuilder.Entity<User>().ToTable("Users");
+            modelBuilder.Entity<Account>().ToTable("Accounts");
+            modelBuilder.Entity<Transaction>().ToTable("Transactions");
+            modelBuilder.Entity<DailyLimit>().ToTable("DailyLimits");
+            modelBuilder.Entity<FraudLog>().ToTable("FraudLogs");
+            modelBuilder.Entity<LedgerEntry>().ToTable("LedgerEntries");
+
+            // 8. Transaction -> Status enum conversion (DB'de string olarak sakla)
             modelBuilder.Entity<Transaction>()
                 .Property(t => t.Status)
                 .HasConversion<string>()
@@ -94,7 +105,7 @@ namespace Vireon.DataAccessLayer.Concrete.EntityFramework
                 .HasMaxLength(20);
 
             // ============================================================
-            // 8. DATABASE INDEXLERI (Performans İyileştirmesi)
+            // 9. DATABASE INDEXLERI (Performans İyileştirmesi)
             // ============================================================
 
             // Transaction indexleri

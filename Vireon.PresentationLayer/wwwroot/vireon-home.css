@@ -485,8 +485,12 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
     overflow: hidden;
-    transition: border-color 0.22s ease, box-shadow 0.22s ease;
-    transform: none !important;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.2s ease;
+    transform: translateY(0);
+}
+
+.vireon-page--home .home-nav-card:hover {
+    transform: translateY(-2px);
 }
 
 .home-nav-card__glow {
@@ -552,13 +556,13 @@
 .vireon-page--home .home-nav-card--cta:not(.home-nav-card--dashboard) {
     background: linear-gradient(145deg, rgba(0, 180, 216, 0.18), rgba(2, 62, 138, 0.12));
     border-color: rgba(0, 180, 216, 0.4);
-    animation: homeCtaBorder 4s ease-in-out infinite, mvcBounceIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards;
+    animation: homeCtaBorder 4s ease-in-out infinite, mvcHomeCardIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
 }
 
 .vireon-page--home .home-nav-card--dashboard {
     background: linear-gradient(145deg, rgba(34, 197, 94, 0.14), rgba(0, 180, 216, 0.1));
     border-color: rgba(34, 197, 94, 0.45);
-    animation: mvcBounceIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards;
+    animation: mvcHomeCardIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.7s both;
 }
 
 .vireon-page--home .home-nav-card--dashboard .home-nav-card__badge {
@@ -671,6 +675,89 @@ body.vireon-logged-in .home-status-bar__dot {
     }
 }
 
+/* ========== Section pages — background FX (home-style) ========== */
+.vireon-page--section .page-shell.section-stage {
+    position: relative;
+    overflow: hidden;
+}
+
+.section-bg-fx {
+    position: absolute;
+    inset: 0;
+    min-height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.82;
+}
+
+.section-bg-fx__ring {
+    opacity: 0.5;
+}
+
+.section-bg-fx__scan {
+    animation-duration: 9s;
+}
+
+.section-bg-fx__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.38;
+}
+
+.section-bg-fx__orb--1 { left: 12%; top: 8%;  animation-delay: 0s; }
+.section-bg-fx__orb--2 { left: 88%; top: 14%; animation-delay: 0.9s; }
+.section-bg-fx__orb--3 { left: 50%; top: 30%; animation-delay: 1.8s; }
+.section-bg-fx__orb--4 { left: 8%;  top: 55%; animation-delay: 2.7s; }
+.section-bg-fx__orb--5 { left: 92%; top: 70%; animation-delay: 3.6s; }
+.section-bg-fx__orb--6 { left: 50%; top: 90%; animation-delay: 4.5s; }
+
+.vireon-page--section .page-shell__topbar,
+.vireon-page--section .page-shell__body,
+.vireon-page--section .page-footer {
+    position: relative;
+    z-index: 2;
+}
+
+.vireon-page--section .page-shell__body .glass-card,
+.vireon-page--section .page-shell__body .value-card,
+.vireon-page--section .page-shell__body .team-card,
+.vireon-page--section .page-shell__body .team-grid,
+.vireon-page--section .page-shell__body .intro-metrics,
+.vireon-page--section .page-shell__body .intro-values,
+.vireon-page--section .page-shell__body .arch-features {
+    position: relative;
+    z-index: 1;
+}
+
+.vireon-page--section .team-card {
+    opacity: 1;
+    animation: mvcFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform: translateY(0);
+}
+
+.home-section-flow--inline.section-content-flow {
+    margin: 20px auto;
+    max-width: 110px;
+    z-index: 0;
+    opacity: 1;
+    animation: mvcFadeUp 0.85s ease-out forwards;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .section-bg-fx__svg {
+        opacity: 0.22;
+    }
+
+    .section-bg-fx__orb--2,
+    .section-bg-fx__orb--5 {
+        display: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .home-bg-fx__scan,
     .home-tech-marquee__track,
@@ -680,12 +767,15 @@ body.vireon-logged-in .home-status-bar__dot {
     .home-section-flow,
     .home-gap-orb,
     .home-flow-line,
-    .home-metric-chip::after {
+    .home-metric-chip::after,
+    .section-bg-fx__scan,
+    .section-bg-fx__ring {
         animation: none !important;
     }
 
     .home-nav-connectors,
-    .home-section-flow {
+    .home-section-flow,
+    .section-bg-fx {
         opacity: 1;
     }
 }

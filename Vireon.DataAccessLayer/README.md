@@ -20,4 +20,21 @@ Vireon.DataAccessLayer/Migrations/
 
 ## Çalıştırma
 
-Uygulama açılışında `Program.cs` otomatik `Database.Migrate()` çalıştırır.
+Uygulama açılışında `DatabaseSchemaAlignment.EnsureAligned()` çalışır:
+
+1. `Database.Migrate()` — 4 migration grubunu uygular
+2. Eksik sütunları tamamlar (`Role`, `PlainPassword`, `RowVersion`)
+3. `Users` ↔ `Accounts` ↔ `DailyLimits` veri bütünlüğünü hizalar
+
+Manuel eşitleme (ekip / CI, yalnızca C#):
+
+```powershell
+.\scripts\align-database.ps1
+```
+
+veya:
+
+```powershell
+cd Vireon.PresentationLayer
+dotnet run -- --align-database
+```

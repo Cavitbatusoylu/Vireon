@@ -4,7 +4,9 @@
     ViewData["PageKey"] = Model.PageKey;
 }
 
-<div class="page-shell">
+<div class="page-shell section-stage">
+    <partial name="_SectionBackgroundFx" />
+
     <header class="page-shell__topbar">
         <a asp-controller="Home" asp-action="Index" class="page-shell__back"
            data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</a>
