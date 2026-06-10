@@ -3037,6 +3037,115 @@ body.dashboard-active .container {
     max-width: 500px;
 }
 
+.fx-rates-card {
+    margin-bottom: 20px;
+    max-width: 500px;
+}
+
+.fx-rates-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0 12px;
+}
+
+.fx-rates-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fx-rate-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(0, 245, 255, 0.08);
+    border: 1px solid rgba(0, 245, 255, 0.22);
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.fx-sim-group .fx-sim-hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.transfer-fx-preview {
+    margin: -8px 0 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.transfer-fx-preview.is-cross {
+    border-color: rgba(0, 245, 255, 0.35);
+    background: rgba(0, 245, 255, 0.06);
+}
+
+.transfer-fx-preview.is-same {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.fx-preview-muted {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 13px;
+}
+
+.fx-preview-same {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.fx-preview-label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.fx-preview-arrow {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.fx-preview-target {
+    color: var(--primary);
+}
+
+[data-theme="light"] .fx-rates-title,
+[data-theme="light"] .fx-sim-hint,
+[data-theme="light"] .fx-preview-muted,
+[data-theme="light"] .fx-preview-same,
+[data-theme="light"] .fx-preview-label {
+    color: rgba(15, 23, 42, 0.62);
+}
+
+[data-theme="light"] .fx-rate-chip {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: rgba(14, 165, 233, 0.28);
+    color: #0f172a;
+}
+
+[data-theme="light"] .transfer-fx-preview {
+    background: rgba(15, 23, 42, 0.04);
+    border-color: rgba(15, 23, 42, 0.12);
+}
+
+[data-theme="light"] .transfer-fx-preview.is-cross {
+    background: rgba(14, 165, 233, 0.08);
+    border-color: rgba(14, 165, 233, 0.28);
+}
+
 .transfer-form .form-group {
     margin-bottom: 25px;
 }
@@ -3057,6 +3166,49 @@ body.dashboard-active .container {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 15px var(--glow-cyan);
+}
+
+select.neon-input {
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: menulist;
+}
+
+html:not([data-theme="light"]) select.neon-input {
+    color-scheme: dark;
+    background-color: #141a2e;
+    color: #f1f5f9;
+}
+
+html:not([data-theme="light"]) select.neon-input option {
+    background-color: #141a2e;
+    color: #f1f5f9;
+}
+
+html[data-theme="light"] select.neon-input {
+    color-scheme: light;
+    background-color: #ffffff;
+    border-color: rgba(15, 23, 42, 0.14);
+    color: #0f172a;
+    -webkit-text-fill-color: #0f172a;
+}
+
+html[data-theme="light"] select.neon-input option {
+    background-color: #ffffff;
+    color: #0f172a;
+}
+
+html[data-theme="light"] .form-group input.neon-input,
+html[data-theme="light"] .form-group textarea.neon-input {
+    background-color: #ffffff;
+    border-color: rgba(15, 23, 42, 0.14);
+    color: #0f172a;
+    -webkit-text-fill-color: #0f172a;
+}
+
+html[data-theme="light"] .form-group input.neon-input::placeholder,
+html[data-theme="light"] .form-group textarea.neon-input::placeholder {
+    color: rgba(15, 23, 42, 0.42);
 }
 
 /* Limit Cards */

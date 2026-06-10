@@ -9,7 +9,7 @@ namespace Vireon.BusinessLayer.Concrete
 {
     public class NeonAIOptions
     {
-        public string ApiToken { get; set; } = "";
+        public string ApiToken { get; set; }
         public string ModelId { get; set; } = "llama-3.1-8b-instant";
     }
 

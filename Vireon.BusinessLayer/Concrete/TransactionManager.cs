@@ -14,9 +14,9 @@ namespace Vireon.BusinessLayer.Concrete
         private static readonly Dictionary<string, decimal> ExchangeRates = new()
         {
             ["TRY"] = 1m,
-            ["USD"] = 30.50m,
-            ["EUR"] = 33.20m,
-            ["GBP"] = 38.70m
+            ["USD"] = 46.14m,
+            ["EUR"] = 53.33m,
+            ["GBP"] = 61.82m
         };
 
         public TransactionManager(VireonContext context, ILogger<TransactionManager> logger)

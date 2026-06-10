@@ -12,7 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="vireon.css?v=20260610-35">
+    <link rel="stylesheet" href="vireon.css?v=20260610-38">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -333,7 +333,7 @@
                                 <div class="dashboard-grid-modern">
                                     <div class="glass-card balance-hero">
                                         <div class="hero-label" data-tr="Kullanılabilir Bakiye" data-en="Available Balance">Available Balance</div>
-                                        <div class="hero-amount">₺<span id="dashBalance">0.00</span></div>
+                                        <div class="hero-amount"><span id="dashBalanceSymbol">₺</span><span id="dashBalance">0.00</span></div>
                                         <div class="hero-details">
                                             <span id="dashAccountNo">**** ****</span> | <span id="dashCurrency">TRY</span>
                                         </div>
@@ -483,6 +483,10 @@
                             </div>
                             <div class="dash-sub-section" id="dash-transfers">
                                 <h2 class="sub-section-title" data-tr="Para Gönder" data-en="Send Money">Send Money</h2>
+                                <div class="glass-card transfer-card fx-rates-card">
+                                    <h4 class="fx-rates-title" data-tr="Simülasyon Kurları (TRY baz)" data-en="Simulated Rates (TRY base)">Simulated Rates (TRY base)</h4>
+                                    <div class="fx-rates-panel" id="fxRatesPanel"></div>
+                                </div>
                                 <div class="glass-card transfer-card">
                                     <div class="transfer-form">
                                         <div class="form-group">
@@ -490,9 +494,26 @@
                                             <input type="text" id="transferTarget" placeholder="VR-0001" class="neon-input" oninput="lookupReceiverName()">
                                             <span class="receiver-name-hint" id="transferReceiverName"></span>
                                         </div>
+                                        <div class="form-group fx-sim-group">
+                                            <label data-tr="Kur simülasyonu (alıcı para birimi)" data-en="Rate simulator (receiver currency)">Rate simulator (receiver currency)</label>
+                                            <select id="transferFxSimCurrency" class="neon-input">
+                                                <option value="" data-tr="Gerçek alıcı hesabına göre" data-en="Use receiver account currency">Use receiver account currency</option>
+                                                <option value="USD">USD — US Dollar</option>
+                                                <option value="EUR">EUR — Euro</option>
+                                                <option value="GBP">GBP — British Pound</option>
+                                                <option value="TRY">TRY — Turkish Lira</option>
+                                            </select>
+                                            <p class="fx-sim-hint" data-tr="Demo hesaplar TRY olduğu için farklı para birimini buradan seçerek çapraz kur önizlemesi yapabilirsiniz."
+                                                data-en="Demo accounts use TRY — pick another currency here to preview cross-rate conversion.">
+                                                Demo accounts use TRY — pick another currency here to preview cross-rate conversion.
+                                            </p>
+                                        </div>
                                         <div class="form-group">
-                                            <label data-tr="Miktar (₺)" data-en="Amount (₺)">Amount (₺)</label>
+                                            <label id="transferAmountLabel" data-tr="Miktar (₺TRY)" data-en="Amount (₺TRY)">Amount (₺TRY)</label>
                                             <input type="number" id="transferAmount" placeholder="0.00" class="neon-input">
+                                        </div>
+                                        <div class="transfer-fx-preview" id="transferFxPreview">
+                                            <span class="fx-preview-muted" data-tr="Tutar girince kur önizlemesi burada görünür." data-en="Enter an amount to preview the exchange rate.">Enter an amount to preview the exchange rate.</span>
                                         </div>
                                         <div class="form-group">
                                             <label data-tr="Açıklama" data-en="Description">Description</label>
@@ -1655,7 +1676,7 @@
         </footer>
     </div>
 
-    <script src="vireon.js?v=20260610-35" defer></script>
+    <script src="vireon.js?v=20260610-37" defer></script>
     <script>
         // ========== GLOBAL STATE ==========
         if (typeof window.currentLang === 'undefined') {
