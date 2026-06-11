@@ -1,0 +1,34 @@
+<div class="neon-ai-root" id="neonAiRoot">
+    <button type="button" class="ai-chat-launcher" id="aiLauncher" onclick="toggleAIChat()" aria-label="Open Neon AI assistant" aria-expanded="false">
+        <span class="ai-orbit" aria-hidden="true"></span>
+        <span class="ai-icon" aria-hidden="true">💬</span>
+    </button>
+    <div class="ai-chat-window" id="aiChatWindow" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="ai-chat-header">
+            <div class="ai-header-info">
+                <div class="ai-avatar"><img src="/images/vireon_robot.png" alt=""></div>
+                <div class="ai-header-text">
+                    <h4 id="aiChatTitle">NEON AI</h4>
+                    <p class="ai-header-sub" data-tr="Canlı Asistan" data-en="Live Assistant">Live Assistant</p>
+                </div>
+            </div>
+            <div class="ai-header-actions">
+                <button type="button" class="ai-close-btn" onclick="toggleAIChat()" aria-label="Close chat">✕</button>
+            </div>
+        </div>
+        <div class="ai-chat-body" id="aiChatBody">
+            <div class="ai-message bot">
+                <p data-tr="Merhaba! Ben Neon. Bankacılık işlemlerinizde size nasıl yardımcı olabilirim?"
+                   data-en="Hello! I'm Neon. How can I assist you with your banking transactions today?">
+                    Hello! I'm Neon. How can I assist you with your banking transactions today?
+                </p>
+            </div>
+        </div>
+        <div class="ai-chat-footer">
+            <input type="text" id="floatingAiInput" class="ai-input" placeholder="Type your message..."
+                   data-tr-placeholder="Mesajınızı yazın..." data-en-placeholder="Type your message..." autocomplete="off"
+                   onkeydown="if(event.key === 'Enter') { event.preventDefault(); sendAIMessage(); }">
+            <button type="button" class="ai-send-btn" onclick="sendAIMessage()" aria-label="Send message">➤</button>
+        </div>
+    </div>
+</div>

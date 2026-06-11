@@ -100,9 +100,14 @@
     50%      { transform: translate(12px, -8px) scale(1.05); }
 }
 
-/* ----- Page entrance ----- */
+/* ----- Page entrance (opacity only — transform breaks position:fixed widgets) ----- */
+@keyframes mvcPageIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
 .vireon-page {
-    animation: mvcFadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: mvcPageIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .top-navbar {
@@ -611,6 +616,10 @@
 .tx-list-modern .tx-item:nth-child(5) { animation-delay: 0.25s; }
 
 /* ----- Page transition (internal navigation) ----- */
+.vireon-page--dashboard .page-transition {
+    display: none !important;
+}
+
 .page-transition {
     position: fixed;
     inset: 0;

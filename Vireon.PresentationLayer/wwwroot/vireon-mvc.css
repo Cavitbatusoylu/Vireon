@@ -1,5 +1,16 @@
 /* ========== VIREON MVC — Clean multi-page frontend ========== */
 
+/* Global UI scale (~80% browser zoom) */
+html {
+    zoom: 0.8;
+}
+
+@supports not (zoom: 0.8) {
+    html {
+        font-size: 80%;
+    }
+}
+
 .vireon-page {
     padding-top: 72px;
 }
@@ -290,9 +301,9 @@
 }
 
 .vireon-page--dashboard .dashboard-shell {
-    max-width: 1400px;
+    max-width: min(100%, 1680px);
     margin: 0 auto;
-    padding: 24px clamp(12px, 3vw, 24px) 40px;
+    padding: 24px clamp(12px, 2vw, 20px) 32px;
 }
 
 .vireon-page--dashboard .dashboard-topbar {
@@ -589,4 +600,15 @@
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+/* Neon AI — viewport-fixed, above page transition */
+.neon-ai-root,
+.ai-chat-launcher,
+.ai-chat-window {
+    z-index: 10050;
+}
+
+.vireon-page--dashboard .neon-ai-root {
+    display: none !important;
 }

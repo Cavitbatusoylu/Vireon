@@ -90,6 +90,18 @@ function isInternalNavLink(anchor) {
     }
 }
 
+function isDashboardNavLink(anchor) {
+    if (!anchor) return false;
+    try {
+        const url = new URL(anchor.href, window.location.origin);
+        const path = url.pathname.replace(/\/+$/, '').toLowerCase();
+        const here = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+        return path.startsWith('/dashboard') && here.startsWith('/dashboard');
+    } catch {
+        return false;
+    }
+}
+
 function initPageTransitions() {
     const overlay = document.getElementById('pageTransition');
     const cameFromNav = (() => {
@@ -114,6 +126,7 @@ function initPageTransitions() {
         if (!isReturnVisit()) return;
         const anchor = e.target.closest('a[href]');
         if (!isInternalNavLink(anchor)) return;
+        if (isDashboardNavLink(anchor)) return;
         e.preventDefault();
         navigateWithTransition(anchor.href);
     });
@@ -497,6 +510,8 @@ function saveSession(user, remember) {
       localStorage.setItem(SESSION_KEY, data);
       localStorage.setItem(REMEMBER_KEY, '1');
       sessionStorage.removeItem(SESSION_KEY);
+      const email = user?.email || user?.Email;
+      if (email) localStorage.setItem(REMEMBER_EMAIL_KEY, String(email).toLowerCase());
    } else {
       sessionStorage.setItem(SESSION_KEY, data);
       localStorage.removeItem(SESSION_KEY);
@@ -746,7 +761,11 @@ document.addEventListener('DOMContentLoaded', () => {
        if (isDashboardPage()) {
            initDashboardPage().catch(e => console.error('Dashboard init error:', e));
        } else if (page === 'login' || page === 'register' || page === 'forgot-password') {
-           if (currentUser) window.location.href = '/Dashboard/Overview';
+           if (currentUser) {
+               window.location.href = '/Dashboard/Overview';
+           } else if (page === 'login') {
+               restoreLoginFormFromRemember();
+           }
            updateNavbarForLoggedOutUser();
            const loginBtn = getEl('loginBtn');
            if (loginBtn) loginBtn.style.display = 'none';
@@ -1609,7 +1628,6 @@ function handleLogout() {
     if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
     currentUser = null;
     clearSession();
-    clearRememberedEmail();
     document.body.classList.remove('admin-mode');
     resetAllApplicationUi();
 
@@ -1849,7 +1867,7 @@ function resetAiChatUi() {
 
     const aiContent = getEl('aiChatContent');
     if (aiContent) {
-        aiContent.innerHTML = `<div class="bot-bubble"><div class="bubble-icon">🤖</div><div class="bubble-text">${escapeHtml(dashWelcome)}</div></div>`;
+        aiContent.innerHTML = `<div class="bot-bubble"><div class="bubble-icon">\u{1F916}</div><div class="bubble-text">${escapeHtml(dashWelcome)}</div></div>`;
     }
     const aiBody = getEl('aiChatBody');
     if (aiBody) {
@@ -2335,7 +2353,7 @@ async function sendAiMessage() {
 
         display.innerHTML += `
             <div class="bot-bubble">
-                <div class="bubble-icon">🤖</div>
+                <div class="bubble-icon">\u{1F916}</div>
                 <div class="bubble-text">${formatBotMessageHtml(botResponse)}</div>
             </div>
         `;
@@ -2832,7 +2850,7 @@ function updateTransactionList(txs, accountId, listElement) {
       const amountClass = isDeposit ? 'tx-in' : (isOut ? 'tx-out' : 'tx-in');
       const symbol = isDeposit ? '+' : (isOut ? '-' : '+');
       const label = isDeposit ? depositLabel : (isOut ? outLabel : inLabel);
-      const icon = isDeposit ? '💰' : (isOut ? '📤' : '📥');
+      const icon = isDeposit ? '\u{1F4B0}' : (isOut ? '\u{1F4E4}' : '\u{1F4E5}');
       const statusRaw = typeof tx.status === 'number'
          ? ['Pending', 'Completed', 'Failed', 'Cancelled'][tx.status] || ''
          : (tx.status || tx.Status || 'Completed');

@@ -19,6 +19,8 @@ internal class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.WebHost.UseUrls("http://localhost:5202");
+
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)
             .WriteTo.Console()

@@ -20,10 +20,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/vireon.css?v=20260610-47">
-    <link rel="stylesheet" href="/vireon-mvc.css?v=20260610-56">
-    <link rel="stylesheet" href="/vireon-animations.css?v=20260610-58">
-    <link rel="stylesheet" href="/vireon-home.css?v=20260610-62">
+    <link rel="stylesheet" href="/vireon.css?v=20260611-02">
+    <link rel="stylesheet" href="/vireon-mvc.css?v=20260611-01">
+    <link rel="stylesheet" href="/vireon-animations.css?v=20260611-01">
+    <link rel="stylesheet" href="/vireon-home.css?v=20260611-01">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/pwa/icon-192.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#00b4d8">
@@ -100,8 +100,13 @@
 
     @RenderBody()
 
+    @if (!pageKey.StartsWith("dashboard-"))
+    {
+        @await Html.PartialAsync("_NeonAiWidget")
+    }
+
     @await Html.PartialAsync("_SiteScripts")
-    <script src="/vireon.js?v=20260610-60" defer></script>
+    <script src="/vireon.js?v=20260611-01" defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
