@@ -1,0 +1,272 @@
+2026-06-11 11:27:36.474 +03:00 [INF] Database bağlantısı kontrol ediliyor...
+2026-06-11 11:27:36.794 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:27:36.800 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:27:36.808 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-11 11:27:36.818 +03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-11 11:27:36.892 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+2026-06-11 11:27:36.950 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:36.972 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:27:36.975 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:36.977 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:27:36.979 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:36.981 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:27:36.983 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:36.985 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:27:36.998 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u"
+    WHERE "u"."Id" = "a"."UserId")
+2026-06-11 11:27:37.001 +03:00 [INF] 📂 Paylaşımlı SQLite: C:\Users\cavit\OneDrive\Desktop\Vireon\Database\vireon_local.db
+2026-06-11 11:27:37.009 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Password" NOT LIKE '$2%'
+2026-06-11 11:27:37.013 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'cavit@vireon.com'
+LIMIT 1
+2026-06-11 11:27:37.016 +03:00 [INF] 🔄 Demo hesapları senkronize ediliyor...
+2026-06-11 11:27:37.019 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:27:37.183 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:37.187 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:37.197 +03:00 [INF]   ✓ cavit@vireon.com güncellendi (VR-99999)
+2026-06-11 11:27:37.198 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:27:37.354 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:37.356 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:37.358 +03:00 [INF]   ✓ enes@vireon.com güncellendi (VR-88888)
+2026-06-11 11:27:37.359 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:27:37.495 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:37.497 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:27:37.499 +03:00 [INF]   ✓ kerem@vireon.com güncellendi (VR-77777)
+2026-06-11 11:27:37.515 +03:00 [INF] ✅ Demo hesapları hazır.
+2026-06-11 11:27:37.520 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'testuser@example.com'
+LIMIT 1
+2026-06-11 11:27:37.531 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email"
+FROM "Users" AS "u"
+WHERE "u"."PlainPassword" IS NULL OR "u"."PlainPassword" = ''
+2026-06-11 11:27:37.533 +03:00 [INF] ℹ️ PlainPassword boş 1 hesap — bir kez giriş veya şifre sıfırlama sonrası DB'ye yazılır: cbs@vireon.com
+2026-06-11 11:27:37.534 +03:00 [INF] ✅ Database hazır!
+2026-06-11 11:27:37.618 +03:00 [INF] Now listening on: http://localhost:5202
+2026-06-11 11:27:37.619 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-11 11:27:37.620 +03:00 [INF] Hosting environment: Development
+2026-06-11 11:27:37.620 +03:00 [INF] Content root path: C:\Users\cavit\OneDrive\Desktop\Vireon\Vireon.PresentationLayer
+2026-06-11 11:29:33.680 +03:00 [INF] Application is shutting down...
+2026-06-11 11:29:41.550 +03:00 [INF] Database bağlantısı kontrol ediliyor...
+2026-06-11 11:29:41.868 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:29:41.874 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:29:41.881 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-11 11:29:41.889 +03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-11 11:29:41.956 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+2026-06-11 11:29:42.013 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.035 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:29:42.038 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.040 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:29:42.042 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.044 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:29:42.045 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.047 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:29:42.058 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u"
+    WHERE "u"."Id" = "a"."UserId")
+2026-06-11 11:29:42.060 +03:00 [INF] 📂 Paylaşımlı SQLite: C:\Users\cavit\OneDrive\Desktop\Vireon\Database\vireon_local.db
+2026-06-11 11:29:42.067 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Password" NOT LIKE '$2%'
+2026-06-11 11:29:42.071 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'cavit@vireon.com'
+LIMIT 1
+2026-06-11 11:29:42.073 +03:00 [INF] 🔄 Demo hesapları senkronize ediliyor...
+2026-06-11 11:29:42.076 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:29:42.234 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.238 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.247 +03:00 [INF]   ✓ cavit@vireon.com güncellendi (VR-99999)
+2026-06-11 11:29:42.248 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:29:42.401 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.403 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.405 +03:00 [INF]   ✓ enes@vireon.com güncellendi (VR-88888)
+2026-06-11 11:29:42.406 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:29:42.510 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.514 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:29:42.515 +03:00 [INF]   ✓ kerem@vireon.com güncellendi (VR-77777)
+2026-06-11 11:29:42.532 +03:00 [INF] ✅ Demo hesapları hazır.
+2026-06-11 11:29:42.536 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'testuser@example.com'
+LIMIT 1
+2026-06-11 11:29:42.545 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email"
+FROM "Users" AS "u"
+WHERE "u"."PlainPassword" IS NULL OR "u"."PlainPassword" = ''
+2026-06-11 11:29:42.547 +03:00 [INF] ℹ️ PlainPassword boş 1 hesap — bir kez giriş veya şifre sıfırlama sonrası DB'ye yazılır: cbs@vireon.com
+2026-06-11 11:29:42.548 +03:00 [INF] ✅ Database hazır!
+2026-06-11 11:29:42.626 +03:00 [INF] Now listening on: http://localhost:5202
+2026-06-11 11:29:42.627 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-11 11:29:42.628 +03:00 [INF] Hosting environment: Development
+2026-06-11 11:29:42.629 +03:00 [INF] Content root path: C:\Users\cavit\OneDrive\Desktop\Vireon\Vireon.PresentationLayer
+2026-06-11 11:32:56.873 +03:00 [INF] Application is shutting down...

@@ -4,9 +4,7 @@
 
 namespace Vireon.DataAccessLayer.Migrations
 {
-    /// <summary>
-    /// Grup 2 — Account concurrency token (Accounts.RowVersion, optimistic locking).
-    /// </summary>
+    /// <inheritdoc />
     public partial class AddRowVersion : Migration
     {
         /// <inheritdoc />

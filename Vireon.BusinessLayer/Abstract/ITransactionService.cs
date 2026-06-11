@@ -7,8 +7,7 @@ namespace Vireon.BusinessLayer.Abstract
         void ProcessTransaction(Transaction transaction);
         Account? GetAccountByNumber(string accountNumber);
         void Deposit(string accountNumber, decimal amount, string? description);
-        decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency);
         int GetRecentTransactionCount(int accountId, int minutes);
-        void LogFraudEvent(int accountId, string riskType, string description);
+        decimal ConvertCurrency(decimal amount, string fromCurrency, string toCurrency);
     }
-}  
+}

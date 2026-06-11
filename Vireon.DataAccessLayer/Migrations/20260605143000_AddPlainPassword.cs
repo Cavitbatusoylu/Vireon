@@ -1,12 +1,14 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Vireon.DataAccessLayer.Concrete.EntityFramework;
 
 #nullable disable
 
 namespace Vireon.DataAccessLayer.Migrations
 {
-    /// <summary>
-    /// Grup 4 — Demo okunabilir şifre sütunu (Users.PlainPassword).
-    /// </summary>
+    [DbContext(typeof(VireonContext))]
+    [Migration("20260605143000_AddPlainPassword")]
+    /// <inheritdoc />
     public partial class AddPlainPassword : Migration
     {
         /// <inheritdoc />

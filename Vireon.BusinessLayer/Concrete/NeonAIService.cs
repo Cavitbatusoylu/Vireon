@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Vireon.DtoLayer.DTOs;
+
 
 namespace Vireon.BusinessLayer.Concrete
 {
@@ -90,30 +90,6 @@ namespace Vireon.BusinessLayer.Concrete
                 "Welcome! I can help with account info, transfers, or limits.",
                 "Hello! Welcome to the Vireon digital banking system. What would you like to do?"
             }},
-            { "hi", new[] { "Hi! I'm Neon. How can I help with your banking today?", "Hello! Ask me about transfers, balance, limits or account info." }},
-            { "hey", new[] { "Hey! I'm here. Need help with a transfer or your account?", "Hey! Tell me what you'd like to do — send money, check balance, or view limits." }},
-            { "whats up", new[] { "All good here! I'm Neon, your Vireon assistant. Want to send money, check your balance, or review limits?", "Systems are running smoothly! How can I help with your banking today?" }},
-            { "how are you", new[] { "I'm doing great and ready to help! What banking task can I assist with?", "All systems operational! Would you like help with a transfer or account info?" }},
-            { "send money", new[] {
-                "To send money, open 💸 Send Money in the left menu. Enter the receiver account (VR-XXXXX format) and the amount.",
-                "Go to Finance → Send Money. Fill in the receiver account number and amount, then confirm the transfer."
-            }},
-            { "want to send", new[] {
-                "Sure! Open 💸 Send Money from the left menu. You'll need the receiver's VR-XXXXX account number and the amount.",
-                "To send money: left menu → Send Money → enter receiver account and amount → confirm."
-            }},
-            { "send", new[] {
-                "To send money, use 💸 Send Money in the left menu. Enter the VR-XXXXX account number and amount.",
-                "Open Send Money from the Finance section. Transfers are processed with ACID guarantees."
-            }},
-            { "money", new[] {
-                "You can send money via 💸 Send Money or deposit via 💰 Deposit in the Finance menu.",
-                "For transfers use Send Money; to add funds use Deposit. Both are in the left Finance section."
-            }},
-            { "pay", new[] {
-                "To pay someone, use 💸 Send Money. Enter their VR-XXXXX account number and the amount.",
-                "Payments are made through Send Money in the left menu. Make sure you have the correct account number."
-            }},
             { "balance", new[] {
                 "You can view your balance on the Dashboard > Overview page. Click the 📊 icon in the left menu.",
                 "Your account balance is shown at the top of the main panel. Refresh the page for the latest figure."
@@ -122,10 +98,6 @@ namespace Vireon.BusinessLayer.Concrete
                 "To send money, go to 💸 Send Money in the left menu. Enter the receiver account number (VR-XXXXX) and the amount.",
                 "Transfers are ACID-compliant. Mind your daily limit — you can review it under the ⚡ section."
             }},
-            { "deposit", new[] {
-                "To deposit funds, go to 💰 Deposit in the left menu. Enter the amount and confirm.",
-                "Use the Deposit section under Finance to add money to your account."
-            }},
             { "limit", new[] {
                 "Your default daily transfer limit is 50,000₺. You can adjust it under ⚡ Daily Limits.",
                 "You can check your limits in the 'Daily Limits' section of the left menu — used and remaining limits are shown there."
@@ -133,10 +105,6 @@ namespace Vireon.BusinessLayer.Concrete
             { "account", new[] {
                 "You can see your account details under 📋 Account Information.",
                 "To open a new account, use the registration form. Each user is assigned a VR-XXXXX account number automatically."
-            }},
-            { "transaction", new[] {
-                "View your transaction history in the 📜 Transaction History section of the left menu.",
-                "All completed transfers and deposits are listed under Transaction History."
             }},
             { "security", new[] {
                 "Vireon protects your passwords with BCrypt hashing. The fraud detection system flags suspicious transactions automatically.",
@@ -154,21 +122,7 @@ namespace Vireon.BusinessLayer.Concrete
             { "fraud", new[] {
                 "Vireon uses a rule-based AI risk engine to detect suspicious transactions automatically. High-value or frequent transactions are logged to FraudLogs.",
                 "Our fraud detection analyzes every transfer. Transactions scoring above 70% risk are blocked automatically."
-            }},
-            { "thanks", new[] { "You're welcome! Let me know if you need anything else.", "Happy to help! I'm here for any other banking questions." }},
-            { "thank you", new[] { "You're welcome! Anything else I can help with?", "Glad I could help! Ask anytime." }}
-        };
-
-        private static readonly string[] _englishHints =
-        {
-            "hello", "hi", "hey", "whats up", "how are you", "send", "money", "transfer", "balance",
-            "account", "help", "deposit", "limit", "security", "want", "need", "pay", "please", "thank"
-        };
-
-        private static readonly string[] _turkishHints =
-        {
-            "merhaba", "selam", "naber", "nasilsin", "para", "gonder", "gönder", "bakiye", "hesap",
-            "yardim", "yardım", "transfer", "limit", "yatir", "yatır", "istiyorum", "güvenlik", "guvenlik"
+            }}
         };
 
         public NeonAIService(HttpClient httpClient, IOptions<NeonAIOptions> options)
@@ -185,7 +139,7 @@ namespace Vireon.BusinessLayer.Concrete
 
             // API key yoksa veya geçersizse offline yanıt ver
             if (string.IsNullOrWhiteSpace(opt.ApiToken) || opt.ApiToken.Length < 10)
-                return GetOfflineResponse(message, ResolveOfflineLanguage(message, isEnglish));
+                return GetOfflineResponse(message, isEnglish);
 
             try
             {
@@ -229,26 +183,16 @@ namespace Vireon.BusinessLayer.Concrete
                 if (!response.IsSuccessStatusCode)
                 {
                     // API hatası varsa offline fallback
-                    return GetOfflineResponse(message, ResolveOfflineLanguage(message, isEnglish));
+                    return GetOfflineResponse(message, isEnglish);
                 }
 
-                return ParseResponse(body) ?? GetOfflineResponse(message, ResolveOfflineLanguage(message, isEnglish));
+                return ParseResponse(body) ?? GetOfflineResponse(message, isEnglish);
             }
             catch (Exception)
             {
                 // Bağlantı hatası durumunda da offline yanıt ver
-                return GetOfflineResponse(message, ResolveOfflineLanguage(message, isEnglish));
+                return GetOfflineResponse(message, isEnglish);
             }
-        }
-
-        private static bool ResolveOfflineLanguage(string message, bool uiIsEnglish)
-        {
-            var normalized = NormalizeForMatch(message);
-            var enScore = _englishHints.Count(h => normalized.Contains(NormalizeForMatch(h)));
-            var trScore = _turkishHints.Count(h => normalized.Contains(NormalizeForMatch(h)));
-            if (enScore > trScore) return true;
-            if (trScore > enScore) return false;
-            return uiIsEnglish;
         }
 
         private static string GetOfflineResponse(string message, bool isEnglish)
@@ -258,7 +202,7 @@ namespace Vireon.BusinessLayer.Concrete
 
             foreach (var kvp in dictionary.OrderByDescending(k => k.Key.Length))
             {
-                var key = NormalizeForMatch(kvp.Key);
+                var key = isEnglish ? kvp.Key.ToLowerInvariant() : NormalizeForMatch(kvp.Key);
                 if (lower.Contains(key))
                 {
                     var responses = kvp.Value;
@@ -270,9 +214,9 @@ namespace Vireon.BusinessLayer.Concrete
             {
                 var generalEn = new[]
                 {
-                    "I didn't quite catch that. Try asking about: send money, balance, deposit, limits, account info, or type 'help' for a full list.",
-                    "I'm here to help with Vireon banking! Ask me to send money, check your balance, view limits, or type 'help' for more options. 🤖",
-                    "Could you be more specific? For example: 'I want to send money', 'What's my balance?', or 'Show daily limits'."
+                    $"I see you'd like to know about \"{message}\". As the Vireon banking system, I can help with account management, money transfers, limit settings and security. Would you like to ask something more specific?",
+                    "I'd be happy to help! Use the left menu in your Vireon panel to reach the relevant section. Type 'help' for detailed assistance.",
+                    "I'm currently running in offline mode. I can answer basic banking questions: balance, transfer, limit, account, security and more! 🤖"
                 };
                 return generalEn[Random.Shared.Next(generalEn.Length)];
             }
@@ -292,15 +236,7 @@ namespace Vireon.BusinessLayer.Concrete
         private static string NormalizeForMatch(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;
-
-            var sb = new StringBuilder(input.Length);
-            foreach (var c in input.ToLowerInvariant())
-            {
-                if (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c))
-                    sb.Append(c);
-            }
-
-            return sb.ToString()
+            return input.ToLowerInvariant()
                 .Replace('ı', 'i')
                 .Replace('ş', 's')
                 .Replace('ğ', 'g')
@@ -320,5 +256,11 @@ namespace Vireon.BusinessLayer.Concrete
             }
             catch { return null; }
         }
+    }
+
+    public class ChatMessage
+    {
+        public string Role { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
     }
 }

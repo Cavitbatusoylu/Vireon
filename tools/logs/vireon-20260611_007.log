@@ -1,0 +1,1796 @@
+2026-06-11 11:33:01.463 +03:00 [INF] Database bağlantısı kontrol ediliyor...
+2026-06-11 11:33:01.765 +03:00 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:33:01.771 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:33:01.781 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-11 11:33:01.793 +03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-11 11:33:01.864 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+2026-06-11 11:33:01.923 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:01.945 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:33:01.948 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:01.949 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:33:01.951 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:01.953 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:33:01.955 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:01.957 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:33:01.972 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u"
+    WHERE "u"."Id" = "a"."UserId")
+2026-06-11 11:33:01.976 +03:00 [INF] 📂 Paylaşımlı SQLite: C:\Users\cavit\OneDrive\Desktop\Vireon\Database\vireon_local.db
+2026-06-11 11:33:01.986 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Password" NOT LIKE '$2%'
+2026-06-11 11:33:01.991 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'cavit@vireon.com'
+LIMIT 1
+2026-06-11 11:33:01.994 +03:00 [INF] 🔄 Demo hesapları senkronize ediliyor...
+2026-06-11 11:33:01.997 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:33:02.153 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:02.158 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:02.167 +03:00 [INF]   ✓ cavit@vireon.com güncellendi (VR-99999)
+2026-06-11 11:33:02.169 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:33:02.273 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:02.275 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:02.277 +03:00 [INF]   ✓ enes@vireon.com güncellendi (VR-88888)
+2026-06-11 11:33:02.279 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:33:02.386 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:02.388 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:33:02.390 +03:00 [INF]   ✓ kerem@vireon.com güncellendi (VR-77777)
+2026-06-11 11:33:02.405 +03:00 [INF] ✅ Demo hesapları hazır.
+2026-06-11 11:33:02.409 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'testuser@example.com'
+LIMIT 1
+2026-06-11 11:33:02.418 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email"
+FROM "Users" AS "u"
+WHERE "u"."PlainPassword" IS NULL OR "u"."PlainPassword" = ''
+2026-06-11 11:33:02.420 +03:00 [INF] ℹ️ PlainPassword boş 1 hesap — bir kez giriş veya şifre sıfırlama sonrası DB'ye yazılır: cbs@vireon.com
+2026-06-11 11:33:02.421 +03:00 [INF] ✅ Database hazır!
+2026-06-11 11:33:02.499 +03:00 [INF] Now listening on: http://localhost:5202
+2026-06-11 11:33:02.500 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-11 11:33:02.501 +03:00 [INF] Hosting environment: Development
+2026-06-11 11:33:02.502 +03:00 [INF] Content root path: C:\Users\cavit\OneDrive\Desktop\Vireon\Vireon.PresentationLayer
+2026-06-11 11:42:40.184 +03:00 [INF] Database bağlantısı kontrol ediliyor...
+2026-06-11 11:42:40.519 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:42:40.524 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "name" = '__EFMigrationsHistory' AND "type" = 'table';
+2026-06-11 11:42:40.529 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-11 11:42:40.536 +03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-11 11:42:40.613 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+2026-06-11 11:42:40.672 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.694 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:42:40.695 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.695 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:42:40.696 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.696 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:42:40.696 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.696 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "DailyLimits" AS "d"
+    WHERE "d"."UserId" = @__user_Id_0)
+2026-06-11 11:42:40.706 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u"
+    WHERE "u"."Id" = "a"."UserId")
+2026-06-11 11:42:40.706 +03:00 [INF] 📂 Paylaşımlı SQLite: C:\Users\cavit\OneDrive\Desktop\Vireon\Database\vireon_local.db
+2026-06-11 11:42:40.713 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Password" NOT LIKE '$2%'
+2026-06-11 11:42:40.715 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'cavit@vireon.com'
+LIMIT 1
+2026-06-11 11:42:40.716 +03:00 [INF] 🔄 Demo hesapları senkronize ediliyor...
+2026-06-11 11:42:40.718 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:42:40.871 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.874 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.882 +03:00 [INF]   ✓ cavit@vireon.com güncellendi (VR-99999)
+2026-06-11 11:42:40.883 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:42:40.994 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.994 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:40.995 +03:00 [INF]   ✓ enes@vireon.com güncellendi (VR-88888)
+2026-06-11 11:42:40.995 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__spec_Email_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__spec_Email_0
+LIMIT 1
+2026-06-11 11:42:41.098 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:41.099 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+WHERE "d"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 11:42:41.099 +03:00 [INF]   ✓ kerem@vireon.com güncellendi (VR-77777)
+2026-06-11 11:42:41.115 +03:00 [INF] ✅ Demo hesapları hazır.
+2026-06-11 11:42:41.118 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = 'testuser@example.com'
+LIMIT 1
+2026-06-11 11:42:41.126 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email"
+FROM "Users" AS "u"
+WHERE "u"."PlainPassword" IS NULL OR "u"."PlainPassword" = ''
+2026-06-11 11:42:41.127 +03:00 [INF] ℹ️ PlainPassword boş 1 hesap — bir kez giriş veya şifre sıfırlama sonrası DB'ye yazılır: cbs@vireon.com
+2026-06-11 11:42:41.127 +03:00 [INF] ✅ Database hazır!
+2026-06-11 11:42:41.327 +03:00 [INF] Now listening on: http://localhost:5202
+2026-06-11 11:42:41.327 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-11 11:42:41.327 +03:00 [INF] Hosting environment: Development
+2026-06-11 11:42:41.328 +03:00 [INF] Content root path: C:\Users\cavit\OneDrive\Desktop\Vireon\Vireon.PresentationLayer
+2026-06-11 12:16:46.381 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 12:16:46.454 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__emailLower_0='?' (Size = 16), @__emailInput_1='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 12:16:46.636 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 12:16:46.637 +03:00 [INF] ✅ Başarılı giriş: Cavit Batu (cavit@vireon.com) - Hesap: VR-99999
+2026-06-11 12:16:47.706 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:16:47.814 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:16:47.852 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:16:47.874 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:16:47.892 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:16:47.901 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:16:47.956 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:16:47.960 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:17:23.249 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:17:23.252 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:17:23.259 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:17:23.263 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:17:23.265 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:17:23.266 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:17:23.268 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:17:23.269 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:17:23.273 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:17:23.273 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:17:23.274 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:17:23.275 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:17:23.275 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:17:23.275 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:17:23.285 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:17:23.301 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:17:23.308 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:17:23.313 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:17:23.318 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:17:23.321 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:17:23.325 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:17:23.327 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:17:23.331 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:17:23.334 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:17:23.342 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:19:26.996 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:19:26.997 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:19:27.002 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:19:27.003 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:19:27.006 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:19:27.007 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:19:27.037 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:19:27.039 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:19:33.448 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:19:33.449 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:19:33.454 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:19:33.455 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:19:33.463 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:19:33.464 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:19:33.466 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:19:33.468 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:19:37.112 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:19:37.113 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:19:37.131 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:19:37.132 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:19:37.134 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:19:37.135 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:19:37.138 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:19:37.139 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:19:37.142 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:19:37.142 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:19:37.142 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:19:37.142 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:19:37.143 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:19:37.143 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:19:37.143 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:19:37.146 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:19:37.146 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:19:37.147 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:19:37.147 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:19:37.147 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:19:37.148 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:19:37.148 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:19:37.148 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:19:37.149 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:19:37.149 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:21:31.642 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:31.643 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:31.651 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:31.652 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:31.655 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:31.656 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:31.675 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:31.676 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:34.013 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:34.014 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:34.021 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:34.022 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:34.024 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:34.025 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:34.027 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:34.029 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:36.614 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:36.615 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:36.621 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:36.621 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:36.623 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:36.623 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:36.625 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:36.627 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:39.998 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:39.999 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:21:40.001 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:21:40.002 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:21:40.002 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:21:40.002 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:40.003 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:21:40.003 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:21:40.004 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:21:40.004 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:21:40.004 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:21:40.004 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:21:40.004 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:21:40.004 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:21:40.005 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:21:40.005 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:21:40.005 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:21:40.006 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:40.007 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:40.009 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:40.010 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:40.013 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:40.015 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:40.018 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:40.021 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:41.040 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:41.040 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:21:41.040 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:21:41.040 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:21:41.040 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:21:41.041 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:41.041 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:21:41.041 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:21:41.041 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:21:41.042 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:21:41.042 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:21:41.042 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:21:41.043 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:21:41.043 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:41.043 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:21:41.043 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:21:41.046 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:41.046 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:21:41.047 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:21:41.049 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:41.050 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:41.052 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:41.052 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:41.054 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:41.055 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:43.936 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:43.937 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:43.942 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:43.943 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:43.944 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:43.945 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:43.946 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:43.948 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:43.951 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:43.951 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:43.951 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:43.951 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:43.951 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:43.952 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:48.212 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:48.213 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:48.221 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:21:48.222 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:21:48.223 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:21:48.224 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:21:48.226 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:21:48.227 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:21:48.230 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:21:48.230 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:21:48.230 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:21:48.230 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:21:48.230 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:21:48.230 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:21:48.230 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:21:48.231 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:21:48.231 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:21:48.231 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:21:48.231 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:21:48.232 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:21:48.232 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:21:48.232 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:21:48.233 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:21:48.233 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:21:48.233 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:28:26.628 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:28:26.633 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:28:26.640 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:28:26.642 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:28:26.644 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:28:26.647 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:28:26.668 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:28:26.670 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:28:43.157 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:28:43.159 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:28:43.187 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:28:43.189 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:28:43.190 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:28:43.191 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:28:43.193 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:28:43.194 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:28:43.196 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:28:43.196 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:28:43.196 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:28:43.196 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:28:43.197 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:28:43.197 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:28:43.198 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:28:43.200 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:28:43.200 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:28:43.200 +03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:28:43.201 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:28:43.201 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:28:43.201 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:28:43.202 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:28:43.203 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:28:43.203 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:28:43.204 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:37:03.630 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 12:37:03.641 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__emailLower_0='?' (Size = 16), @__emailInput_1='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 12:37:03.932 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 12:37:03.933 +03:00 [INF] ✅ Başarılı giriş: Cavit Batu (cavit@vireon.com) - Hesap: VR-99999
+2026-06-11 12:37:04.279 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:37:04.280 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:37:04.290 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:37:04.292 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:37:04.296 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:37:04.297 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:37:04.321 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:37:04.322 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:37:10.863 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:37:10.864 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:37:10.875 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:37:10.876 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:37:10.879 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:37:10.879 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:37:10.881 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:37:10.882 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:37:10.885 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:37:10.885 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:37:10.885 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:37:10.886 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:37:10.886 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:37:10.886 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:37:10.886 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:37:10.886 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:37:10.887 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:37:10.887 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:37:10.887 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:37:10.888 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:37:10.888 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:37:10.889 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:37:10.890 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:37:10.890 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:37:10.891 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:38:21.975 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:38:21.976 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:38:21.982 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:38:21.983 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:38:21.985 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:38:21.985 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:38:22.005 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:38:22.006 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:38:26.423 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:38:26.424 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:38:26.435 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:38:26.436 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:38:26.438 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:38:26.439 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:38:26.441 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:38:26.442 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:38:26.444 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 12:38:26.444 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 12:38:26.444 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 12:38:26.444 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 12:38:26.445 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 12:38:26.445 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 12:38:26.445 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 12:38:26.445 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 12:38:26.445 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 12:38:26.445 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 12:38:26.445 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:38:26.446 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 12:38:26.447 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 12:38:26.447 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:38:26.447 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 12:38:26.447 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 12:38:26.448 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 12:48:07.617 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 12:48:07.624 +03:00 [INF] Executed DbCommand (3ms) [Parameters=[@__emailLower_0='?' (Size = 15), @__emailInput_1='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 12:48:07.883 +03:00 [WRN] ⚠️ Şifre hatalı: enes@vireon.com
+2026-06-11 12:48:14.682 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 12:48:14.684 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__emailLower_0='?' (Size = 15), @__emailInput_1='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 12:48:14.980 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 12:48:14.980 +03:00 [INF] ✅ Başarılı giriş: Enes (enes@vireon.com) - Hesap: VR-88888
+2026-06-11 12:48:15.321 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:48:15.322 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:48:15.327 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:48:15.328 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:48:15.331 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:48:15.332 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:48:15.361 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:48:15.362 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:48:56.717 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:48:56.717 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:48:56.719 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:48:56.719 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:48:56.721 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:48:56.723 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:48:56.749 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:48:56.750 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:49:04.245 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:49:04.245 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:49:04.250 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:49:04.251 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:49:04.253 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:49:04.254 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:49:04.257 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:49:04.257 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:49:38.711 +03:00 [INF] 📡 GET /api/users/search
+2026-06-11 12:49:38.742 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToUpperInvariant_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."AccountNumber" = @__ToUpperInvariant_0
+LIMIT 1
+2026-06-11 12:49:41.214 +03:00 [INF] 📡 GET /api/users/search
+2026-06-11 12:49:41.215 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToUpperInvariant_0='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."AccountNumber" = @__ToUpperInvariant_0
+LIMIT 1
+2026-06-11 12:49:41.646 +03:00 [INF] 📡 GET /api/users/search
+2026-06-11 12:49:41.650 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToUpperInvariant_0='?' (Size = 8)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."AccountNumber" = @__ToUpperInvariant_0
+LIMIT 1
+2026-06-11 12:49:41.650 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 12:55:29.501 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:55:29.514 +03:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:55:29.517 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:55:29.518 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:55:29.520 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:55:29.523 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:55:29.564 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:55:29.565 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:55:49.204 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:55:49.205 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:55:49.210 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:55:49.211 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:55:49.213 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:55:49.214 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:55:49.216 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:55:49.216 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:55:55.788 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 12:55:55.789 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 12:55:55.792 +03:00 [INF] 📡 GET /api/users
+2026-06-11 12:55:55.793 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 12:55:55.794 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 12:55:55.795 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 12:55:55.797 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 12:55:55.797 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 12:56:34.524 +03:00 [INF] 📡 GET /api/users/search
+2026-06-11 12:56:34.525 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToUpperInvariant_0='?' (Size = 7)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."AccountNumber" = @__ToUpperInvariant_0
+LIMIT 1
+2026-06-11 12:56:34.948 +03:00 [INF] 📡 GET /api/users/search
+2026-06-11 12:56:34.950 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToUpperInvariant_0='?' (Size = 8)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."AccountNumber" = @__ToUpperInvariant_0
+LIMIT 1
+2026-06-11 12:56:34.954 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 13:09:24.319 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 13:09:24.326 +03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__emailLower_0='?' (Size = 16), @__emailInput_1='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 13:09:24.660 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 13:09:24.660 +03:00 [INF] ✅ Başarılı giriş: Cavit Batu (cavit@vireon.com) - Hesap: VR-99999
+2026-06-11 13:09:25.004 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:09:25.005 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:09:25.012 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:09:25.013 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:09:25.016 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:09:25.017 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:09:25.042 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:09:25.043 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:09:29.961 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:09:29.961 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:09:29.983 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:09:29.984 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:09:29.985 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:09:29.986 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:09:29.987 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:09:29.988 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:09:29.990 +03:00 [INF] 📡 GET /api/users/admin-users
+2026-06-11 13:09:29.990 +03:00 [INF] 📡 GET /api/fraudlogs
+2026-06-11 13:09:29.990 +03:00 [INF] 📡 GET /api/users/admin-stats
+2026-06-11 13:09:29.990 +03:00 [INF] 📡 GET /api/users/admin-transactions
+2026-06-11 13:09:29.991 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."AccountId", "f"."Description", "f"."LogDate", "f"."RiskType"
+FROM "FraudLogs" AS "f"
+2026-06-11 13:09:29.991 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Email", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance"
+FROM "Users" AS "u"
+2026-06-11 13:09:29.991 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:09:29.991 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Users" AS "u"
+2026-06-11 13:09:29.992 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."Date", "t"."Description", "t"."Status", (
+    SELECT "a"."AccountNumber"
+    FROM "Accounts" AS "a"
+    WHERE "a"."Id" = "t"."SenderAccountId"
+    LIMIT 1), (
+    SELECT "a0"."AccountNumber"
+    FROM "Accounts" AS "a0"
+    WHERE "a0"."Id" = "t"."ReceiverAccountId"
+    LIMIT 1), (
+    SELECT "u"."Name" || ' ' || "u"."Surname"
+    FROM "Users" AS "u"
+    WHERE "u"."Id" IN (
+        SELECT "a1"."UserId"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."Id" = "t"."SenderAccountId"
+    )
+    LIMIT 1), (
+    SELECT "u0"."Name" || ' ' || "u0"."Surname"
+    FROM "Users" AS "u0"
+    WHERE "u0"."Id" IN (
+        SELECT "a2"."UserId"
+        FROM "Accounts" AS "a2"
+        WHERE "a2"."Id" = "t"."ReceiverAccountId"
+    )
+    LIMIT 1), CASE
+    WHEN "t"."SenderAccountId" = "t"."ReceiverAccountId" THEN 'Deposit'
+    ELSE 'Transfer'
+END
+FROM "Transactions" AS "t"
+ORDER BY "t"."Date" DESC
+LIMIT @__p_0
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Accounts" AS "a"
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role", COALESCE((
+    SELECT "a"."Balance"
+    FROM "Accounts" AS "a"
+    WHERE "a"."UserId" = "u"."Id"
+    LIMIT 1), '0.0') AS "Balance", (
+    SELECT COUNT(*)
+    FROM "Transactions" AS "t"
+    WHERE "t"."SenderAccountId" IN (
+        SELECT "a0"."Id"
+        FROM "Accounts" AS "a0"
+        WHERE "a0"."UserId" = "u"."Id"
+    ) OR "t"."ReceiverAccountId" IN (
+        SELECT "a1"."Id"
+        FROM "Accounts" AS "a1"
+        WHERE "a1"."UserId" = "u"."Id"
+    )) AS "TransactionCount"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC, "u"."Role" = 'Admin' DESC, "u"."Name", "u"."Surname"
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" = "t"."ReceiverAccountId"
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "Transactions" AS "t"
+WHERE "t"."SenderAccountId" <> "t"."ReceiverAccountId"
+2026-06-11 13:09:29.993 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "FraudLogs" AS "f"
+2026-06-11 13:09:29.994 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "LedgerEntries" AS "l"
+2026-06-11 13:12:41.497 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 13:12:41.498 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__emailLower_0='?' (Size = 16), @__emailInput_1='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 13:12:41.758 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 13:12:41.759 +03:00 [INF] ✅ Başarılı giriş: Cavit Batu (cavit@vireon.com) - Hesap: VR-99999
+2026-06-11 13:12:42.100 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:12:42.101 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:12:42.105 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:12:42.107 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:12:42.109 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:12:42.110 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:12:42.136 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:12:42.137 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:13:23.553 +03:00 [INF] 📡 POST /api/ai/chat
+2026-06-11 13:13:23.759 +03:00 [INF] Start processing HTTP request POST https://api.groq.com/openai/v1/chat/completions
+2026-06-11 13:13:23.765 +03:00 [INF] Sending HTTP request POST https://api.groq.com/openai/v1/chat/completions
+2026-06-11 13:13:24.420 +03:00 [INF] Received HTTP response headers after 648.7366ms - 401
+2026-06-11 13:13:24.423 +03:00 [INF] End processing HTTP request after 676.5673ms - 401
+2026-06-11 13:13:34.321 +03:00 [INF] 📡 POST /api/ai/chat
+2026-06-11 13:13:34.330 +03:00 [INF] Start processing HTTP request POST https://api.groq.com/openai/v1/chat/completions
+2026-06-11 13:13:34.331 +03:00 [INF] Sending HTTP request POST https://api.groq.com/openai/v1/chat/completions
+2026-06-11 13:13:34.448 +03:00 [INF] Received HTTP response headers after 116.8968ms - 401
+2026-06-11 13:13:34.449 +03:00 [INF] End processing HTTP request after 118.4789ms - 401
+2026-06-11 13:26:18.681 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 13:26:18.686 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__emailLower_0='?' (Size = 15), @__emailInput_1='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 13:26:18.901 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 13:26:18.901 +03:00 [INF] ✅ Başarılı giriş: Enes (enes@vireon.com) - Hesap: VR-88888
+2026-06-11 13:26:19.237 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:26:19.238 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:26:19.244 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:26:19.245 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:26:19.248 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:26:19.249 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:26:19.268 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:26:19.269 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:57:05.522 +03:00 [INF] 📡 POST /api/users/login
+2026-06-11 13:57:05.529 +03:00 [INF] Executed DbCommand (4ms) [Parameters=[@__emailLower_0='?' (Size = 15), @__emailInput_1='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."AccountNumber", "u"."CreatedAt", "u"."Email", "u"."Name", "u"."Password", "u"."PlainPassword", "u"."Role", "u"."Surname"
+FROM "Users" AS "u"
+WHERE "u"."Email" = @__emailLower_0 OR "u"."Email" = @__emailInput_1
+LIMIT 1
+2026-06-11 13:57:05.740 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[@__user_Id_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+WHERE "a"."UserId" = @__user_Id_0
+LIMIT 1
+2026-06-11 13:57:05.740 +03:00 [INF] ✅ Başarılı giriş: Enes (enes@vireon.com) - Hesap: VR-88888
+2026-06-11 13:57:06.094 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:57:06.095 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:57:06.101 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:57:06.102 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:57:06.104 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:57:06.105 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:57:06.137 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:57:06.138 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:57:10.044 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:57:10.046 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:57:10.050 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:57:10.050 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:57:10.052 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:57:10.053 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:57:10.056 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:57:10.056 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:57:25.056 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:57:25.056 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:57:25.062 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:57:25.063 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:57:25.064 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:57:25.065 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:57:25.068 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:57:25.069 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"
+2026-06-11 13:57:27.441 +03:00 [INF] 📡 GET /api/accounts
+2026-06-11 13:57:27.442 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "a"."Id", "a"."AccountNumber", "a"."Balance", "a"."Currency", "a"."RowVersion", "a"."UserId"
+FROM "Accounts" AS "a"
+2026-06-11 13:57:27.445 +03:00 [INF] 📡 GET /api/users
+2026-06-11 13:57:27.445 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."Name", "u"."Surname", "u"."Email", "u"."AccountNumber", "u"."CreatedAt", "u"."Role"
+FROM "Users" AS "u"
+ORDER BY "u"."Id" DESC
+2026-06-11 13:57:27.447 +03:00 [INF] 📡 GET /api/transactions
+2026-06-11 13:57:27.447 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "t"."Id", "t"."Amount", "t"."CreatedAt", "t"."Date", "t"."Description", "t"."ReceiverAccountId", "t"."SenderAccountId", "t"."Status"
+FROM "Transactions" AS "t"
+2026-06-11 13:57:27.450 +03:00 [INF] 📡 GET /api/dailylimits
+2026-06-11 13:57:27.451 +03:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."LastResetDate", "d"."MaxDailyLimit", "d"."UsedLimit", "d"."UserId"
+FROM "DailyLimits" AS "d"

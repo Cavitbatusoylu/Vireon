@@ -4,9 +4,7 @@
 
 namespace Vireon.DataAccessLayer.Migrations
 {
-    /// <summary>
-    /// Grup 3 — Admin/User rolü (Users.Role, varsayılan: User).
-    /// </summary>
+    /// <inheritdoc />
     public partial class AddUserRole : Migration
     {
         /// <inheritdoc />
@@ -17,7 +15,7 @@ namespace Vireon.DataAccessLayer.Migrations
                 table: "Users",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "User");
+                defaultValue: "");
         }
 
         /// <inheritdoc />

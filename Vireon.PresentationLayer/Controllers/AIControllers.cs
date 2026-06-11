@@ -21,8 +21,9 @@ namespace Vireon.PresentationLayer.Controllers
             if (string.IsNullOrWhiteSpace(request?.Message))
                 return BadRequest(new { message = "Mesaj boş olamaz." });
 
-            var result = await _neonAIService.GetResponseAsync(request.Message, request.History, request.Lang);
+            var result = await _neonAIService.GetResponseAsync(request.Message, lang: request.Lang);
             return Ok(new { response = result });
         }
     }
+
 }

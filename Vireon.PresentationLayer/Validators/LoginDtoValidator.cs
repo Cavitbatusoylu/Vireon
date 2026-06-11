@@ -9,11 +9,11 @@ namespace Vireon.PresentationLayer.Validators
         {
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("E-posta adresi zorunludur.")
-                .EmailAddress().WithMessage("Geçerli bir e-posta adresi giriniz.");
+                .EmailAddress().WithMessage("GeÃ§erli bir e-posta adresi giriniz.");
 
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Şifre zorunludur.")
-                .MinimumLength(6).WithMessage("Şifre en az 6 karakter olmalıdır.");
+                .NotEmpty().WithMessage("Åifre zorunludur.")
+                .MinimumLength(6).WithMessage("Åifre en az 6 karakter olmalÄ±dÄ±r.");
         }
     }
 }
