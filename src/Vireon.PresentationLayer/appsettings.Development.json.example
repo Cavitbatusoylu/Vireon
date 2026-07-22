@@ -1,0 +1,6 @@
+{
+  "NeonAI": {
+    "ApiToken": "YOUR_GROQ_API_KEY",
+    "ModelId": "llama-3.1-8b-instant"
+  }
+}
