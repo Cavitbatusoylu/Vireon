@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vireon - Immutable Ledger | Digital Bank Core System</title>
+    <meta name="description"
+        content="Vireon - Database-centric digital bank core system simulation. Secure, consistent, and traceable financial transaction management.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="vireon.css?v=20260610-35">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
+    <link rel="shortcut icon" href="images/pwa/icon-192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="images/pwa/icon-192.png">
+    <link rel="manifest" href="manifest.json?v=20260605-14">
+    <meta name="theme-color" content="#00b4d8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vireon">
+    <meta name="application-name" content="Vireon Digital Bank">
+    <meta name="msapplication-TileImage" content="images/pwa/icon-512.png">
+    <meta name="msapplication-TileColor" content="#0a0f1a">
+    <!-- Chart.js for Dashboard Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen show" id="loadingScreen">
+        <img src="images/vireon-logo-transparent-new.png" alt="Vireon Logo" class="loading-logo">
+        
+        <div class="loader-ring"></div>
+        <div class="loading-text" data-tr="Vireon Yükleniyor..." data-en="Loading Vireon...">Loading Vireon...</div>
+    </div>
+
+    <!-- Ambient Background -->
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Grid Overlay -->
+    <div class="grid-overlay"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar" id="topNavbar">
+        <div class="navbar-left">
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="navbar-logo" id="navLogo">
+            
+            <span class="navbar-brand">VIREON</span>
+        </div>
+        <div class="navbar-right">
+            <!-- Language Switcher -->
+            <div class="lang-switcher">
+                <button class="lang-btn" id="langTR" onclick="switchLang('tr')">TR</button>
+                <button class="lang-btn active" id="langEN" onclick="switchLang('en')">EN</button>
+            </div>
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" data-tr-title="Tema Değiştir" data-en-title="Toggle Theme" data-tr-aria-label="Tema değiştir" data-en-aria-label="Toggle theme" title="Toggle Theme" aria-label="Toggle theme">
+                <span class="theme-icon-dark">🌙</span>
+                <span class="theme-icon-light">☀️</span>
+            </button>
+            <div class="navbar-actions" id="navbarActions">
+                <!-- Back to Home (dashboard only) -->
+                <button class="login-btn" id="backToHomeBtn" onclick="backToMenu()" style="display: none;" aria-label="Back to home">
+                    <span class="login-icon">🏠</span>
+                    <span data-tr="Ana Menü" data-en="Home">Home</span>
+                </button>
+                <!-- Dashboard (landing, logged in) -->
+                <button class="login-btn" id="dashboardNavBtn" onclick="showSection('dashboard')" style="display: none;" aria-label="Go to dashboard">
+                    <span class="login-icon">📊</span>
+                    <span data-tr="Dashboardım" data-en="My Dashboard">My Dashboard</span>
+                </button>
+                <!-- PWA Install -->
+                <button type="button" class="login-btn install-app-btn" id="installBtn" hidden aria-label="Install app">
+                    <span class="login-icon">📱</span>
+                    <span data-tr="Yükle" data-en="Install">Install</span>
+                </button>
+                <!-- Login -->
+                <button class="login-btn" id="loginBtn" aria-label="Open login modal">
+                    <span class="login-icon">🔐</span>
+                    <span data-tr="Giriş Yap" data-en="Sign In">Sign In</span>
+                </button>
+                <!-- Logout -->
+                <button class="login-btn" id="logoutBtn" onclick="handleLogout()" style="display: none;" aria-label="Logout">
+                    <span class="login-icon">🚪</span>
+                    <span data-tr="Çıkış Yap" data-en="Logout">Logout</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeLoginModal()" aria-label="Close login modal">✕</button>
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
+            
+            <h2 data-tr="Vireon'a Giriş Yap" data-en="Sign In to Vireon">Sign In to Vireon</h2>
+            <p class="modal-subtitle" data-tr="Dijital banka çekirdek sisteminize erişin"
+                data-en="Access your digital bank core system">Access your digital bank core system</p>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="ornek@vireon.com" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Şifre" data-en="Password">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
+                        <span data-tr="Beni Hatırla" data-en="Remember Me">Remember Me</span>
+                    </label>
+                    <a href="#" onclick="openForgotPasswordModal(event)" class="forgot-link" data-tr="Şifremi Unuttum" data-en="Forgot Password?">Forgot
+                        Password?</a>
+                </div>
+                <button type="submit" class="login-submit-btn" data-tr="Giriş Yap" data-en="Sign In">Sign In</button>
+            </form>
+            <p class="modal-footer-text">
+                <span data-tr="Hesabınız yok mu?" data-en="Don't have an account?">Don't have an account?</span>
+                <a href="#" onclick="openRegisterModal(event)" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRegisterModal()" aria-label="Close register modal">✕</button>
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
+            
+            <h2 data-tr="Vireon'a Kayıt Ol" data-en="Sign Up to Vireon">Sign Up to Vireon</h2>
+            <p class="modal-subtitle" data-tr="Dijital banka sistemine katılın"
+                data-en="Join the digital bank system">Join the digital bank system</p>
+            <form class="login-form" onsubmit="handleRegister(event)">
+                <div class="register-name-row">
+                    <div class="form-group">
+                        <label data-tr="Ad" data-en="First Name">First Name</label>
+                        <input type="text" id="registerName" placeholder="Cavit" autocomplete="given-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-tr="Soyad" data-en="Last Name">Last Name</label>
+                        <input type="text" id="registerSurname" placeholder="Soylu" autocomplete="family-name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                    <input type="email" id="registerEmail" placeholder="ornek@vireon.com" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Şifre" data-en="Password">Password</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Şifre Tekrar" data-en="Confirm Password">Confirm Password</label>
+                    <input type="password" id="registerConfirmPassword" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-submit-btn" data-tr="Kayıt Ol" data-en="Sign Up">Sign Up</button>
+            </form>
+            <p class="modal-footer-text">
+                <span data-tr="Zaten hesabınız var mı?" data-en="Already have an account?">Already have an account?</span>
+                <a href="#" onclick="openLoginModalFromRegister(event)" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotPasswordModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close forgot password modal">✕</button>
+            <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="modal-logo">
+            
+            <h2 data-tr="Şifremi Unuttum" data-en="Forgot Password">Forgot Password</h2>
+            <p class="modal-subtitle" data-tr="E-posta, hesap numaranız ve yeni şifrenizi girin"
+                data-en="Enter your email, account number and new password">Enter your email, account number and new password</p>
+            <form class="login-form" onsubmit="handleForgotPassword(event)">
+                <div class="form-group">
+                    <label data-tr="E-posta Adresi" data-en="Email Address">Email Address</label>
+                    <input type="email" id="forgotPasswordEmail" placeholder="ornek@vireon.com" required>
+                </div>
+                <div class="form-group">
+                    <label data-tr="Hesap Numarası" data-en="Account Number">Account Number</label>
+                    <input type="text" id="forgotPasswordAccountNo" placeholder="VR-12345" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label data-tr="Yeni Şifre" data-en="New Password">New Password</label>
+                    <input type="password" id="forgotPasswordNew" placeholder="••••••••" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label data-tr="Yeni Şifre (Tekrar)" data-en="Confirm New Password">Confirm New Password</label>
+                    <input type="password" id="forgotPasswordConfirm" placeholder="••••••••" required minlength="6">
+                </div>
+                <button type="submit" class="login-submit-btn" data-tr="Şifreyi Sıfırla" data-en="Reset Password">Reset Password</button>
+            </form>
+            <p class="modal-footer-text">
+                <span data-tr="Şifrenizi hatırladınız mı?" data-en="Remembered your password?">Remembered your password?</span>
+                <a href="#" onclick="openLoginModalFromForgot(event)" data-tr="Giriş Yap" data-en="Sign In">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header" id="mainHeader">
+            <div class="logo">
+        <img src="images/vireon-logo-transparent-new.png" alt="Vireon Logo" class="logo-image" id="mainLogo">
+                
+            </div>
+            <h1 class="brand-name">Vireon</h1>
+        </div>
+
+        <!-- Menu Grid (Compact Version) -->
+        <div class="menu-grid compact-grid" id="menuGrid">
+            <div class="menu-item initial-load" onclick="scrollToSection('section-introduction')">
+                <div class="menu-badge">IN</div>
+                <div class="menu-title" data-tr="Tanıtım" data-en="Introduction">Introduction</div>
+            </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-components')">
+                <div class="menu-badge">SV</div>
+                <div class="menu-title" data-tr="Bileşenler" data-en="Components">Components</div>
+            </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-architecture')">
+                <div class="menu-badge">AR</div>
+                <div class="menu-title" data-tr="Mimari" data-en="Architecture">Architecture</div>
+            </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-team')">
+                <div class="menu-badge">TM</div>
+                <div class="menu-title" data-tr="Ekip" data-en="Team">Team</div>
+            </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-desktop')">
+                <div class="menu-badge">DT</div>
+                <div class="menu-title" data-tr="Masaüstü" data-en="Desktop">Desktop</div>
+            </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-about')">
+                <div class="menu-badge">AB</div>
+                <div class="menu-title" data-tr="Hakkında" data-en="About">About</div>
+            </div>
+            <div class="menu-item initial-load" onclick="scrollToSection('section-contact')">
+                <div class="menu-badge">CT</div>
+                <div class="menu-title" data-tr="İletişim" data-en="Contact">Contact</div>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="contentArea">
+            <!-- Dashboard (üstte: giriş sonrası doğrudan burada) -->
+            <div class="content-section" id="dashboard">
+                <div class="dashboard-shell">
+                    <div class="dashboard-topbar">
+                        <button type="button" class="back-btn dash-back" onclick="backToMenu()" data-tr="← Ana sayfa" data-en="← Home">← Home</button>
+                    </div>
+                    <div class="dashboard-wrapper">
+                        <aside class="dash-sidebar">
+                            <div class="sidebar-header">
+                                <div class="sidebar-logo">
+                                    <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="sidebar-logo-img">
+                                    <span>VIREON</span>
+                                </div>
+                            </div>
+                            <nav class="sidebar-nav">
+                                <ul class="sidebar-menu">
+                                    <li class="active" data-dash="dash-overview" onclick="switchDashSection('dash-overview')">
+                                        <span class="sidebar-icon">📊</span>
+                                        <span data-tr="Genel Bakış" data-en="Overview">Overview</span>
+                                    </li>
+                                    <li class="sidebar-group-label" aria-hidden="true">
+                                        <span data-tr="Finans" data-en="Finance">Finance</span>
+                                    </li>
+                                    <li data-dash="dash-transfers" onclick="switchDashSection('dash-transfers')">
+                                        <span class="sidebar-icon">💸</span>
+                                        <span data-tr="Para Gönder" data-en="Send Money">Send Money</span>
+                                    </li>
+                                    <li data-dash="dash-deposit" onclick="switchDashSection('dash-deposit')">
+                                        <span class="sidebar-icon">💰</span>
+                                        <span data-tr="Para Yatır" data-en="Deposit">Deposit</span>
+                                    </li>
+                                    <li data-dash="dash-qr" onclick="switchDashSection('dash-qr')">
+                                        <span class="sidebar-icon">📱</span>
+                                        <span data-tr="QR Ödeme" data-en="QR Payment">QR Payment</span>
+                                    </li>
+                                    <li data-dash="dash-history" onclick="switchDashSection('dash-history')">
+                                        <span class="sidebar-icon">📜</span>
+                                        <span data-tr="İşlem Geçmişi" data-en="History">History</span>
+                                    </li>
+                                    <li data-dash="dash-limits" onclick="switchDashSection('dash-limits')">
+                                        <span class="sidebar-icon">⚡</span>
+                                        <span data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</span>
+                                    </li>
+                                    <li data-dash="dash-db-explorer" onclick="switchDashSection('dash-db-explorer')">
+                                        <span class="sidebar-icon">🗄️</span>
+                                        <span data-tr="Veritabanı İzleyici" data-en="DB Explorer">DB Explorer</span>
+                                    </li>
+                                    <li data-dash="dash-account-info" onclick="switchDashSection('dash-account-info')">
+                                        <span class="sidebar-icon">📋</span>
+                                        <span data-tr="Hesap Bilgileri" data-en="Account Info">Account Info</span>
+                                    </li>
+                                    <li data-dash="dash-ai-coach" onclick="switchDashSection('dash-ai-coach')">
+                                        <span class="sidebar-icon">🤖</span>
+                                        <span data-tr="Neon Yapay Zeka" data-en="Neon AI Coach">Neon AI Coach</span>
+                                    </li>
+                                    <li data-dash="dash-profile" onclick="switchDashSection('dash-profile')">
+                                        <span class="sidebar-icon">👤</span>
+                                        <span data-tr="Profil Ayarları" data-en="Profile">Profile</span>
+                                    </li>
+                                    <li data-dash="dash-password" onclick="switchDashSection('dash-password')">
+                                        <span class="sidebar-icon">🔐</span>
+                                        <span data-tr="Şifre Değiştir" data-en="Change Password">Change Password</span>
+                                    </li>
+                                    <li data-dash="dash-admin" onclick="switchDashSection('dash-admin')" id="adminMenuItem" style="display:none;">
+                                        <span class="sidebar-icon">🛡️</span>
+                                        <span data-tr="Admin Paneli" data-en="Admin Panel">Admin Panel</span>
+                                    </li>
+                                </ul>
+                            </nav>
+                            <div class="sidebar-footer">
+                                <button type="button" class="logout-btn" onclick="handleLogout()" data-tr="Çıkış" data-en="Logout">Logout</button>
+                            </div>
+                        </aside>
+                        <main class="dash-content">
+                            <div class="dash-sub-section active" id="dash-overview">
+                                <h2 class="sub-section-title" data-tr="Hesap Özeti" data-en="Account Overview">Account Overview</h2>
+                                <div class="dashboard-grid-modern">
+                                    <div class="glass-card balance-hero">
+                                        <div class="hero-label" data-tr="Kullanılabilir Bakiye" data-en="Available Balance">Available Balance</div>
+                                        <div class="hero-amount">₺<span id="dashBalance">0.00</span></div>
+                                        <div class="hero-details">
+                                            <span id="dashAccountNo">**** ****</span> | <span id="dashCurrency">TRY</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="charts-row-modern">
+                                        <div class="glass-card chart-card">
+                                            <h4 data-tr="Bakiye Akışı" data-en="Balance Flow">Balance Flow</h4>
+                                            <div class="chart-container-modern">
+                                                <canvas id="balanceLineChart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="glass-card chart-card">
+                                            <h4 data-tr="İşlem Dağılımı" data-en="Transaction Mix">Transaction Mix</h4>
+                                            <div class="chart-container-modern">
+                                                <canvas id="expensePieChart"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card recent-tx-modern">
+                                        <h4 data-tr="Son İşlemler" data-en="Recent Transactions">Recent Transactions</h4>
+                                        <div id="overviewTransactions" class="tx-list-modern">
+                                            <p data-tr="Yükleniyor..." data-en="Loading...">Loading...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- DATABASE EXPLORER (Hoca isteği: DB Görselleştirme) -->
+                            <div class="dash-sub-section" id="dash-db-explorer">
+                                <h2 class="sub-section-title" data-tr="Veritabanı İzleyici" data-en="Database Explorer">Database Explorer</h2>
+                                <div class="db-stats-grid" id="dbStatsContainer">
+                                    <!-- JS ile dolacak -->
+                                </div>
+                                <div class="glass-card db-preview-card">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="Banka Verileri (Live)" data-en="Bank Data (Live)">Bank Data (Live)</h4>
+                                        <button class="refresh-btn-mini" onclick="fetchDatabaseStats()" aria-label="Refresh database stats">↻</button>
+                                    </div>
+                                    <div class="vireon-table-scroll">
+                                        <table id="dbUsersTable" class="vireon-table-modern">
+                                            <thead>
+                                                <tr><th>ID</th><th data-tr="Müşteri" data-en="Customer">Customer</th><th data-tr="Hesap No" data-en="Account No">Account No</th><th data-tr="Bakiye" data-en="Balance">Balance</th></tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI COACH (Neon / Groq) -->
+                            <div class="dash-sub-section" id="dash-ai-coach">
+                                <h2 class="sub-section-title" data-tr="Neon Yapay Zeka" data-en="Neon AI Coach">Neon AI Coach</h2>
+                                <div class="ai-chat-shell glass-card">
+                                    <div class="ai-chat-body" id="aiChatContent">
+                                        <div class="bot-bubble">
+                                            <div class="bubble-icon">🤖</div>
+                                            <div class="bubble-text" data-tr="Merhaba! Ben Neon. Senin bankacılık işlemlerini analiz ediyorum. Sana nasıl yardımcı olabilirim?" data-en="Hi! I'm Neon. I analyze your banking activity. How can I help you?">Hi! I'm Neon. I analyze your banking activity. How can I help you?</div>
+                                        </div>
+                                    </div>
+                                    <div class="ai-chat-footer">
+                                        <input type="text" id="aiInput" placeholder="Ask Neon..." data-tr-placeholder="Neon'a sor..." data-en-placeholder="Ask Neon..." onkeypress="if(event.key==='Enter') sendAiMessage()">
+                                        <button class="ai-send-btn" onclick="sendAiMessage()" aria-label="Send message">➤</button>
+                                    </div>
+                                    <div class="ai-chat-history-panel">
+                                        <div class="ai-history-header">
+                                            <span data-tr="Sohbet Geçmişi" data-en="Chat History">Chat History</span>
+                                            <button type="button" class="ai-history-clear" onclick="clearAiChatHistory()" data-tr="Temizle" data-en="Clear">Clear</button>
+                                        </div>
+                                        <ul class="ai-history-list" id="aiChatHistoryList"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ACCOUNT INFORMATION SECTION -->
+                            <div class="dash-sub-section" id="dash-account-info">
+                                <h2 class="sub-section-title" data-tr="Hesap Bilgileri" data-en="Account Information">Account Information</h2>
+                                <div class="account-info-grid">
+                                    <div class="glass-card account-info-card">
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Hesap Numarası" data-en="Account Number">Account Number</span>
+                                            <span class="info-value info-highlight" id="infoAccountNumber">-</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Ad Soyad" data-en="Full Name">Full Name</span>
+                                            <span class="info-value" id="infoFullName">-</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="E-posta" data-en="Email">Email</span>
+                                            <span class="info-value" id="infoEmail">-</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Kayıt Tarihi" data-en="Registration Date">Registration Date</span>
+                                            <span class="info-value" id="infoCreatedAt">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="glass-card account-info-card">
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Güncel Bakiye" data-en="Current Balance">Current Balance</span>
+                                            <span class="info-value info-balance" id="infoBalance">₺0.00</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Para Birimi" data-en="Currency">Currency</span>
+                                            <span class="info-value" id="infoCurrency">TRY</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                            <span class="info-value" id="infoTxCount">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="glass-card" style="margin-top: 20px;">
+                                    <h4 data-tr="İşlem Geçmişi" data-en="Transaction History">Transaction History</h4>
+                                    <div id="infoTransactionHistory" class="tx-list-modern">
+                                        <p data-tr="Yükleniyor..." data-en="Loading...">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dash-sub-section" id="dash-deposit">
+                                <h2 class="sub-section-title" data-tr="Para Yatır" data-en="Deposit Funds">Deposit Funds</h2>
+                                <div class="glass-card transfer-card">
+                                    <div class="transfer-form">
+                                        <div class="form-group">
+                                            <label data-tr="Yatırılacak Tutar (₺)" data-en="Amount (₺)">Amount (₺)</label>
+                                            <input type="number" id="depositAmount" class="neon-input" placeholder="0.00" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Not (isteğe bağlı)" data-en="Note (optional)">Note (optional)</label>
+                                            <input type="text" id="depositNote" class="neon-input" placeholder="">
+                                        </div>
+                                        <button type="button" class="login-submit-btn" onclick="handleDepositRequest()" data-tr="Yatırım talebi oluştur" data-en="Submit deposit request">Submit deposit request</button>
+                                        <p class="dash-hint" data-tr="Bu işlem demo modundadır; gerçek ödeme altyapısı bağlı değildir." data-en="Demo only — no real payment rail connected.">Demo only — no real payment rail connected.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash-sub-section" id="dash-qr">
+                                <h2 class="sub-section-title" data-tr="QR ile Ödeme" data-en="QR Payment">QR Payment</h2>
+                                <div class="glass-card qr-card">
+                                    <p class="qr-desc" data-tr="Hesabınıza yönlendiren statik QR. Gerçek uygulamada EFT/Havale bilgisi encode edilir." data-en="Static QR for your account. Production apps encode EFT/wire metadata.">Static QR for your account.</p>
+                                    <div class="qr-wrap">
+                                        <img id="qrPaymentImg" src="" alt="QR" class="qr-image" width="200" height="200">
+                                    </div>
+                                    <p class="qr-meta"><span data-tr="Hesap:" data-en="Account:">Account:</span> <span id="qrAccountLabel">-</span></p>
+                                    <button type="button" class="login-submit-btn" onclick="refreshQrCode()" data-tr="QR yenile" data-en="Refresh QR">Refresh QR</button>
+                                </div>
+                            </div>
+                            <div class="dash-sub-section" id="dash-transfers">
+                                <h2 class="sub-section-title" data-tr="Para Gönder" data-en="Send Money">Send Money</h2>
+                                <div class="glass-card transfer-card">
+                                    <div class="transfer-form">
+                                        <div class="form-group">
+                                            <label data-tr="Alıcı Hesap Numarası" data-en="Receiver Account Number">Receiver Account Number</label>
+                                            <input type="text" id="transferTarget" placeholder="VR-0001" class="neon-input" oninput="lookupReceiverName()">
+                                            <span class="receiver-name-hint" id="transferReceiverName"></span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Miktar (₺)" data-en="Amount (₺)">Amount (₺)</label>
+                                            <input type="number" id="transferAmount" placeholder="0.00" class="neon-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Açıklama" data-en="Description">Description</label>
+                                            <input type="text" id="transferDesc" placeholder="Optional" class="neon-input" data-tr-placeholder="İsteğe bağlı" data-en-placeholder="Optional">
+                                        </div>
+                                        <button type="button" class="login-submit-btn" onclick="handleSendTransfer()" id="sendBtn" data-tr="Gönder" data-en="Send">Send</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash-sub-section" id="dash-profile">
+                                <div class="profile-layout-grid">
+                                    <div class="profile-layout-left">
+                                    <div class="profile-layout-account">
+                                        <h2 class="sub-section-title" data-tr="Hesap Bilgileri" data-en="Account Details">Account Details</h2>
+                                        <div class="glass-card transfer-card profile-settings-card">
+                                            <div class="transfer-form">
+                                                <div class="form-group">
+                                                    <label data-tr="Ad" data-en="First name">First name</label>
+                                                    <input type="text" id="profileName" class="neon-input" autocomplete="given-name">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="Soyad" data-en="Last name">Last name</label>
+                                                    <input type="text" id="profileSurname" class="neon-input" autocomplete="family-name">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="E-posta" data-en="Email">Email</label>
+                                                    <input type="email" id="profileEmail" class="neon-input" autocomplete="email">
+                                                </div>
+                                                <button type="button" class="login-submit-btn" onclick="handleProfileSave()" data-tr="Kaydet" data-en="Save">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="profile-layout-reset">
+                                        <h2 class="sub-section-title" data-tr="Şifremi Unuttum" data-en="Forgot Password">Forgot Password</h2>
+                                        <p class="profile-section-desc" data-tr="Mevcut şifrenizi bilmiyorsanız e-posta ve hesap numaranızla yeni şifre belirleyebilirsiniz."
+                                            data-en="If you don't know your current password, set a new one with your email and account number.">
+                                            If you don't know your current password, set a new one with your email and account number.
+                                        </p>
+                                        <div class="glass-card transfer-card profile-settings-card">
+                                            <div class="transfer-form">
+                                                <div class="form-group">
+                                                    <label data-tr="E-posta" data-en="Email">Email</label>
+                                                    <input type="email" id="profileResetEmail" class="neon-input" autocomplete="email">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="Hesap Numarası" data-en="Account Number">Account Number</label>
+                                                    <input type="text" id="profileResetAccountNo" class="neon-input" placeholder="VR-12345" autocomplete="off">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="Yeni şifre" data-en="New password">New password</label>
+                                                    <input type="password" id="profileResetNewPwd" class="neon-input" autocomplete="new-password">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="Yeni şifre (tekrar)" data-en="Confirm new password">Confirm new password</label>
+                                                    <input type="password" id="profileResetConfirmPwd" class="neon-input" autocomplete="new-password">
+                                                </div>
+                                                <button type="button" class="login-submit-btn" onclick="handleProfileForgotPassword()" data-tr="Şifreyi sıfırla" data-en="Reset password">Reset password</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+
+                                    <div class="profile-layout-delete">
+                                        <h2 class="sub-section-title danger-section-title" data-tr="Hesabımı Sil" data-en="Delete My Account">Delete My Account</h2>
+                                        <div class="glass-card danger-zone-card profile-settings-card">
+                                            <div class="danger-zone-header">
+                                                <span class="danger-zone-icon" aria-hidden="true">⚠️</span>
+                                                <div>
+                                                    <h3 data-tr="Kalıcı hesap silme" data-en="Permanent account deletion">Permanent account deletion</h3>
+                                                    <p data-tr="Bu işlem geri alınamaz. Aşağıdaki veriler kalıcı olarak silinir:"
+                                                        data-en="This action cannot be undone. The following will be permanently removed:">
+                                                        This action cannot be undone. The following will be permanently removed:
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <ul class="danger-zone-list">
+                                                <li data-tr="Profil bilgileriniz ve giriş kaydınız" data-en="Your profile and login record">Your profile and login record</li>
+                                                <li data-tr="Banka hesabınız ve bakiye bilgisi" data-en="Your bank account and balance">Your bank account and balance</li>
+                                                <li data-tr="Tüm işlem geçmişi ve defter kayıtları" data-en="All transaction history and ledger entries">All transaction history and ledger entries</li>
+                                                <li data-tr="Günlük limit ayarlarınız" data-en="Your daily limit settings">Your daily limit settings</li>
+                                            </ul>
+                                            <div class="transfer-form danger-zone-form">
+                                                <div class="form-group">
+                                                    <label data-tr="Mevcut şifreniz" data-en="Current password">Current password</label>
+                                                    <input type="password" id="deleteAccountPassword" class="neon-input" autocomplete="current-password">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="E-postanızı yazarak onaylayın" data-en="Confirm by typing your email">Confirm by typing your email</label>
+                                                    <input type="email" id="deleteAccountEmailConfirm" class="neon-input" autocomplete="off">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label data-tr="Onay metni: HESABIMI SIL" data-en="Confirmation phrase: DELETE MY ACCOUNT">Confirmation phrase: DELETE MY ACCOUNT</label>
+                                                    <input type="text" id="deleteAccountPhrase" class="neon-input" placeholder="DELETE MY ACCOUNT" data-tr-placeholder="HESABIMI SIL" data-en-placeholder="DELETE MY ACCOUNT" autocomplete="off">
+                                                </div>
+                                                <label class="danger-checkbox-label">
+                                                    <input type="checkbox" id="deleteAccountAck">
+                                                    <span data-tr="Sonuçları anladım; hesabımın kalıcı olarak silinmesini istiyorum."
+                                                        data-en="I understand the consequences and want to permanently delete my account.">
+                                                        I understand the consequences and want to permanently delete my account.
+                                                    </span>
+                                                </label>
+                                                <button type="button" class="danger-delete-btn" id="deleteAccountBtn" onclick="handleDeleteAccount()" disabled
+                                                    data-tr="Hesabımı kalıcı olarak sil" data-en="Permanently delete my account">
+                                                    Permanently delete my account
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash-sub-section" id="dash-password">
+                                <h2 class="sub-section-title" data-tr="Şifre Değiştir" data-en="Change Password">Change Password</h2>
+                                <div class="glass-card transfer-card">
+                                    <div class="transfer-form">
+                                        <div class="form-group">
+                                            <label data-tr="Mevcut şifre" data-en="Current password">Current password</label>
+                                            <input type="password" id="pwdCurrent" class="neon-input" autocomplete="current-password">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Yeni şifre" data-en="New password">New password</label>
+                                            <input type="password" id="pwdNew" class="neon-input" autocomplete="new-password">
+                                        </div>
+                                        <div class="form-group">
+                                            <label data-tr="Yeni şifre (tekrar)" data-en="Confirm new password">Confirm new password</label>
+                                            <input type="password" id="pwdConfirm" class="neon-input" autocomplete="new-password">
+                                        </div>
+                                        <button type="button" class="login-submit-btn" onclick="handlePasswordChange()" data-tr="Şifreyi güncelle" data-en="Update password">Update password</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash-sub-section" id="dash-limits">
+                                <h2 class="sub-section-title" data-tr="Günlük Limitler" data-en="Daily Limits">Daily Limits</h2>
+                                <div class="limits-dashboard-grid">
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Maksimum Limit" data-en="Max Daily Limit">Max Daily Limit</span>
+                                        <div class="limit-value">₺<span id="maxLimit">0</span></div>
+                                        <button type="button" class="edit-limit-btn" onclick="toggleLimitEdit()" data-tr="Düzenle" data-en="Edit">Edit</button>
+                                    </div>
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Kullanılan Limit" data-en="Used Limit">Used Limit</span>
+                                        <div class="limit-value limit-value-used">₺<span id="usedLimit">0</span></div>
+                                        <span class="limit-card-hint" id="limitUsagePct">0%</span>
+                                    </div>
+                                    <div class="glass-card limit-card-modern">
+                                        <span class="limit-card-label" data-tr="Kalan Limit" data-en="Remaining Limit">Remaining Limit</span>
+                                        <div class="limit-value limit-value-remaining">₺<span id="remainingLimit">0</span></div>
+                                        <span class="limit-card-hint" id="limitResetHint" data-tr="Bugün geçerli" data-en="Valid today">Valid today</span>
+                                    </div>
+                                </div>
+                                <div class="glass-card limit-progress-card">
+                                    <div class="limit-progress-header">
+                                        <span data-tr="Limit Kullanımı" data-en="Limit Usage">Limit Usage</span>
+                                        <span id="limitProgressLabel">0 / 0 TL</span>
+                                    </div>
+                                    <div class="limit-progress-track">
+                                        <div class="limit-progress-fill" id="limitProgressFill" style="width: 0%"></div>
+                                    </div>
+                                    <p class="limit-meta-row">
+                                        <span data-tr="Son sıfırlama:" data-en="Last reset:">Last reset:</span>
+                                        <strong id="lastResetDate">—</strong>
+                                    </p>
+                                    <p class="limit-meta-row limit-meta-muted" data-tr="Günlük transfer limitiniz her gece 00:00'da sıfırlanır. Para yatırma işlemleri bu limite dahil değildir."
+                                        data-en="Your daily transfer limit resets at midnight. Deposits are not counted toward this limit.">
+                                        Your daily transfer limit resets at midnight. Deposits are not counted toward this limit.
+                                    </p>
+                                </div>
+                                
+                                <!-- Edit Limit Form (Hidden by default) -->
+                                <div id="limitEditForm" class="glass-card transfer-card" style="display: none; margin-top: 20px;">
+                                    <div class="transfer-form">
+                                        <h3 data-tr="Limit Düzenle" data-en="Edit Limit">Edit Limit</h3>
+                                        <div class="form-group">
+                                            <label data-tr="Yeni Günlük Limit (₺)" data-en="New Daily Limit (₺)">New Daily Limit (₺)</label>
+                                            <input type="number" id="newMaxLimit" class="neon-input" placeholder="50000">
+                                        </div>
+                                        <button type="button" class="login-submit-btn" onclick="handleUpdateLimit()" data-tr="Güncelle" data-en="Update">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dash-sub-section" id="dash-history">
+                                <h2 class="sub-section-title" data-tr="Tüm İşlemler" data-en="Full Transaction History">Full Transaction History</h2>
+                                <div class="dash-card transactions-card">
+                                    <div class="tx-list tx-list-modern" id="fullTransactionHistory">
+                                        <p data-tr="Henüz işlem bulunamadı." data-en="No transactions found.">No transactions found.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========== ADMIN PANEL ========== -->
+                            <div class="dash-sub-section" id="dash-admin">
+                                <div class="card-header-modern admin-panel-header">
+                                    <h2 class="sub-section-title" data-tr="🛡️ Admin Paneli" data-en="🛡️ Admin Panel" style="margin:0;">🛡️ Admin Panel</h2>
+                                    <button type="button" class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh admin panel">↻</button>
+                                </div>
+                                <p class="dash-hint admin-last-updated" id="adminLastUpdated" data-tr="Veriler yükleniyor..." data-en="Loading data...">Loading data...</p>
+                                
+                                <!-- System Stats -->
+                                <div class="admin-stats-grid" id="adminStatsGrid">
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">👥</span>
+                                        <span class="admin-stat-value" id="adminTotalUsers">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Kullanıcı" data-en="Total Users">Total Users</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💳</span>
+                                        <span class="admin-stat-value" id="adminTotalAccounts">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Hesap" data-en="Total Accounts">Total Accounts</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">📊</span>
+                                        <span class="admin-stat-value" id="adminTotalTx">0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam İşlem" data-en="Total Transactions">Total Transactions</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💵</span>
+                                        <span class="admin-stat-value" id="adminTotalDeposits">0</span>
+                                        <span class="admin-stat-label" data-tr="Para Yatırma" data-en="Deposits">Deposits</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">↔️</span>
+                                        <span class="admin-stat-value" id="adminTotalTransfers">0</span>
+                                        <span class="admin-stat-label" data-tr="Transferler" data-en="Transfers">Transfers</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">💰</span>
+                                        <span class="admin-stat-value" id="adminTotalBalance">₺0</span>
+                                        <span class="admin-stat-label" data-tr="Toplam Bakiye" data-en="Total Balance">Total Balance</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">🚨</span>
+                                        <span class="admin-stat-value" id="adminTotalFraud">0</span>
+                                        <span class="admin-stat-label" data-tr="Fraud Kayıtları" data-en="Fraud Logs">Fraud Logs</span>
+                                    </div>
+                                    <div class="glass-card admin-stat-card">
+                                        <span class="admin-stat-icon">📝</span>
+                                        <span class="admin-stat-value" id="adminTotalLedger">0</span>
+                                        <span class="admin-stat-label" data-tr="Muhasebe Kayıtları" data-en="Ledger Entries">Ledger Entries</span>
+                                    </div>
+                                </div>
+
+                                <!-- All Users Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Tüm Kullanıcılar" data-en="All Users">All Users</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminUsersTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th data-tr="Ad Soyad" data-en="Name">Name</th>
+                                                    <th data-tr="E-posta" data-en="Email">Email</th>
+                                                    <th data-tr="Hesap No" data-en="Account No">Account No</th>
+                                                    <th data-tr="Bakiye" data-en="Balance">Balance</th>
+                                                    <th data-tr="İşlem" data-en="Tx Count">Tx Count</th>
+                                                    <th data-tr="Rol" data-en="Role">Role</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminUsersBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- All Transactions Table -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <h4 data-tr="Tüm İşlem Kayıtları" data-en="All Transaction Records">All Transaction Records</h4>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminTxTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th data-tr="Tür" data-en="Type">Type</th>
+                                                    <th data-tr="Gönderen" data-en="Sender">Sender</th>
+                                                    <th data-tr="Alıcı" data-en="Receiver">Receiver</th>
+                                                    <th data-tr="Tutar" data-en="Amount">Amount</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                    <th data-tr="Durum" data-en="Status">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminTxBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Suspicious Transactions / Fraud Logs -->
+                                <div class="glass-card" style="margin-top: 24px;">
+                                    <div class="card-header-modern">
+                                        <h4 data-tr="🚨 Şüpheli İşlemler" data-en="🚨 Suspicious Transactions">🚨 Suspicious Transactions</h4>
+                                        <button class="refresh-btn-mini" onclick="loadAdminPanel()" aria-label="Refresh fraud logs">↻</button>
+                                    </div>
+                                    <p class="dash-hint" data-tr="Yüksek tutarlı, gece (00:00-05:00) veya sık tekrarlayan işlemler otomatik olarak buraya kaydedilir." data-en="High-value, night-time (00:00-05:00) or frequent transactions are automatically logged here.">High-value, night-time or frequent transactions are logged here.</p>
+                                    <div class="vireon-table-scroll">
+                                        <table class="vireon-table-modern" id="adminFraudTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th data-tr="Hesap" data-en="Account">Account</th>
+                                                    <th data-tr="Risk Tipi" data-en="Risk Type">Risk Type</th>
+                                                    <th data-tr="Açıklama" data-en="Description">Description</th>
+                                                    <th data-tr="Tarih" data-en="Date">Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="adminFraudBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+            <!-- Introduction Section -->
+            <div class="landing-content-section" id="section-introduction">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img">
+                    </div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+
+                <!-- Hero Banner -->
+                <div class="intro-hero">
+                    <div class="intro-hero-content">
+                        <span class="intro-badge">Est. 2026</span>
+                        <h1 class="intro-headline" data-tr="Güvenli Dijital<br><span>Bankacılık</span> Altyapısı"
+                            data-en="Secure Digital<br><span>Banking</span> Infrastructure">
+                            Secure
+                            Digital<br><span>Banking</span> Infrastructure
+                        </h1>
+                        <p class="intro-subtext"
+                           data-tr="Finansal işlemlerin güvenli, tutarlı ve izlenebilir biçimde yönetilmesini sağlayan, veritabanı merkezli dijital banka çekirdek sistemi simülasyonu."
+                           data-en="Database-centric digital bank core system simulation ensuring secure, consistent, and traceable financial transaction management.">
+                            Database-centric digital bank core system simulation ensuring secure, consistent, and
+                            traceable financial transaction management.
+                        </p>
+                        <div class="intro-cta-group">
+                            <button class="intro-cta-primary is-active" type="button" data-tr="Sistemi Keşfet" data-en="Explore System">
+                                Explore
+                                System
+                            </button>
+                            <button class="intro-cta-secondary" type="button" data-tr="Dokümantasyon"
+                                    data-en="Documentation">
+                                Documentation
+                            </button>
+                        </div>
+                        <div class="intro-doc-panel glass-card intro-panel intro-panel-doc" id="intro-documentation" hidden>
+                            <h3 class="intro-doc-title" data-tr="Proje Dokümantasyonu" data-en="Project Documentation">Project Documentation</h3>
+                            <p class="intro-doc-lead" data-tr="Vireon; katmanlı mimari ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur."
+                                data-en="Vireon is a digital bank core simulation built with layered architecture.">
+                                Vireon is a digital bank core simulation built with layered architecture.
+                            </p>
+                            <ul class="intro-doc-list">
+                                <li data-tr="Sunum Katmanı: ASP.NET Core Web API + web arayüzü (PWA)" data-en="Presentation: ASP.NET Core Web API + web UI (PWA)">Presentation: ASP.NET Core Web API + web UI (PWA)</li>
+                                <li data-tr="İş Katmanı: TransactionManager, FraudModelService, NeonAIService" data-en="Business: TransactionManager, FraudModelService, NeonAIService">Business: TransactionManager, FraudModelService, NeonAIService</li>
+                                <li data-tr="Veri Katmanı: Entity Framework Core + VireonContext" data-en="Data access: Entity Framework Core + VireonContext">Data access: Entity Framework Core + VireonContext</li>
+                                <li data-tr="Veritabanı: SQLite — paylaşımlı vireon_local.db" data-en="Database: SQLite — shared vireon_local.db">Database: SQLite — shared vireon_local.db</li>
+                                <li data-tr="Demo hesapları uygulama açılışında otomatik senkronize edilir" data-en="Demo accounts are auto-synced on startup">Demo accounts are auto-synced on startup</li>
+                                <li data-tr="Şema ve seed: 4 gruplu EF Core migration + Program.cs" data-en="Schema and seed: 4 grouped EF Core migrations + Program.cs">Schema and seed: 4 grouped EF Core migrations + Program.cs</li>
+                                <li data-tr="Migration grupları: InitialCreate → AddRowVersion → AddUserRole → AddPlainPassword" data-en="Migration groups: InitialCreate → AddRowVersion → AddUserRole → AddPlainPassword">Migration groups: InitialCreate → AddRowVersion → AddUserRole → AddPlainPassword</li>
+                            </ul>
+                            <p class="intro-doc-note" data-tr="Yerel çalıştırma: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202"
+                                data-en="Local run: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202">
+                                Local run: cd Vireon.PresentationLayer && dotnet run → http://localhost:5202
+                            </p>
+                        </div>
+                    </div>
+                    <div class="intro-hero-visual">
+                        <img src="images/coding-screen.jpg" alt="Vireon System" class="hero-image">
+                        <div class="intro-floating-card card-1">
+                            <span class="card-icon">🔒</span>
+                            <span class="card-text" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+                        </div>
+                        <div class="intro-floating-card card-2">
+                            <span class="card-icon">🛡️</span>
+                            <span class="card-text" data-tr="Fraud Tespiti" data-en="Fraud Detection">
+                                Fraud
+                                Detection
+                            </span>
+                        </div>
+                        <div class="intro-floating-card card-3">
+                            <span class="card-icon">📊</span>
+                            <span class="card-text" data-tr="Değişmez Defter" data-en="Immutable Ledger">
+                                Immutable Ledger
+                            </span>
+                        </div>
+                        <div class="intro-orb"></div>
+                    </div>
+                </div>
+
+                <!-- Sistemi Keşfet: metrikler + katman kartları -->
+                <div class="intro-panel intro-panel-explore is-active" id="intro-explore">
+                <!-- Metrics Strip -->
+                <div class="intro-metrics">
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="10000">0</span>
+                        <span class="metric-label" data-tr="Güvenli İşlem" data-en="Secure Transactions">
+                            Secure
+                            Transactions
+                        </span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="98">0</span>
+                        <span class="metric-suffix">%</span>
+                        <span class="metric-label" data-tr="Veri Bütünlüğü" data-en="Data Integrity">
+                            Data
+                            Integrity
+                        </span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value" data-target="6">0</span>
+                        <span class="metric-label" data-tr="Veritabanı Tablosu" data-en="DB Tables">DB Tables</span>
+                    </div>
+                    <div class="metric-divider"></div>
+                    <div class="metric-item">
+                        <span class="metric-value">24/7</span>
+                        <span class="metric-label" data-tr="ACID Uyumlu" data-en="ACID Compliant">ACID Compliant</span>
+                    </div>
+                </div>
+
+                <!-- Core Values (katmanlı mimariye uygun) -->
+                <div class="intro-values">
+                    <div class="value-card">
+                        <img src="images/process-optimized.jpg" alt="Presentation Layer" class="value-card-img" data-tr-alt="Sunum Katmanı" data-en-alt="Presentation Layer">
+                        <div class="value-number">01</div>
+                        <h3 data-tr="Sunum Katmanı" data-en="Presentation Layer">Presentation Layer</h3>
+                        <p data-tr="ASP.NET Core Web API ve modern web arayüzü. Kullanıcı istekleri bu katmandan sisteme girer."
+                           data-en="ASP.NET Core Web API and modern web UI. User requests enter the system through this layer.">
+                            ASP.NET Core Web API and modern web UI. User requests enter the system through this layer.
+                        </p>
+                    </div>
+                    <div class="value-card">
+                        <img src="images/tech-audit.jpg" alt="Business Layer" class="value-card-img" data-tr-alt="İş Katmanı" data-en-alt="Business Layer">
+                        <div class="value-number">02</div>
+                        <h3 data-tr="İş Katmanı" data-en="Business Layer">Business Layer</h3>
+                        <p data-tr="TransactionManager ile güvenli transferler, FraudModelService ile şüpheli işlem tespiti ve NeonAIService ile akıllı asistan."
+                           data-en="Secure transfers via TransactionManager, suspicious activity detection via FraudModelService, and NeonAIService assistant.">
+                            Secure transfers via TransactionManager, suspicious activity detection via FraudModelService, and NeonAIService assistant.
+                        </p>
+                    </div>
+                    <div class="value-card">
+                        <img src="images/digital-strategy.jpg" alt="Data Layer" class="value-card-img" data-tr-alt="Veri Katmanı" data-en-alt="Data Layer">
+                        <div class="value-number">03</div>
+                        <h3 data-tr="Veri ve Veritabanı" data-en="Data & Database">Data & Database</h3>
+                        <p data-tr="Entity Framework Core ile veri erişimi; paylaşımlı SQLite (vireon_local.db) üzerinde değiştirilemez muhasebe defteri."
+                           data-en="Data access via Entity Framework Core; immutable ledger on shared SQLite (vireon_local.db).">
+                            Data access via Entity Framework Core; immutable ledger on shared SQLite (vireon_local.db).
+                        </p>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Tech Stack Preview -->
+                <div class="intro-tech">
+                    <p class="tech-label" data-tr="Kullanılan Teknolojiler" data-en="Technologies Used">
+                        Technologies
+                        Used
+                    </p>
+                    <div class="tech-marquee">
+                        <div class="tech-track">
+                            <span class="tech-item">ASP.NET Core</span>
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">SQLite</span>
+                            <span class="tech-item">EF Core</span>
+                            <span class="tech-item">PWA</span>
+                            <span class="tech-item">FluentValidation</span>
+                            <span class="tech-item">Web API</span>
+                            <span class="tech-item">AutoMapper</span>
+                            <span class="tech-item">ASP.NET Core</span>
+                            <span class="tech-item">C#</span>
+                            <span class="tech-item">SQLite</span>
+                            <span class="tech-item">Chart.js</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Components Section -->
+            <div class="landing-content-section" id="section-components">
+                <div class="section-header-small">
+                    <div class="small-logo">
+                        <img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img">
+                    </div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Sistem Bileşenleri" data-en="System Components">System Components</h2>
+                    <p class="section-subtitle" data-tr="Vireon çekirdek bankacılık sistemi modülleri"
+                        data-en="Vireon core banking system modules">Vireon core banking system modules</p>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="switchTab(this, 'backend')" data-tr="Sunucu" data-en="Backend">Backend</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'database')" data-tr="Veritabanı" data-en="Database">Database</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'security')" data-tr="Güvenlik" data-en="Security">Security</button>
+                        <button class="tab-btn" onclick="switchTab(this, 'desktop')" data-tr="Masaüstü" data-en="Desktop">Desktop</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="backend">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">💸</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Para Transfer Sistemi" data-en="Transfer System">Transfer System</h4>
+                                        <p data-tr="ACID uyumlu para transferi mekanizması. Bakiye kontrolü, limit kontrolü, fraud analizi ve ledger kaydı tek bir transaction içinde yürütülür."
+                                            data-en="ACID-compliant money transfer mechanism. Balance check, limit check, fraud analysis, and ledger entry all run within a single transaction.">
+                                            ACID-compliant money transfer mechanism.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">👤</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hesap Yönetimi" data-en="Account Management">Account Management</h4>
+                                        <p data-tr="Kullanıcı hesaplarının oluşturulması, bakiye takibi, hesap durumu yönetimi."
+                                            data-en="User account creation, balance tracking, and account status management.">
+                                            User account creation and balance tracking.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">⚡</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Günlük Limit Motoru" data-en="Daily Limit Engine">Daily Limit Engine</h4>
+                                        <p data-tr="Kullanıcı bazlı günlük transfer limiti izlenir, gün sonunda otomatik sıfırlanır ve limit aşımı girişimleri loglanır."
+                                            data-en="User-based daily transfer limits are tracked, auto-reset daily, and over-limit attempts are logged.">
+                                            User-based daily transfer limits are tracked, auto-reset daily, and over-limit attempts are logged.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📒</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Muhasebe Defteri Servisi" data-en="Ledger Service">Ledger Service</h4>
+                                        <p data-tr="Her transfer/deposit işleminde önceki ve yeni bakiyeyi kaydeden immutable ledger kayıtları oluşturulur."
+                                            data-en="Immutable ledger entries are generated for every transfer/deposit with previous and new balance values.">
+                                            Immutable ledger entries are generated for every transfer/deposit with previous and new balance values.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🤖</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Neon AI Entegrasyonu" data-en="Neon AI Integration">Neon AI Integration</h4>
+                                        <p data-tr="Neon AI sohbet endpoint'i ile kullanıcıya finansal akışlar hakkında rehberlik sağlanır. Sorumlu: Cavit Batu Soylu."
+                                            data-en="The Neon AI chat endpoint provides guidance on financial workflows. Owner: Cavit Batu Soylu.">
+                                            The Neon AI chat endpoint provides guidance on financial workflows. Owner: Cavit Batu Soylu.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="database">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🗄️</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Tablo Tasarımı" data-en="Table Design">Table Design</h4>
+                                        <p data-tr="Users, Accounts, Transactions ve LedgerEntries tabloları."
+                                            data-en="Highly optimized schema for financial consistency.">
+                                            Highly optimized schema for financial consistency.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔗</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="İlişkiler ve Kısıtlar" data-en="Relations & Constraints">Relations & Constraints</h4>
+                                        <p data-tr="Users-Accounts-DailyLimits-Transactions arasında foreign key, unique ve check constraint yapıları ile veri bütünlüğü korunur."
+                                            data-en="Data integrity is enforced with foreign keys, unique constraints, and check constraints across core tables.">
+                                            Data integrity is enforced with foreign keys, unique constraints, and check constraints across core tables.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🧬</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Migration Yönetimi" data-en="Migration Management">Migration Management</h4>
+                                        <p data-tr="Şema evrimi dört gruplu EF Core migration ile yönetilir; her adım tek bir sorumluluk alanını kapsar."
+                                            data-en="Schema evolution uses four grouped EF Core migrations, each covering a single responsibility.">
+                                            Schema evolution uses four grouped EF Core migrations, each covering a single responsibility.
+                                        </p>
+                                        <div class="migration-catalog-table-wrap">
+                                            <table class="vireon-table-modern migration-catalog-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th data-tr="Migration" data-en="Migration">Migration</th>
+                                                        <th data-tr="İçerik" data-en="Scope">Scope</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><code>InitialCreate</code></td>
+                                                        <td data-tr="Temel 6 tablo (Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries)" data-en="Core 6 tables (Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries)">Core 6 tables (Users, Accounts, Transactions, DailyLimits, FraudLogs, LedgerEntries)</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>AddRowVersion</code></td>
+                                                        <td data-tr="Account concurrency token" data-en="Account concurrency token">Account concurrency token</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>AddUserRole</code></td>
+                                                        <td data-tr="Admin/User rolü" data-en="Admin/User role">Admin/User role</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><code>AddPlainPassword</code></td>
+                                                        <td data-tr="Demo okunabilir şifre sütunu" data-en="Demo readable password column">Demo readable password column</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📈</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Raporlama Sorguları" data-en="Reporting Queries">Reporting Queries</h4>
+                                        <p data-tr="Dashboard, admin panel ve hesap bilgi ekranları için optimize edilmiş okuma sorguları kullanılır."
+                                            data-en="Optimized read queries power dashboard, admin panel, and account information screens.">
+                                            Optimized read queries power dashboard, admin panel, and account information screens.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="security">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔒</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="ACID & Güvenlik" data-en="ACID & Security">ACID & Security</h4>
+                                        <p data-tr="İşlemlerin tutarlılığı ve veri güvenliği."
+                                            data-en="Ensuring transaction atomicity and data integrity.">
+                                            Ensuring transaction atomicity and data integrity.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔐</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Şifre Güvenliği" data-en="Password Security">Password Security</h4>
+                                        <p data-tr="Kullanıcı şifreleri BCrypt ile hashlenerek saklanır; düz metin parola veritabanında tutulmaz."
+                                            data-en="User passwords are stored with BCrypt hashing; plaintext passwords are never persisted.">
+                                            User passwords are stored with BCrypt hashing; plaintext passwords are never persisted.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🚨</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Fraud ve Anomali Kayıtları" data-en="Fraud & Anomaly Logging">Fraud & Anomaly Logging</h4>
+                                        <p data-tr="Yüksek tutar, gece transferi ve yüksek frekans gibi risk desenleri FraudLogs tablosuna kayıt edilir."
+                                            data-en="Risk patterns like high amount, night transfer, and high frequency are logged to FraudLogs.">
+                                            Risk patterns like high amount, night transfer, and high frequency are logged to FraudLogs.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🧱</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Hata Dayanıklılığı" data-en="Error Resilience">Error Resilience</h4>
+                                        <p data-tr="Global middleware ile API hataları standartlaştırılır; frontend tarafında güvenli fallback ve toast geri bildirimi uygulanır."
+                                            data-en="API errors are standardized via global middleware, while frontend applies safe fallbacks and toast feedback.">
+                                            API errors are standardized via global middleware, while frontend applies safe fallbacks and toast feedback.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="desktop">
+                            <div class="services-list">
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">💻</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Electron Masaüstü" data-en="Electron Desktop">Electron Desktop</h4>
+                                        <p data-tr="Kesintisiz masaüstü deneyimi ve yerel bildirimler."
+                                            data-en="Seamless desktop experience with native windowing and icons.">
+                                            Seamless desktop experience with native windowing and icons.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">📦</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Paketleme ve Dağıtım" data-en="Packaging & Distribution">Packaging & Distribution</h4>
+                                        <p data-tr="Electron tabanlı build akışı ile Windows kurulum çıktıları alınır ve kurum içi dağıtım senaryoları desteklenir."
+                                            data-en="Electron-based build flow produces Windows installers and supports internal distribution scenarios.">
+                                            Electron-based build flow produces Windows installers and supports internal distribution scenarios.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="service-row">
+                                    <div class="service-row-icon">
+                                        <div style="font-size: 48px;">🔄</div>
+                                    </div>
+                                    <div class="service-row-content">
+                                        <h4 data-tr="Web ile Senkron Çalışma" data-en="Web-Desktop Sync">Web-Desktop Sync</h4>
+                                        <p data-tr="Masaüstü sürüm, aynı API altyapısını kullanarak web istemcisiyle eş zamanlı veri akışı ve tutarlı deneyim sunar."
+                                            data-en="The desktop app uses the same API backbone as web, ensuring synchronized data flow and consistent UX.">
+                                            The desktop app uses the same API backbone as web, ensuring synchronized data flow and consistent UX.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture Section -->
+            <div class="landing-content-section" id="section-architecture">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Sistem Mimarisi" data-en="System Architecture">System Architecture</h2>
+                    <p class="section-subtitle" data-tr="Veritabanı ve API katmanları arasındaki veri akışı"
+                        data-en="Data flow between database and API layers">Data flow between database and API layers</p>
+                </div>
+
+                <div class="architecture-content">
+                    <div class="arch-diagram glass-card">
+                        <h3 data-tr="Katmanlı Mimari" data-en="Layered Architecture">Layered Architecture</h3>
+                        <div class="arch-layers">
+                            <div class="arch-layer">
+                                <div class="layer-icon">🌐</div>
+                                <div class="layer-info">
+                                    <h4 data-tr="Sunum Katmanı" data-en="Presentation Layer">Presentation Layer</h4>
+                                    <p data-tr="ASP.NET Core Web API + Modern Web UI" data-en="ASP.NET Core Web API + Modern Web UI">ASP.NET Core Web API + Modern Web UI</p>
+                                </div>
+                            </div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="arch-layer">
+                                <div class="layer-icon">⚙️</div>
+                                <div class="layer-info">
+                                    <h4 data-tr="İş Katmanı" data-en="Business Layer">Business Layer</h4>
+                                    <p data-tr="TransactionManager, FraudModelService, NeonAIService" data-en="TransactionManager, FraudModelService, NeonAIService">TransactionManager, FraudModelService, NeonAIService</p>
+                                </div>
+                            </div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="arch-layer">
+                                <div class="layer-icon">💾</div>
+                                <div class="layer-info">
+                                    <h4 data-tr="Veri Erişim Katmanı" data-en="Data Access Layer">Data Access Layer</h4>
+                                    <p data-tr="Entity Framework Core + VireonContext" data-en="Entity Framework Core + VireonContext">Entity Framework Core + VireonContext</p>
+                                </div>
+                            </div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="arch-layer">
+                                <div class="layer-icon">🗄️</div>
+                                <div class="layer-info">
+                                    <h4 data-tr="Veritabanı Katmanı" data-en="Database Layer">Database Layer</h4>
+                                    <p data-tr="SQLite — ACID uyumlu işlemler (paylaşımlı vireon_local.db)" data-en="SQLite — ACID compliant transactions (shared vireon_local.db)">SQLite — ACID compliant transactions (shared vireon_local.db)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="arch-features">
+                        <div class="arch-feature-card glass-card">
+                            <div class="feature-icon">🔒</div>
+                            <h4 data-tr="ACID Garantisi" data-en="ACID Guarantee">ACID Guarantee</h4>
+                            <p data-tr="Tüm finansal işlemler atomik, tutarlı, izole ve kalıcıdır" data-en="All financial transactions are atomic, consistent, isolated, and durable">All financial transactions are atomic, consistent, isolated, and durable</p>
+                        </div>
+                        <div class="arch-feature-card glass-card">
+                            <div class="feature-icon">📊</div>
+                            <h4 data-tr="Değişmez Defter" data-en="Immutable Ledger">Immutable Ledger</h4>
+                            <p data-tr="Değişmez muhasebe defteri — kayıtlar silinemez veya değiştirilemez" data-en="Immutable accounting ledger — records cannot be deleted or modified">Immutable accounting ledger — records cannot be deleted or modified</p>
+                        </div>
+                        <div class="arch-feature-card glass-card">
+                            <div class="feature-icon">🛡️</div>
+                            <h4 data-tr="Dolandırıcılık Tespiti" data-en="Fraud Detection">Fraud Detection</h4>
+                            <p data-tr="Gerçek zamanlı kural tabanlı risk analizi ve skorlama" data-en="Real-time rule-based fraud analysis and risk scoring">Real-time rule-based fraud analysis and risk scoring</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Section -->
+            <div class="landing-content-section" id="section-team">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+                
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Proje Ekibi" data-en="Project Team">Project Team</h2>
+                    <p class="section-subtitle" data-tr="Bilgisayar Mühendisliği öğrencileri tarafından geliştirildi"
+                        data-en="Developed by Computer Engineering students">Developed by Computer Engineering students</p>
+                </div>
+
+                <div class="team-grid team-grid-avatars">
+                    <div class="team-card team-card-avatar">
+                        <div class="team-avatar" aria-hidden="true">CBS</div>
+                        <div class="team-info">
+                            <h4>Cavit Batu Soylu</h4>
+                            <p data-tr="Full Stack & Yapay Zeka" data-en="Full Stack & AI">Full Stack & AI</p>
+                        </div>
+                    </div>
+                    <div class="team-card team-card-avatar">
+                        <div class="team-avatar" aria-hidden="true">EK</div>
+                        <div class="team-info">
+                            <h4>Enes Kaya</h4>
+                            <p data-tr="Backend Geliştirici" data-en="Backend Developer">Backend Developer</p>
+                        </div>
+                    </div>
+                    <div class="team-card team-card-avatar">
+                        <div class="team-avatar" aria-hidden="true">KA</div>
+                        <div class="team-info">
+                            <h4>Kerem Arslan</h4>
+                            <p data-tr="Veritabanı Uzmanı" data-en="Database Specialist">Database Specialist</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop App Version Section -->
+            <div class="landing-content-section" id="section-desktop">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon-logo-transparent-new.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Vireon Masaüstü" data-en="Vireon Desktop">Vireon Desktop</h2>
+                    <p class="section-subtitle" data-tr="Electron altyapısı ile yerleşik deneyim"
+                        data-en="Native desktop experience powered by Electron">Native desktop experience powered by Electron</p>
+                </div>
+
+                <div class="desktop-showcase">
+                    <div class="desktop-mockup">
+                        <div class="mockup-header">
+                            <div class="mockup-dots"><span></span><span></span><span></span></div>
+                            <div class="mockup-title">Vireon.exe</div>
+                        </div>
+                        <div class="mockup-screen">
+                            <img src="images/vireon-logo-transparent-new.png" alt="Desktop Logo" class="mockup-logo">
+                            <h3 data-tr="Masaüstü Gücü" data-en="Desktop Power">Desktop Power</h3>
+                            <p data-tr="Hız, güvenlik ve yerel entegrasyon." data-en="Speed, security, and native integration.">Speed, security, and native integration.</p>
+                        </div>
+                    </div>
+                    <div class="desktop-features">
+                        <div class="d-feature">
+                            <span class="d-icon">🚀</span>
+                            <div class="d-text">
+                                <h4 data-tr="Yüksek Performans" data-en="High Performance">High Performance</h4>
+                                <p data-tr="Hızlı yükleme ve düşük bellek kullanımı." data-en="Fast loading and low memory footprint.">Fast loading and low memory footprint.</p>
+                            </div>
+                        </div>
+                        <div class="d-feature">
+                            <span class="d-icon">🎨</span>
+                            <div class="d-text">
+                                <h4 data-tr="Özel İkon" data-en="Custom Branding">Custom Branding</h4>
+                                <p data-tr="Masaüstünde Vireon logosu ile yerleşik görünüm." data-en="Official Vireon icon on your taskbar.">Official Vireon icon on your taskbar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+
+            <!-- Testimonials / Team Section -->
+            <div class="content-section" id="testimonials">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon_robot.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Ekibimiz" data-en="Our Team">Our Team</h2>
+                    <p class="section-subtitle" data-tr="Proje ekibi ve sorumlulukları"
+                        data-en="Project team and responsibilities">Project team and responsibilities</p>
+                </div>
+
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="Modern web arayüzü (PWA), Neon AI asistan (NeonAIService, Groq entegrasyonu, sohbet arayüzü), paylaşımlı SQLite yolu, admin/DB Explorer paneli ve kullanıcı profil akışlarından sorumluyum."
+                            data-en="Responsible for the modern web UI (PWA), Neon AI assistant (NeonAIService, Groq integration, chat UI), shared SQLite path, admin/DB Explorer panels, and user profile flows.">
+                            Responsible for the modern web UI (PWA), Neon AI assistant (NeonAIService, Groq integration, chat UI), shared SQLite path, admin/DB Explorer panels, and user profile flows.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">CBS</div>
+                            </div>
+                            <div class="author-info">
+                                <h5>Cavit Batu Soylu</h5>
+                                <p>Frontend, Neon AI &amp; DB path</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="API Controller'lar, TransactionManager, FraudModelService ve doğrulama katmanından sorumluyum. Ayrı microservice yok; tek solution içinde katmanlı mimari."
+                            data-en="Responsible for API controllers, TransactionManager, FraudModelService, and validation. No separate microservices—layered architecture in one solution.">
+                            Responsible for API controllers, TransactionManager, FraudModelService, and validation. No separate microservices—layered architecture in one solution.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">EK</div>
+                            </div>
+                            <div class="author-info">
+                                <h5>Enes Kaya</h5>
+                                <p>API &amp; Business Layer</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="Entity modeller, VireonContext, EF Core migration'lar ve seed tarafımdan."
+                            data-en="Entity models, VireonContext, EF Core migrations, and seed data.">
+                            Entity models, VireonContext, EF Core migrations, and seed data.</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">KA</div>
+                            </div>
+                            <div class="author-info">
+                                <h5>Kerem Arslan</h5>
+                                <p>Migrations &amp; Seed</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text"
+                            data-tr="Vireon; ASP.NET Core Web API, SQLite, Entity Framework Core ve PWA web arayüzü ile geliştirilmiş dijital banka çekirdek sistemi simülasyonudur. Demo: http://localhost:5202"
+                            data-en="Vireon is a digital bank core simulation built with ASP.NET Core Web API, SQLite, EF Core, and a PWA web UI. Demo at http://localhost:5202">
+                            Vireon is a digital bank core simulation built with ASP.NET Core Web API, SQLite, EF Core, and a PWA web UI. Demo at http://localhost:5202</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <div class="avatar-placeholder">VP</div>
+                            </div>
+                            <div class="author-info">
+                                <h5 data-tr="Proje Özeti" data-en="Project Summary">Project Summary</h5>
+                                <p data-tr="Bilgisayar Mühendisliği" data-en="Computer Engineering">Computer Engineering
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="landing-content-section" id="section-about">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon_robot.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="Hakkımızda" data-en="About">About</h2>
+                    <p class="section-subtitle" data-tr="Proje hakkında detaylı bilgi"
+                        data-en="Detailed project information">Detailed project information</p>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3 data-tr="Dijital Banka Çekirdek Sistemi" data-en="Digital Bank Core System">Digital Bank
+                            Core System</h3>
+                        <p data-tr="Vireon, finansal işlemlerin güvenli, tutarlı ve izlenebilir biçimde yönetilmesini modelleyen, veritabanı merkezli bir dijital banka çekirdek sistemi simülasyonudur."
+                            data-en="Vireon is a database-centric digital bank core system simulation that models secure, consistent, and traceable financial transaction management.">
+                            Vireon is a database-centric digital bank core system simulation that models secure,
+                            consistent, and traceable financial transaction management.</p>
+                        <p data-tr="Sistem; para transferi, hesap yönetimi, günlük limit kontrolü, fraud analizi ve immutable muhasebe defteri mantığını uygulayarak gerçek bankacılık sistemlerinin çekirdek işlem mekanizmasını teknik olarak modellemektedir."
+                            data-en="The system applies money transfer, account management, daily limit control, fraud analysis, and immutable ledger logic to technically model the core processing mechanism of real banking systems.">
+                            The system applies money transfer, account management, daily limit control, fraud analysis,
+                            and immutable ledger logic to technically model the core processing mechanism of real
+                            banking systems.</p>
+                        <p data-tr="Bu proje Bilgisayar Mühendisliği 2. sınıf final projesi olarak Cavit Batu Soylu, Enes Kaya ve Kerem Arslan tarafından geliştirilmektedir."
+                            data-en="This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a Computer Engineering 2nd year final project.">
+                            This project is being developed by Cavit Batu Soylu, Enes Kaya, and Kerem Arslan as a
+                            Computer Engineering 2nd year final project.</p>
+                        <p data-tr="Sistem; SQLite (Database/vireon_local.db) üzerinde çalışır, katmanlı ASP.NET Core mimarisi kullanır, ACID transfer ve immutable ledger uygular. Otomatik test projesi yoktur (final kapsamı). Electron masaüstü opsiyoneldir."
+                            data-en="The system uses SQLite (Database/vireon_local.db), layered ASP.NET Core architecture, ACID transfers, and an immutable ledger. No automated test project (final scope). Electron desktop is optional.">
+                            The system uses SQLite (Database/vireon_local.db), layered ASP.NET Core architecture, ACID transfers, and an immutable ledger. No automated test project (final scope). Electron desktop is optional.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="landing-content-section" id="section-contact">
+                <div class="section-header-small">
+                    <div class="small-logo"><img src="images/vireon_robot.png" alt="Vireon" class="small-logo-img"></div>
+                    <div class="small-brand">
+                        <h3>VIREON</h3>
+                        <p>Immutable Ledger</p>
+                    </div>
+                </div>
+                <button class="back-btn" onclick="backToMenu()" data-tr="← Ana Menü" data-en="← Main Menu">← Main
+                    Menu</button>
+
+                <div class="section-header">
+                    <h2 class="section-title" data-tr="İletişim" data-en="Contact">Contact</h2>
+                    <p class="section-subtitle" data-tr="Proje ekibi ile iletişime geçin"
+                        data-en="Get in touch with the project team">Get in touch with the project team</p>
+                </div>
+
+                <div class="contact-grid">
+                    <div class="contact-form">
+                        <div class="form-group">
+                            <input type="text" data-tr-placeholder="Adınız" data-en-placeholder="Your Name"
+                                placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" data-tr-placeholder="E-posta" data-en-placeholder="Email"
+                                placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" data-tr-placeholder="Konu" data-en-placeholder="Subject"
+                                placeholder="Subject">
+                        </div>
+                        <div class="form-group">
+                            <textarea data-tr-placeholder="Mesajınız" data-en-placeholder="Your Message"
+                                placeholder="Your Message"></textarea>
+                        </div>
+                        <button class="submit-btn" data-tr="Gönder" data-en="Send">Send</button>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">🎓</div>
+                            <div class="contact-details">
+                                <h4 data-tr="Üniversite" data-en="University">University</h4>
+                                <p data-tr="Bilgisayar Mühendisliği Bölümü" data-en="Computer Engineering Department">
+                                    Computer Engineering Department</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div class="contact-details">
+                                <h4 data-tr="E-posta" data-en="Email">Email</h4>
+                                <p>vireon@university.edu.tr</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div class="contact-details">
+                                <h4 data-tr="Telefon" data-en="Phone">Phone</h4>
+                                <p>+90 (XXX) XXX-XXXX</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Neon AI Floating Button -->
+        <button type="button" class="ai-chat-launcher" id="aiLauncher" onclick="toggleAIChat()" data-tr-aria-label="Neon AI asistanını aç" data-en-aria-label="Open Neon AI assistant" aria-label="Open Neon AI assistant" aria-expanded="false" aria-controls="aiChatWindow">
+            <span class="ai-orbit" aria-hidden="true"></span>
+            <span class="ai-icon" aria-hidden="true">💬</span>
+        </button>
+
+        <!-- Neon AI Chat Window -->
+        <div class="ai-chat-window" id="aiChatWindow" role="dialog" aria-modal="true" aria-labelledby="aiChatTitle" aria-hidden="true">
+            <div class="ai-chat-header">
+                <div class="ai-header-info">
+                    <div class="ai-avatar"><img src="images/vireon_robot.png" alt=""></div>
+                    <div class="ai-header-text">
+                        <h4 id="aiChatTitle">NEON AI</h4>
+                        <p class="ai-header-sub" data-tr="Canlı Asistan" data-en="Live Assistant">Live Assistant</p>
+                    </div>
+                </div>
+                <div class="ai-header-actions">
+                    <button type="button" class="ai-history-toggle-btn" id="floatingAiHistoryBtn" onclick="toggleFloatingAiHistory()" data-tr-title="Sohbet Geçmişi" data-en-title="Chat History" data-tr-aria-label="Sohbet geçmişini göster" data-en-aria-label="Toggle chat history" aria-label="Toggle chat history" aria-expanded="false" aria-controls="floatingAiHistoryPanel" title="Chat History">
+                        <span aria-hidden="true">🕓</span>
+                    </button>
+                    <button type="button" class="ai-close-btn" onclick="toggleAIChat()" data-tr-aria-label="Sohbeti kapat" data-en-aria-label="Close chat" aria-label="Close chat">✕</button>
+                </div>
+            </div>
+            <div class="ai-chat-body" id="aiChatBody">
+                <div class="ai-message bot">
+                    <p data-tr="Merhaba! Ben Neon. Bankacılık işlemlerinizde size nasıl yardımcı olabilirim?" data-en="Hello! I'm Neon. How can I assist you with your banking transactions today?">Hello! I'm Neon. How can I assist you with your banking transactions today?</p>
+                </div>
+            </div>
+            <div class="ai-chat-footer">
+                <input type="text" id="floatingAiInput" class="ai-input" placeholder="Type your message..." data-tr-placeholder="Mesajınızı yazın..." data-en-placeholder="Type your message..." autocomplete="off" onkeydown="if(event.key === 'Enter') { event.preventDefault(); sendAIMessage(); }">
+                <button type="button" class="ai-send-btn" onclick="sendAIMessage()" data-tr-aria-label="Mesaj gönder" data-en-aria-label="Send message" aria-label="Send message">➤</button>
+            </div>
+            <div class="ai-chat-history-panel ai-chat-history-panel--floating" id="floatingAiHistoryPanel" aria-hidden="true">
+                <div class="ai-history-header">
+                    <span data-tr="Sohbet Geçmişi" data-en="Chat History">Chat History</span>
+                    <button type="button" class="ai-history-clear" onclick="clearAiChatHistory()" data-tr="Temizle" data-en="Clear">Clear</button>
+                </div>
+                <ul class="ai-history-list" id="floatingAiHistoryList"></ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer" id="mainFooter">
+            <p>© 2026 Vireon — <span
+                    data-tr="Dijital Banka Çekirdek Sistemi Simülasyonu | Bilgisayar Mühendisliği Final Projesi"
+                    data-en="Digital Bank Core System Simulation | Computer Engineering Final Project">Digital Bank Core
+                    System Simulation | Computer Engineering Final Project</span></p>
+        </footer>
+    </div>
+
+    <script src="vireon.js?v=20260610-35" defer></script>
+    <script>
+        // ========== GLOBAL STATE ==========
+        if (typeof window.currentLang === 'undefined') {
+            window.currentLang = localStorage.getItem('vireon-lang') || 'en';
+        }
+
+        function switchLang(lang) {
+            window.currentLang = lang;
+            document.documentElement.lang = lang === 'tr' ? 'tr' : 'en';
+            document.getElementById('langTR').classList.toggle('active', lang === 'tr');
+            document.getElementById('langEN').classList.toggle('active', lang === 'en');
+
+            document.querySelectorAll('[data-tr][data-en]').forEach(el => {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+                const text = el.getAttribute('data-' + lang);
+                if (text != null) el.innerHTML = text;
+            });
+
+            document.querySelectorAll('[data-tr-placeholder][data-en-placeholder]').forEach(el => {
+                el.placeholder = el.getAttribute('data-' + lang + '-placeholder') || '';
+            });
+
+            document.querySelectorAll('[data-tr-title][data-en-title]').forEach(el => {
+                el.title = el.getAttribute('data-' + lang + '-title') || '';
+            });
+
+            document.querySelectorAll('[data-tr-aria-label][data-en-aria-label]').forEach(el => {
+                el.setAttribute('aria-label', el.getAttribute('data-' + lang + '-aria-label') || '');
+            });
+
+            document.querySelectorAll('[data-tr-alt][data-en-alt]').forEach(el => {
+                el.alt = el.getAttribute('data-' + lang + '-alt') || '';
+            });
+
+            localStorage.setItem('vireon-lang', lang);
+
+            if (typeof window.onLanguageChange === 'function') window.onLanguageChange();
+        }
+
+        // ========== THEME TOGGLE ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('vireon-theme', next);
+        }
+
+        // ========== LOAD SAVED PREFERENCES & CLEANUP ==========
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                switchLang(localStorage.getItem('vireon-lang') || 'en');
+
+                const savedTheme = localStorage.getItem('vireon-theme');
+                if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                // Safe Modal Listener
+                const lModal = document.getElementById('loginModal');
+                if (lModal) {
+                    lModal.addEventListener('click', function (e) {
+                        if (e.target === this) closeLoginModal();
+                    });
+                }
+            } catch (e) { console.error("Pref Load Error", e); }
+
+            // Final Safety: If by any chance vireon.js didn't clear the loader
+            setTimeout(() => {
+                const loader = document.getElementById('loadingScreen');
+                if (loader && !loader.classList.contains('hidden')) {
+                    loader.classList.add('hidden');
+                    loader.style.display = 'none';
+                    console.log("NEON AI: UI Unlocked (Recovery Mode)");
+                }
+            }, 4000);
+        });
+
+    </script>
+</body>
+
+</html>
