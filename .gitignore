@@ -1,0 +1,64 @@
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+TestResults/
+*.exe
+*.dll
+*.pdb
+*.cache
+
+# macOS
+.DS_Store
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Visual Studio Code
+.vscode/
+
+# Environment Variables
+.env
+
+# Secrets (API keys - never commit)
+Vireon.PresentationLayer/appsettings.Development.json
+!Vireon.PresentationLayer/appsettings.Development.json.example
+
+# Node
+node_modules/
+package-lock.json
+
+# Electron
+electron/
+
+# Build logs
+*.log
+build_errors.txt
+
+# HTTP test files
+*.http
+
+# SQLite temporary files
+*.db-shm
+*.db-wal
+
+# Local SQLite database (created automatically on startup via EF migrations)
+Database/*.db
+*.sqlite
+*.sqlite3
+
+# IDEs
+.idea/
+
+# Application Logs
+logs/
